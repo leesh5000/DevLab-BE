@@ -173,3 +173,7 @@ create table comments_likes
 create index comments_likes_member_id on comments_likes (member_id);
 create index comments_likes_comment_id on comments_likes (comment_id);
 ```
+
+## API Endpoints
+
+공유 링크 : https://docs.google.com/spreadsheets/d/1qybDebGINrPRCwvj_EIV89gqKfhXwwa4-aGY2DBxk1I/edit?usp=sharing
