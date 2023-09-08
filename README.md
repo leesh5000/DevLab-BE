@@ -177,3 +177,11 @@ create index comments_likes_comment_id on comments_likes (comment_id);
 ## API Endpoints
 
 공유 링크 : https://docs.google.com/spreadsheets/d/1qybDebGINrPRCwvj_EIV89gqKfhXwwa4-aGY2DBxk1I/edit?usp=sharing
+
+## Skills
+
+- Language : Java 17
+- Build : Gradle
+- Framework : Spring Boot 3.1.3
+- Testing Tools : Junit5
+- Database : MySQL 8.0.33 (Prod), H2 (Test)
