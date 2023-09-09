@@ -71,9 +71,9 @@ _Reference_
 ## SQL
 
 ```sql
-create database if not exists community;
-
-use community;
+drop database if exists DevLab;
+create database DevLab;
+use DevLab;
 
 create table members
 (
@@ -90,7 +90,7 @@ create table members
     modified_by              varchar(255) not null,
     created_at               timestamp    not null,
     modified_at              timestamp    not null,
-    deleted                  boolean      not null   default false,
+    deleted                  tinyint(1)   not null default 0,
     primary key (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
@@ -108,7 +108,7 @@ create table posts
     modified_by varchar(255) not null,
     created_at  timestamp    not null,
     modified_at timestamp    not null,
-    deleted     boolean      not null   default false,
+    deleted     tinyint(1)   not null default 0,
     primary key (id),
     foreign key (member_id) references members (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
@@ -120,21 +120,21 @@ create index posts_member_id_idx on posts (member_id);
 create table comments
 (
     id          bigint auto_increment,
-    user_id     bigint       not null,
+    member_id     bigint       not null,
     post_id     bigint       not null,
     contents    text         not null,
     created_by  varchar(255) not null,
     modified_by varchar(255) not null,
     created_at  timestamp    not null,
     modified_at timestamp    not null,
-    deleted     boolean      not null   default false,
+    deleted     tinyint(1)   not null default 0,
     primary key (id),
-    foreign key (user_id) references members (id),
+    foreign key (member_id) references members (id),
     foreign key (post_id) references posts (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
 create index comments_created_at_idx on comments (created_at);
-create index comments_member_id_idx on comments (user_id);
+create index comments_member_id_idx on comments (member_id);
 create index comments_post_id_idx on comments (post_id);
 
 create table posts_likes
@@ -178,10 +178,11 @@ create index comments_likes_comment_id on comments_likes (comment_id);
 
 공유 링크 : https://docs.google.com/spreadsheets/d/1qybDebGINrPRCwvj_EIV89gqKfhXwwa4-aGY2DBxk1I/edit?usp=sharing
 
-## Skills
+## Tech Stacks
 
 - Language : Java 17
 - Build : Gradle
 - Framework : Spring Boot 3.1.3
 - Testing Tools : Junit5
 - Database : MySQL 8.0.33 (Prod), H2 (Test)
+- Database Access : Spring Data JPA 3.1.3
