@@ -1,7 +1,7 @@
 package com.leesh.devlab.domain.member;
 
 import com.leesh.devlab.domain.BaseEntity;
-import com.leesh.devlab.domain.member.constant.Oauth2Type;
+import com.leesh.devlab.domain.member.constant.OauthType;
 import com.leesh.devlab.domain.member.constant.Role;
 import com.leesh.devlab.domain.post.Post;
 import jakarta.persistence.*;
@@ -46,7 +46,7 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "oauth2_type", nullable = false, length = 10)
-    private Oauth2Type oauth2Type;
+    private OauthType oauthType;
 
     @Column(name = "profile_img_url", length = 255, nullable = true)
     private String profileImgUrl;
