@@ -6,6 +6,7 @@ import com.leesh.devlab.external.OauthClient;
 import com.leesh.devlab.external.OauthClientFactory;
 import com.leesh.devlab.external.OauthMemberInfo;
 import com.leesh.devlab.external.OauthTokenResponse;
+import com.leesh.devlab.global.jwt.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class OauthService {
 
     private final OauthClientFactory oauthClientFactory;
     private final MemberRepository memberRepository;
+    private final TokenService tokenService;
 
     public void oauthLogin(Request request) {
 
