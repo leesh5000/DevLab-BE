@@ -8,6 +8,11 @@ spring:
     hibernate:
       ddl-auto: validate
 
+  # ENUM Deserializer 대소문자 무시
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+
 jasypt:
   encryptor:
     password: ${PASSWORD}
