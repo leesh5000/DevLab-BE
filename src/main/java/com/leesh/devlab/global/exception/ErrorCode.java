@@ -3,8 +3,14 @@ package com.leesh.devlab.global.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
 @Getter
 public enum ErrorCode {
+
+    /* Auth */
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A-001"),
+    INVALID_TOKEN(UNAUTHORIZED, "A-002"),
 
     /* Member */
     NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "M-001"),
