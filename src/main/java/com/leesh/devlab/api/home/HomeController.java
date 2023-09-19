@@ -1,4 +1,4 @@
-package com.leesh.devlab;
+package com.leesh.devlab.api.home;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
