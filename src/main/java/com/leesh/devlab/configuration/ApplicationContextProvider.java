@@ -1,4 +1,4 @@
-package com.leesh.devlab.global.configuration;
+package com.leesh.devlab.configuration;
 
 import com.leesh.devlab.domain.member.constant.OauthType;
 import lombok.Getter;

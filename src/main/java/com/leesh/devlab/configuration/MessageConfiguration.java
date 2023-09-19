@@ -1,4 +1,4 @@
-package com.leesh.devlab.global.configuration;
+package com.leesh.devlab.configuration;
 
 
 import org.springframework.beans.factory.annotation.Autowired;

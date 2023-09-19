@@ -1,4 +1,4 @@
-package com.leesh.devlab.global.configuration;
+package com.leesh.devlab.configuration;
 
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
