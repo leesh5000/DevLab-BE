@@ -1,10 +1,10 @@
 package com.leesh.devlab.domain.member;
 
 import com.leesh.devlab.domain.BaseEntity;
-import com.leesh.devlab.domain.member.constant.OauthType;
-import com.leesh.devlab.domain.member.constant.Role;
+import com.leesh.devlab.constant.OauthType;
+import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.domain.post.Post;
-import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

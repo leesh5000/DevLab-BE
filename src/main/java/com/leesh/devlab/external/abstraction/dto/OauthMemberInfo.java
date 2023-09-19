@@ -1,6 +1,6 @@
-package com.leesh.devlab.external;
+package com.leesh.devlab.external.abstraction.dto;
 
-import com.leesh.devlab.domain.member.constant.OauthType;
+import com.leesh.devlab.constant.OauthType;
 
 public interface OauthMemberInfo {
 

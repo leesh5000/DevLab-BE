@@ -1,6 +1,6 @@
 package com.leesh.devlab.external.implementation.naver.client;
 
-import com.leesh.devlab.external.OauthApiClient;
+import com.leesh.devlab.external.abstraction.client.OauthApiClient;
 import com.leesh.devlab.external.implementation.naver.dto.NaverMemberInfo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

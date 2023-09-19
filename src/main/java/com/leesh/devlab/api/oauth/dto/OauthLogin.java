@@ -1,6 +1,6 @@
 package com.leesh.devlab.api.oauth.dto;
 
-import com.leesh.devlab.domain.member.constant.OauthType;
+import com.leesh.devlab.constant.OauthType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

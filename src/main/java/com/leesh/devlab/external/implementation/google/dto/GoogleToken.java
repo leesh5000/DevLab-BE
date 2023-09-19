@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.google.dto;
 
-import com.leesh.devlab.external.OauthTokenRequest;
-import com.leesh.devlab.external.OauthTokenResponse;
+import com.leesh.devlab.external.abstraction.dto.OauthTokenRequest;
+import com.leesh.devlab.external.abstraction.dto.OauthTokenResponse;
 import lombok.Builder;
 import lombok.Getter;
 

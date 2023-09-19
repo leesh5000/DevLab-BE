@@ -1,6 +1,6 @@
-package com.leesh.devlab.global.jwt;
+package com.leesh.devlab.jwt.dto;
 
-import com.leesh.devlab.domain.member.constant.Role;
+import com.leesh.devlab.constant.Role;
 
 import java.util.Objects;
 

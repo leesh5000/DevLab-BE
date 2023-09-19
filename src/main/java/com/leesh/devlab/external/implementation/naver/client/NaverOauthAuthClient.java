@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.naver.client;
 
-import com.leesh.devlab.external.OauthAuthClient;
-import com.leesh.devlab.external.OauthTokenRequest;
+import com.leesh.devlab.external.abstraction.client.OauthAuthClient;
+import com.leesh.devlab.external.abstraction.dto.OauthTokenRequest;
 import com.leesh.devlab.external.implementation.naver.dto.NaverToken;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;

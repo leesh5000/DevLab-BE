@@ -1,4 +1,4 @@
-package com.leesh.devlab.domain.member.constant;
+package com.leesh.devlab.constant;
 
 /**
  * 유저의 권한

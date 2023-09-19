@@ -1,4 +1,4 @@
-package com.leesh.devlab.global.exception;
+package com.leesh.devlab.exception.dto;
 
 import lombok.Getter;
 import org.springframework.validation.BindingResult;

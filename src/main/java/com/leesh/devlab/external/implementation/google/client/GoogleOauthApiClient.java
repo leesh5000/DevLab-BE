@@ -1,6 +1,6 @@
 package com.leesh.devlab.external.implementation.google.client;
 
-import com.leesh.devlab.external.OauthApiClient;
+import com.leesh.devlab.external.abstraction.client.OauthApiClient;
 import com.leesh.devlab.external.implementation.google.dto.GoogleMemberInfo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;

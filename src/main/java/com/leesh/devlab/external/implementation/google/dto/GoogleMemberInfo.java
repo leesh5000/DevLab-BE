@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.google.dto;
 
-import com.leesh.devlab.domain.member.constant.OauthType;
-import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.constant.OauthType;
+import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
 
 public record GoogleMemberInfo() {
 

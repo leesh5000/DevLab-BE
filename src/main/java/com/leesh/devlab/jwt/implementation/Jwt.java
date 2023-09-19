@@ -1,6 +1,6 @@
-package com.leesh.devlab.global.jwt.implementation;
+package com.leesh.devlab.jwt.implementation;
 
-import com.leesh.devlab.global.jwt.AuthToken;
+import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.constant.TokenType;
 
 import java.util.Objects;

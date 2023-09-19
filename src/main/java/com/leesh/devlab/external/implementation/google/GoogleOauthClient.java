@@ -1,8 +1,8 @@
 package com.leesh.devlab.external.implementation.google;
 
 import com.leesh.devlab.external.OauthClient;
-import com.leesh.devlab.external.OauthMemberInfo;
-import com.leesh.devlab.external.OauthTokenResponse;
+import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
+import com.leesh.devlab.external.abstraction.dto.OauthTokenResponse;
 import com.leesh.devlab.external.implementation.google.client.GoogleOauthApiClient;
 import com.leesh.devlab.external.implementation.google.client.GoogleOauthAuthClient;
 import com.leesh.devlab.external.implementation.google.dto.GoogleToken;

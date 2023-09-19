@@ -1,5 +1,6 @@
-package com.leesh.devlab.global.exception;
+package com.leesh.devlab.exception.ex;
 
+import com.leesh.devlab.constant.ErrorCode;
 import lombok.Getter;
 
 /**

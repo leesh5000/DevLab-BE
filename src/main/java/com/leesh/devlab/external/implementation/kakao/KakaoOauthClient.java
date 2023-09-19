@@ -1,9 +1,9 @@
 package com.leesh.devlab.external.implementation.kakao;
 
 import com.leesh.devlab.external.OauthClient;
-import com.leesh.devlab.external.OauthMemberInfo;
-import com.leesh.devlab.external.OauthTokenRequest;
-import com.leesh.devlab.external.OauthTokenResponse;
+import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
+import com.leesh.devlab.external.abstraction.dto.OauthTokenRequest;
+import com.leesh.devlab.external.abstraction.dto.OauthTokenResponse;
 import com.leesh.devlab.external.implementation.kakao.client.KakaoOauthApiClient;
 import com.leesh.devlab.external.implementation.kakao.client.KakaoOauthAuthClient;
 import com.leesh.devlab.external.implementation.kakao.dto.KakaoToken;

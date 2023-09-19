@@ -1,5 +1,6 @@
-package com.leesh.devlab.global.exception;
+package com.leesh.devlab.constant;
 
+import com.leesh.devlab.exception.GlobalExHandler;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -11,6 +12,8 @@ public enum ErrorCode {
     /* Auth */
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A-001"),
     INVALID_TOKEN(UNAUTHORIZED, "A-002"),
+    INVALID_AUTHORIZATION_HEADER(UNAUTHORIZED, "A-003"),
+    NOT_EXIST_AUTHORIZATION(UNAUTHORIZED, "A-004"),
 
     /* Member */
     NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "M-001"),
@@ -25,7 +28,7 @@ public enum ErrorCode {
 
     /**
      * 이 필드를 통해 messages_properties 파일에서 해당하는 에러 메세지를 가져온다. <br>
-     * {@link com.leesh.devlab.global.exception.GlobalExHandler#messageSource}
+     * {@link GlobalExHandler#messageSource}
      */
     private final String code;
 

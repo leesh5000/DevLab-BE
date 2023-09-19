@@ -1,6 +1,6 @@
 package com.leesh.devlab.configuration;
 
-import com.leesh.devlab.domain.member.constant.OauthType;
+import com.leesh.devlab.constant.OauthType;
 import lombok.Getter;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

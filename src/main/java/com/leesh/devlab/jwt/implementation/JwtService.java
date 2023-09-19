@@ -1,13 +1,14 @@
-package com.leesh.devlab.global.jwt.implementation;
+package com.leesh.devlab.jwt.implementation;
 
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
-import com.leesh.devlab.domain.member.constant.Role;
-import com.leesh.devlab.global.exception.BusinessException;
-import com.leesh.devlab.global.exception.ErrorCode;
-import com.leesh.devlab.global.jwt.AuthToken;
-import com.leesh.devlab.global.jwt.AuthTokenService;
-import com.leesh.devlab.global.jwt.MemberInfo;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.exception.ex.AuthException;
+import com.leesh.devlab.exception.ex.BusinessException;
+import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.jwt.AuthToken;
+import com.leesh.devlab.jwt.AuthTokenService;
+import com.leesh.devlab.jwt.dto.MemberInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,13 +33,13 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public MemberInfo extractMemberInfo(AuthToken authToken) throws BusinessException {
+    public MemberInfo extractMemberInfo(AuthToken authToken) throws AuthException {
 
         Claims claims = extractAllClaims(authToken);
 
         // 접근 토큰이 아니면, 예외 던지기
         if (!authToken.getTokenType().equals(claims.getSubject())) {
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new AuthException(ErrorCode.INVALID_TOKEN);
         }
 
         return new MemberInfo(
@@ -56,7 +57,7 @@ public class JwtService implements AuthTokenService {
 
         // 토큰 타입 유효성 검증
         if (!tokenType.name().equals(claims.getSubject())) {
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new AuthException(ErrorCode.INVALID_TOKEN);
         }
 
     }
@@ -82,7 +83,7 @@ public class JwtService implements AuthTokenService {
     }
 
     // 이 메소드의 파라미터인 토큰은 해당 시점에서는 Access Token 또는 Refresh Token 인지 알 수 없다.
-    private Claims extractAllClaims(AuthToken authToken) throws BusinessException {
+    private Claims extractAllClaims(AuthToken authToken) throws AuthException {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
@@ -90,9 +91,9 @@ public class JwtService implements AuthTokenService {
                     .parseClaimsJws(authToken.getValue())
                     .getBody();
         } catch (ExpiredJwtException e) {
-            throw new BusinessException(ErrorCode.EXPIRED_TOKEN);
+            throw new AuthException(ErrorCode.EXPIRED_TOKEN);
         } catch (Exception e) {
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new AuthException(ErrorCode.INVALID_TOKEN);
         }
     }
 
