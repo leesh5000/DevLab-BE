@@ -4,7 +4,7 @@ import com.leesh.devlab.domain.member.constant.OauthType;
 import com.leesh.devlab.external.implementation.google.GoogleOauthClient;
 import com.leesh.devlab.external.implementation.kakao.KakaoOauthClient;
 import com.leesh.devlab.external.implementation.naver.NaverOauthClient;
-import com.leesh.devlab.global.ApplicationContextProvider;
+import com.leesh.devlab.global.configuration.ApplicationContextProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
