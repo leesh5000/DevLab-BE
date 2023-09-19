@@ -11,3 +11,7 @@ spring:
 jasypt:
   encryptor:
     password: ${PASSWORD}
+
+custom:
+  locale: en_US
+  timezone: Asia/Seoul
