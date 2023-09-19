@@ -1,6 +1,6 @@
 package com.leesh.devlab.global.jwt;
 
-import com.leesh.devlab.global.jwt.constant.TokenType;
+import com.leesh.devlab.constant.TokenType;
 
 /**
  * <p>

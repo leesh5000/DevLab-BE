@@ -6,7 +6,7 @@ import com.leesh.devlab.global.exception.ErrorCode;
 import com.leesh.devlab.global.jwt.AuthToken;
 import com.leesh.devlab.global.jwt.AuthTokenService;
 import com.leesh.devlab.global.jwt.MemberInfo;
-import com.leesh.devlab.global.jwt.constant.TokenType;
+import com.leesh.devlab.constant.TokenType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

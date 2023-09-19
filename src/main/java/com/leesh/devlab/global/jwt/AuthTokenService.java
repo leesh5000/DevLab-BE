@@ -2,7 +2,7 @@ package com.leesh.devlab.global.jwt;
 
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.global.exception.BusinessException;
-import com.leesh.devlab.global.jwt.constant.TokenType;
+import com.leesh.devlab.constant.TokenType;
 
 import javax.naming.AuthenticationException;
 

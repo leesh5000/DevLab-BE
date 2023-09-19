@@ -1,4 +1,4 @@
-package com.leesh.devlab.global.jwt.constant;
+package com.leesh.devlab.constant;
 
 import lombok.Getter;
 
