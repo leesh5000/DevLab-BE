@@ -1,12 +1,13 @@
 package com.leesh.devlab.global.jwt.implementation;
 
+import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
+import com.leesh.devlab.domain.member.constant.Role;
 import com.leesh.devlab.global.exception.BusinessException;
 import com.leesh.devlab.global.exception.ErrorCode;
 import com.leesh.devlab.global.jwt.AuthToken;
 import com.leesh.devlab.global.jwt.AuthTokenService;
 import com.leesh.devlab.global.jwt.MemberInfo;
-import com.leesh.devlab.constant.TokenType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,7 +33,20 @@ public class JwtService implements AuthTokenService {
 
     @Override
     public MemberInfo extractMemberInfo(AuthToken authToken) throws BusinessException {
-        return null;
+
+        Claims claims = extractAllClaims(authToken);
+
+        // 접근 토큰이 아니면, 예외 던지기
+        if (!authToken.getTokenType().equals(claims.getSubject())) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        return new MemberInfo(
+                claims.get("id", Long.class),
+                claims.get("name", String.class),
+                claims.get("email", String.class),
+                claims.get("role", Role.class)
+        );
     }
 
     @Override
