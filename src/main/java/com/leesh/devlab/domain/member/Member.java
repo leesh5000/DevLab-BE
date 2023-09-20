@@ -47,7 +47,7 @@ public class Member extends BaseEntity {
     private Role role = Role.MEMBER;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "oauth2_type", nullable = true, length = 10)
+    @Column(name = "oauth_type", nullable = true, length = 10)
     private OauthType oauthType;
 
     @Column(name = "profile_img_url", length = 255, nullable = true)
