@@ -4,6 +4,7 @@ import com.leesh.devlab.exception.GlobalExHandler;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Getter
@@ -14,6 +15,13 @@ public enum ErrorCode {
     INVALID_TOKEN(UNAUTHORIZED, "A-002"),
     INVALID_AUTHORIZATION_HEADER(UNAUTHORIZED, "A-003"),
     NOT_EXIST_AUTHORIZATION(UNAUTHORIZED, "A-004"),
+
+    /* Oauth */
+    NOT_SUPPORT_OAUTH_TYPE(HttpStatus.BAD_REQUEST, "O-001"),
+    ALREADY_REGISTERED_FROM_KAKAO(CONFLICT, "O-002"),
+    ALREADY_REGISTERED_FROM_GOOGLE(CONFLICT, "O-003"),
+    ALREADY_REGISTERED_FROM_NAVER(CONFLICT, "O-004"),
+    INVALID_OAUTH_TYPE(HttpStatus.BAD_REQUEST, "O-005"),
 
     /* Member */
     NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "M-001"),

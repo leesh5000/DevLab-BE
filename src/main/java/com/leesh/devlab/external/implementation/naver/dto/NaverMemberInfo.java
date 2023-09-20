@@ -14,7 +14,7 @@ public record NaverMemberInfo() {
 
         @Override
         public String getName() {
-            return profile.name;
+            return profile.nickname;
         }
 
         @Override

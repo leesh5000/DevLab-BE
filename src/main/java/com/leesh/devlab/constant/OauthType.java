@@ -1,5 +1,9 @@
 package com.leesh.devlab.constant;
 
+import com.leesh.devlab.exception.ex.BusinessException;
+
+import static com.leesh.devlab.constant.ErrorCode.ALREADY_REGISTERED_FROM_GOOGLE;
+
 /**
  * 유저의 회원 유형
  * <ul>
@@ -12,12 +16,12 @@ public enum OauthType {
 
     KAKAO, NAVER, GOOGLE;
 
-    public static void isValidOauthType(OauthType userOauthType, OauthType requestOauthType) {
+    public static void validateOauthType(OauthType userOauthType, OauthType requestOauthType) {
         if (userOauthType != requestOauthType) {
             switch (userOauthType) {
-                case GOOGLE -> throw new IllegalArgumentException("이미 구글 소셜 계정으로 가입한 회원입니다.");
-                case NAVER -> throw new IllegalArgumentException("이미 네이버 소셜 계정으로 가입한 회원입니다.");
-                case KAKAO -> throw new IllegalArgumentException("이미 카카오 소셜 계정으로 가입한 회원입니다.");
+                case GOOGLE -> throw new BusinessException(ALREADY_REGISTERED_FROM_GOOGLE, "already registered from google");
+                case NAVER -> throw new BusinessException(ErrorCode.ALREADY_REGISTERED_FROM_NAVER, "already registered from naver");
+                case KAKAO -> throw new BusinessException(ErrorCode.ALREADY_REGISTERED_FROM_KAKAO, "already registered from kakao");
             }
         }
     }

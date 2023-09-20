@@ -1,5 +1,6 @@
 package com.leesh.devlab.api.oauth;
 
+import com.leesh.devlab.api.oauth.dto.OauthLogin;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,11 @@ public class OauthController {
     private final OauthService oauthService;
 
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> oauthLogin(@RequestBody Request request) {
+    public ResponseEntity<OauthLogin.Response> oauthLogin(@RequestBody Request request) {
 
-        // AccessToken을 가져온다.
-        oauthService.oauthLogin(request);
+        OauthLogin.Response response = oauthService.oauthLogin(request);
 
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok(response);
     }
 
 }

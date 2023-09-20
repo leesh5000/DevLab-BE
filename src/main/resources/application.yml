@@ -18,7 +18,7 @@ jasypt:
     password: ${PASSWORD}
 
 token:
-  secret: ENC(EwRA1TfSuygW/y7UaKFgyTyWELifbHGb/CQrBFE9Tw8LYIxgvcEzDg==)
+  secret: ENC(Xe8iKP7YUyeuieJwi6NUMnHTYC1Nsh42jYCNQR7hRnekV0YPYkI7gMOr286oRFRsmG3zjOKqucs=)
   access-token-expires-in: 9000  # 15분 : 60(s) x 15(m)
   refresh-token-expires-in: 1209600 # 2주 : 60(s) x 60(m) x 24(h) x 14(d)
 

@@ -1,10 +1,11 @@
 package com.leesh.devlab.domain.member;
 
-import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.constant.OauthType;
 import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
+import com.leesh.devlab.jwt.AuthToken;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -108,10 +109,13 @@ public class Member extends BaseEntity {
      * 소셜 로그인을 시도한 유저가 올바른 소셜 업체로 로그인 했는지 체크하는 메서드
      * @param oauthType
      */
-    public void checkValidOauthType(OauthType oauthType) {
-        OauthType.isValidOauthType(this.oauthType, oauthType);
+    public void validateOauthType(OauthType oauthType) {
+        OauthType.validateOauthType(this.oauthType, oauthType);
     }
 
-    /* Business Logic */
+    public void updateRefreshToken(AuthToken refreshToken, LocalDateTime expiredAt) {
+        this.refreshToken = refreshToken.getValue();
+        this.refreshTokenExpiredAt = expiredAt;
+    }
 
 }

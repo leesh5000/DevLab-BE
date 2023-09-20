@@ -72,11 +72,13 @@ public class GlobalExHandler {
     @ExceptionHandler(value = { BusinessException.class })
     protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
 
-        log.error("BusinessException", e);
+        log.error("[Business Exception]", e);
+
+        String errorMessage = convertErrorMessage(e.getErrorCode().getCode());
 
         ErrorResponse errorResponse = ErrorResponse.of(
                 e.getErrorCode().getCode(),
-                convertErrorMessage(e.getErrorCode().getCode()));
+                errorMessage);
 
         return ResponseEntity.status(e.getErrorCode().getHttpStatus())
                 .body(errorResponse);
@@ -88,12 +90,14 @@ public class GlobalExHandler {
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(Exception e) {
 
-        log.error("Exception", e);
+        log.error("[Business Exception]", e);
 
         ErrorCode errorCode = ErrorCode.INTERNAL_ERROR;
 
+        String errorMessage = convertErrorMessage(errorCode.getCode());
+
         ErrorResponse errorResponse = ErrorResponse.of(errorCode.getCode(),
-                convertErrorMessage(errorCode.getCode()));
+                errorMessage);
 
         return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
     }

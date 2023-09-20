@@ -1,16 +1,25 @@
 package com.leesh.devlab.api.oauth;
 
+import com.leesh.devlab.api.oauth.dto.OauthLogin;
+import com.leesh.devlab.constant.GrantType;
+import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.external.OauthClient;
 import com.leesh.devlab.external.OauthClientFactory;
 import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
 import com.leesh.devlab.external.abstraction.dto.OauthTokenResponse;
+import com.leesh.devlab.jwt.AuthToken;
+import com.leesh.devlab.jwt.AuthTokenService;
+import com.leesh.devlab.jwt.dto.MemberInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 import static com.leesh.devlab.api.oauth.dto.OauthLogin.Request;
+import static com.leesh.devlab.util.TimeUtils.convertLocalDateTime;
 
 @RequiredArgsConstructor
 @Transactional
@@ -19,8 +28,9 @@ public class OauthService {
 
     private final OauthClientFactory oauthClientFactory;
     private final MemberRepository memberRepository;
+    private final AuthTokenService authTokenService;
 
-    public void oauthLogin(Request request) {
+    public OauthLogin.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
         OauthMemberInfo oauthMemberInfo = getOauthMemberInfo(request);
@@ -35,8 +45,21 @@ public class OauthService {
         // 소셜 계정으로 로그인 시도한 사용자의 유효성을 검증한다.
         validateOauthMember(findMember, oauthMemberInfo);
 
-        // jwt를 생성한다.
+        // 인증 토큰을 생성한다.
+        MemberInfo memberInfo = MemberInfo.from(findMember);
+        AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
+        AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
 
+        // 유저의 refresh token을 업데이트한다.
+        findMember.updateRefreshToken(
+                refreshToken,
+                convertLocalDateTime(
+                        new Date(System.currentTimeMillis() + TokenType.REFRESH.getExpiresIn())
+                )
+        );
+
+        // 응답 DTO를 생성 후 반환한다.
+        return new OauthLogin.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     /**
@@ -52,7 +75,7 @@ public class OauthService {
         }
 
         // 소셜 계정으로 로그인을 시도한 유저가 올바른 소셜 계정으로 로그인을 한 것인지 체크한다.
-        findMember.checkValidOauthType(oauthMemberInfo.getOauthType());
+        findMember.validateOauthType(oauthMemberInfo.getOauthType());
 
     }
 

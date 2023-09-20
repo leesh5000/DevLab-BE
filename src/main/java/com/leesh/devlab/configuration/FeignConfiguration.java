@@ -43,6 +43,7 @@ public class FeignConfiguration {
             FeignException feignException = FeignException.errorStatus(methodKey, response);
             HttpStatus httpStatus = HttpStatus.valueOf(response.status());
 
+            // 만약, 상대 서버 에러라면, 재시도 로직을 진행한다.
             if (httpStatus.is5xxServerError()) {
                 return new RetryableException(
                         response.status(),
