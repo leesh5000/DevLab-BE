@@ -1,4 +1,4 @@
-package com.leesh.devlab.api.oauth.dto;
+package com.leesh.devlab.api.auth.dto;
 
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.OauthType;

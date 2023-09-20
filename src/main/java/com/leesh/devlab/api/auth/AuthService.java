@@ -1,6 +1,6 @@
-package com.leesh.devlab.api.oauth;
+package com.leesh.devlab.api.auth;
 
-import com.leesh.devlab.api.oauth.dto.OauthLogin;
+import com.leesh.devlab.api.auth.dto.OauthLogin;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
@@ -18,13 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
-import static com.leesh.devlab.api.oauth.dto.OauthLogin.Request;
+import static com.leesh.devlab.api.auth.dto.OauthLogin.Request;
 import static com.leesh.devlab.util.TimeUtils.convertLocalDateTime;
 
 @RequiredArgsConstructor
 @Transactional
 @Service
-public class OauthService {
+public class AuthService {
 
     private final OauthClientFactory oauthClientFactory;
     private final MemberRepository memberRepository;
