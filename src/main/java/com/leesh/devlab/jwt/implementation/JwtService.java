@@ -1,12 +1,9 @@
 package com.leesh.devlab.jwt.implementation;
 
-import com.leesh.devlab.constant.TokenType;
-import com.leesh.devlab.domain.member.Member;
-import com.leesh.devlab.constant.Role;
-import com.leesh.devlab.exception.ex.AuthException;
-import com.leesh.devlab.exception.ex.BusinessException;
 import com.leesh.devlab.constant.ErrorCode;
-import com.leesh.devlab.jwt.AuthToken;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.exception.ex.AuthException;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import io.jsonwebtoken.Claims;
@@ -33,12 +30,12 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public MemberInfo extractMemberInfo(AuthToken authToken) throws AuthException {
+    public MemberInfo extractMemberInfo(String accessToken) throws AuthException {
 
-        Claims claims = extractAllClaims(authToken);
+        Claims claims = extractAllClaims(accessToken);
 
         // 접근 토큰이 아니면, 예외 던지기
-        if (!authToken.getTokenType().equals(claims.getSubject())) {
+        if (!TokenType.ACCESS.name().equals(claims.getSubject())) {
             throw new AuthException(ErrorCode.INVALID_TOKEN);
         }
 
@@ -51,9 +48,9 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public void validateAuthToken(AuthToken authToken, TokenType tokenType) {
+    public void validateAuthToken(String value, TokenType tokenType) {
 
-        Claims claims = extractAllClaims(authToken);
+        Claims claims = extractAllClaims(value);
 
         // 토큰 타입 유효성 검증
         if (!tokenType.name().equals(claims.getSubject())) {
@@ -63,32 +60,30 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public AuthToken createAuthToken(Member member, TokenType tokenType) {
+    public String createAuthToken(MemberInfo memberInfo, TokenType tokenType) {
 
         Date expiredAt = new Date(System.currentTimeMillis() + tokenType.getExpiresIn());
 
-        String value = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(tokenType.name())             // 토큰 제목
                 .setIssuedAt(new Date())                  // 토큰 발급 시간
                 .setExpiration(expiredAt)                 // 토큰 만료되는 시간
-                .claim("id", member.getId())        // 회원 아이디 (PK값)
-                .claim("name", member.getName())    // 회원 이름
-                .claim("email", member.getEmail())  // 회원 이메일
-                .claim("role", member.getRole())    // 유저 role
+                .claim("id", memberInfo.id())        // 회원 아이디 (PK값)
+                .claim("name", memberInfo.name())    // 회원 이름
+                .claim("email", memberInfo.email())  // 회원 이메일
+                .claim("role", memberInfo.role())    // 유저 role
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .setHeaderParam("typ", "JWT")
                 .compact();
-
-        return new Jwt(tokenType, value);
     }
 
     // 이 메소드의 파라미터인 토큰은 해당 시점에서는 Access Token 또는 Refresh Token 인지 알 수 없다.
-    private Claims extractAllClaims(AuthToken authToken) throws AuthException {
+    private Claims extractAllClaims(String value) throws AuthException {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
-                    .parseClaimsJws(authToken.getValue())
+                    .parseClaimsJws(value)
                     .getBody();
         } catch (ExpiredJwtException e) {
             throw new AuthException(ErrorCode.EXPIRED_TOKEN);

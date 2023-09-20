@@ -29,4 +29,9 @@ public class HomeController {
         return map;
     }
 
+    @GetMapping(value = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String auth() {
+        return "HI";
+    }
+
 }
