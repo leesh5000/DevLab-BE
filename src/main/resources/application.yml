@@ -6,6 +6,17 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 1000 # OneToMany 관계 조회 시, 쿼리 한 번으로 최적화
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 5000
+  servlet:
+    multipart:
+      max-file-size: 10MB # 파일 업로드 요청 시, 하나의 파일 크기를 10MB로 제한
+      max-request-size: 100MB # 파일 업로드 요청 시, 전체 요청 크기를 100MB로 제한
 
   # ENUM Deserializer 대소문자 무시
   jackson:
