@@ -4,8 +4,8 @@ import com.leesh.devlab.jwt.AuthToken;
 
 public enum TokenType {
 
-    ACCESS(60 * 20 * 1000), // 20분
-    REFRESH(60 * 60 * 24 * 7 * 1000) // 7일
+    ACCESS(1 * 60 * 1000), // 20분
+    REFRESH(7 * 24 * 60 * 60 * 1000) // 7일
     ;
 
     // 토큰의 유효 기간 (초)

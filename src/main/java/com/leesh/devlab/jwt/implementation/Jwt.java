@@ -11,8 +11,8 @@ public record Jwt(TokenType tokenType, String value, long expiresInMills) implem
         Objects.requireNonNull(tokenType, "tokenType must be not null");
         Objects.requireNonNull(value, "value must be not null");
 
-        if (expiresInMills < System.currentTimeMillis()) {
-            throw new IllegalArgumentException("expiresInMills must be greater than current time");
+        if (expiresInMills <= 0) {
+            throw new IllegalArgumentException("expiresInMills must be greater than 0");
         }
 
     }

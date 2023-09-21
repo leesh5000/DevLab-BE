@@ -76,7 +76,7 @@ public class JwtService implements AuthTokenService {
                 .setHeaderParam("typ", "JWT")
                 .compact();
 
-        return new Jwt(tokenType, value, expiredAt);
+        return new Jwt(tokenType, value, tokenType.getExpiresInMills());
     }
 
     // 이 메소드의 파라미터인 토큰은 해당 시점에서는 Access Token 또는 Refresh Token 인지 알 수 없다.
