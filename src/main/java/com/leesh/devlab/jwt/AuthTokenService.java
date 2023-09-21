@@ -5,8 +5,6 @@ import com.leesh.devlab.exception.ex.AuthException;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.jwt.implementation.JwtService;
 
-import javax.naming.AuthenticationException;
-
 /**
  * <p>권한 및 인증과 관련된 토큰을 생성하고 검증하는 역할을 하는 서비스를 추상화</p>
  * Implementation {@link JwtService}
@@ -15,19 +13,13 @@ public interface AuthTokenService {
 
     /**
      * 토큰으로 부터 멤버 정보를 추출하는 메서드
-     * @param authToken
+     * @param tokenValue
      * @return
      * @throws AuthException accessToken이 아니면 예외 발생
      */
-    MemberInfo extractMemberInfo(AuthToken authToken) throws AuthException;
+    MemberInfo extractMemberInfo(String tokenValue) throws AuthException;
 
-    /**
-     * 인증 토큰이 유효한지 검증하는 메서드
-     * @param authToken 검증할 토큰
-     * @param tokenType 검증할 토큰의 타입 {@link TokenType}
-     * @throws AuthenticationException
-     */
-    void validateAuthToken(AuthToken authToken, TokenType tokenType) throws AuthException;
+    void validateAuthToken(String tokenValue, TokenType tokenType) throws AuthException;
 
     /**
      * 유저 정보로 부터 토큰을 생성하는 메서드

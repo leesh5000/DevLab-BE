@@ -1,5 +1,6 @@
 package com.leesh.devlab.constant;
 
+import com.leesh.devlab.jwt.AuthToken;
 import lombok.Getter;
 
 @Getter
@@ -14,6 +15,14 @@ public enum TokenType {
 
     TokenType(Integer expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public static boolean isAccessToken(AuthToken authToken) {
+        return TokenType.ACCESS == authToken.getTokenType();
+    }
+
+    public static boolean isRefreshToken(AuthToken authToken) {
+        return TokenType.REFRESH == authToken.getTokenType();
     }
 
 }

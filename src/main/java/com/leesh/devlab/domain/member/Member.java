@@ -57,7 +57,7 @@ public class Member extends BaseEntity {
     private String refreshToken;
 
     @Column(name = "refresh_token_expired_at", nullable = true)
-    private LocalDateTime refreshTokenExpiredAt;
+    private Long refreshTokenExpiredAt;
 
     @OrderBy("id")
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
@@ -113,7 +113,7 @@ public class Member extends BaseEntity {
         OauthType.validateOauthType(this.oauthType, oauthType);
     }
 
-    public void updateRefreshToken(AuthToken refreshToken, LocalDateTime expiredAt) {
+    public void updateRefreshToken(AuthToken refreshToken, Long expiredAt) {
         this.refreshToken = refreshToken.getValue();
         this.refreshTokenExpiredAt = expiredAt;
     }

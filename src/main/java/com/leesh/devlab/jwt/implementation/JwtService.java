@@ -31,9 +31,9 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public MemberInfo extractMemberInfo(AuthToken authToken) throws AuthException {
+    public MemberInfo extractMemberInfo(String tokenValue) throws AuthException {
 
-        Claims claims = extractAllClaims(authToken.getValue());
+        Claims claims = extractAllClaims(tokenValue);
 
         // 접근 토큰이 아니면, 예외 던지기
         if (!TokenType.ACCESS.name().equals(claims.getSubject())) {
@@ -49,15 +49,14 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public void validateAuthToken(AuthToken authToken, TokenType tokenType) {
+    public void validateAuthToken(String tokenValue, TokenType tokenType) throws AuthException {
 
-        Claims claims = extractAllClaims(authToken.getValue());
+        Claims claims = extractAllClaims(tokenValue);
 
         // 토큰 타입 유효성 검증
         if (!tokenType.name().equals(claims.getSubject())) {
             throw new AuthException(ErrorCode.INVALID_TOKEN, "wrong token type");
         }
-
     }
 
     @Override

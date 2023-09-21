@@ -1,10 +1,13 @@
-package com.leesh.devlab.api.auth;
+package com.leesh.devlab.api.oauth;
 
-import com.leesh.devlab.api.auth.dto.OauthLogin;
+import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
+import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
+import com.leesh.devlab.exception.ex.AuthException;
 import com.leesh.devlab.external.OauthClient;
 import com.leesh.devlab.external.OauthClientFactory;
 import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
@@ -16,10 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-
-import static com.leesh.devlab.api.auth.dto.OauthLogin.Request;
-import static com.leesh.devlab.util.TimeUtils.convertLocalDateTime;
+import static com.leesh.devlab.api.oauth.dto.OauthLoginDto.Request;
 
 @RequiredArgsConstructor
 @Transactional
@@ -30,7 +30,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final AuthTokenService authTokenService;
 
-    public OauthLogin.Response oauthLogin(Request request) {
+    public OauthLoginDto.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
         OauthMemberInfo oauthMemberInfo = getOauthMemberInfo(request);
@@ -53,13 +53,37 @@ public class AuthService {
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(
                 refreshToken,
-                convertLocalDateTime(
-                        new Date(System.currentTimeMillis() + TokenType.REFRESH.getExpiresIn())
-                )
+                System.currentTimeMillis() + (TokenType.REFRESH.getExpiresIn() * 1000)
         );
 
         // 응답 DTO를 생성 후 반환한다.
-        return new OauthLogin.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new OauthLoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
+    }
+
+    /**
+     * 유저의 리프레시 토큰을 사용하여 새로운 인증 토큰을 발급하는 메서드
+     * @param refreshToken
+     */
+    public RefreshTokenDto refreshToken(String refreshToken) {
+
+        // 리프레시 토큰 검증
+        authTokenService.validateAuthToken(refreshToken, TokenType.REFRESH);
+
+        // 검증을 통과했으면, 리프레시 토큰을 통해 유저를 찾는다.
+        // 리프레시 토큰이 탈취 되었을 때, 블락 처리를 할 수 있어야 하기 때문에 DB에서 유저를 찾아야한다.
+        Member member = memberRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new AuthException(ErrorCode.INVALID_TOKEN, "not invalid refresh token"));
+
+        // 현재 시간이 토큰 만료 시간보다 더 미래이면, 만료된 토큰이므로 액세스 토큰 갱신을 거부한다.
+        if (member.getRefreshTokenExpiredAt() < System.currentTimeMillis()) {
+            throw new AuthException(ErrorCode.EXPIRED_TOKEN, "refresh token is expired");
+        }
+
+        // 새로운 액세스 토큰을 발급한다.
+        AuthToken accessToken = authTokenService.createAuthToken(MemberInfo.from(member), TokenType.ACCESS);
+
+        return new RefreshTokenDto(GrantType.BEARER, accessToken);
+
     }
 
     /**
@@ -91,4 +115,5 @@ public class AuthService {
         return oauthClient.requestMemberInfo(oauthTokenResponse.getAccessToken());
 
     }
+
 }

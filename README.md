@@ -85,7 +85,7 @@ create table members
     oauth_type               varchar(10),
     profile_img_url          varchar(255),
     refresh_token            varchar(255),
-    refresh_token_expired_at datetime,
+    refresh_token_expired_at bigint,
     created_by               varchar(255) not null,
     modified_by              varchar(255) not null,
     created_at               bigint       not null,
@@ -120,7 +120,7 @@ create index posts_member_id_idx on posts (member_id);
 create table comments
 (
     id          bigint auto_increment,
-    member_id     bigint       not null,
+    member_id   bigint       not null,
     post_id     bigint       not null,
     contents    text         not null,
     created_by  varchar(255) not null,

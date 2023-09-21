@@ -14,9 +14,4 @@ public interface AuthToken {
      */
     String getValue();
 
-    /**
-     * @return 토큰의 유효 기간 (초)
-     */
-    Integer getExpiresIn();
-
 }
