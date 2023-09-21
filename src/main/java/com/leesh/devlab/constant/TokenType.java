@@ -4,7 +4,7 @@ import com.leesh.devlab.jwt.AuthToken;
 
 public enum TokenType {
 
-    ACCESS(1 * 60 * 1000), // 20분
+    ACCESS(20 * 60 * 1000), // 20분
     REFRESH(7 * 24 * 60 * 60 * 1000) // 7일
     ;
 

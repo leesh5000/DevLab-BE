@@ -116,4 +116,13 @@ public class AuthService {
 
     }
 
+    public void logout(MemberInfo memberInfo) {
+
+            // 로그아웃 요청한 유저의 리프레시 토큰을 삭제한다.
+            Member member = memberRepository.findById(memberInfo.id())
+                    .orElseThrow(() -> new AuthException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+
+            // 사용자의 리프레시 토큰을 만료 처리한다.
+            member.logout();
+    }
 }

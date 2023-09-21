@@ -2,6 +2,8 @@ package com.leesh.devlab.api.oauth;
 
 import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
 import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
+import com.leesh.devlab.jwt.dto.MemberInfo;
+import com.leesh.devlab.resolver.LoginMember;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -33,7 +35,7 @@ public class AuthController {
     /**
      * 액세스 토큰 갱신 API
      */
-    @GetMapping(path = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RefreshTokenDto> refreshToken(HttpServletRequest request) {
 
         String refreshToken = extractAuthorization(request);
@@ -41,6 +43,14 @@ public class AuthController {
         RefreshTokenDto refreshTokenDto = authService.refreshToken(refreshToken);
 
         return ResponseEntity.ok(refreshTokenDto);
+    }
+
+    @GetMapping(path = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> logout(@LoginMember MemberInfo memberInfo) {
+
+        authService.logout(memberInfo);
+
+        return ResponseEntity.ok().build();
     }
 
 }

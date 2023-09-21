@@ -17,7 +17,7 @@ public class HomeController {
 
     private final Environment environment;
 
-    @GetMapping(value = "/api/health", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/api/secret", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> healthCheck() {
 
         Map<String, Object> map = new HashMap<>();
