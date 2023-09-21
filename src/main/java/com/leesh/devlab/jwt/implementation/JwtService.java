@@ -62,12 +62,12 @@ public class JwtService implements AuthTokenService {
     @Override
     public AuthToken createAuthToken(MemberInfo memberInfo, TokenType tokenType) {
 
-        Date expiredAt = new Date(System.currentTimeMillis() + tokenType.getExpiresIn() * 1000);
+        long expiredAt = System.currentTimeMillis() + tokenType.getExpiresInMills();
 
         String value = Jwts.builder()
-                .setSubject(tokenType.name())             // 토큰 제목
-                .setIssuedAt(new Date())                  // 토큰 발급 시간
-                .setExpiration(expiredAt)                 // 토큰 만료되는 시간
+                .setSubject(tokenType.name())              // 토큰 제목
+                .setIssuedAt(new Date())                   // 토큰 발급 시간
+                .setExpiration(new Date(expiredAt))        // 토큰 만료되는 시간
                 .claim("id", memberInfo.id())        // 회원 아이디 (PK값)
                 .claim("name", memberInfo.name())    // 회원 이름
                 .claim("email", memberInfo.email())  // 회원 이메일
@@ -76,7 +76,7 @@ public class JwtService implements AuthTokenService {
                 .setHeaderParam("typ", "JWT")
                 .compact();
 
-        return new Jwt(tokenType, value);
+        return new Jwt(tokenType, value, expiredAt);
     }
 
     // 이 메소드의 파라미터인 토큰은 해당 시점에서는 Access Token 또는 Refresh Token 인지 알 수 없다.

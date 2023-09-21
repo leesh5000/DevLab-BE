@@ -14,4 +14,10 @@ public interface AuthToken {
      */
     String getValue();
 
+    /**
+     * 토큰의 유효시간을 반환 (밀리 초)
+     * @return 토큰 유효 시간
+     */
+    long getExpiresInMills();
+
 }

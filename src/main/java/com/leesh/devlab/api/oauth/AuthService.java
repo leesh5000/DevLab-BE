@@ -53,7 +53,7 @@ public class AuthService {
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(
                 refreshToken,
-                System.currentTimeMillis() + (TokenType.REFRESH.getExpiresIn() * 1000)
+                System.currentTimeMillis() + TokenType.REFRESH.getExpiresInMills()
         );
 
         // 응답 DTO를 생성 후 반환한다.

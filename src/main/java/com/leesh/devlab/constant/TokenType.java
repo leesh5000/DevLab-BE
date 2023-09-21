@@ -1,20 +1,22 @@
 package com.leesh.devlab.constant;
 
 import com.leesh.devlab.jwt.AuthToken;
-import lombok.Getter;
 
-@Getter
 public enum TokenType {
 
-    ACCESS(60 * 20), // 20분
-    REFRESH(60 * 60 * 24 * 7) // 7일
+    ACCESS(60 * 20 * 1000), // 20분
+    REFRESH(60 * 60 * 24 * 7 * 1000) // 7일
     ;
 
     // 토큰의 유효 기간 (초)
-    private final Integer expiresIn;
+    private final long expiresInMills;
 
     TokenType(Integer expiresIn) {
-        this.expiresIn = expiresIn;
+        this.expiresInMills = expiresIn;
+    }
+
+    public long getExpiresInMills() {
+        return expiresInMills;
     }
 
     public static boolean isAccessToken(AuthToken authToken) {
