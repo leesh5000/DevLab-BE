@@ -50,7 +50,7 @@ public class AuthController {
 
         authService.logout(memberInfo);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

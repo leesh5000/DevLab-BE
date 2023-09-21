@@ -12,6 +12,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    show-sql: true # JPA 쿼리 로그 출력
+    properties:
+      hibernate:
+        format_sql: true
 
 oauth:
   kakao:
