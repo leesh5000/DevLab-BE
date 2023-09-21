@@ -2,6 +2,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    open-in-view: false # 영속성 컨텍스트의 생존 범위를 트랜잭션 범위로 한정
+    properties:
+      hibernate:
+        default_batch_fetch_size: 1000 # OneToMany 관계 조회 시, 쿼리 한 번으로 최적화
 
   # ENUM Deserializer 대소문자 무시
   jackson:
