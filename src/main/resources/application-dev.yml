@@ -1,0 +1,28 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /dev
+
+spring:
+  datasource:
+    url: ENC(b50jR4Se7Fp96Y9sp0bU4vTutjSmUWdLb7npDqW9Qm6FE2nma/h7dfEmbCC9L+xL)
+    username: ENC(2OMRFfW6qV+EJGkmM+8DHg==)
+    password: ENC(+acLZtSIkxphwaupMf7LQsscP9cxn/KD)
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+oauth:
+  kakao:
+    id: ENC(KLlnfX+E6CGb8QkdKxlPl/de9Od1Q7CtqcSCLQ52rzeK+U/PblemtUO12mHIgGga)
+    secret: ENC(2MF+9z6/vDSweNTZmCc/0m0ay74GZJ02J4WrWm1eKQ6mg6srrTYysPYHDxOILSdq)
+    redirect-uri: ENC(wof0BAJX6oQga46VHwdAIq0CF8tgw6krnXkOIks6/i4ybmf2HaSlwEnsNeHrlxQOGDCIILnf4Ds=)
+  naver:
+    id: ENC(UnYi68AGn4s7HpRmTchLFcLog5lIC7lo8nOx3+xTkm4=)
+    secret: ENC(ToI2nG/YNkqbGM3RCGnQRTw/D3rcXp2m)
+    redirect-uri: ENC(Jkozw5iHxUdopon9H6D86Lz8lP5JOBy4x+jwPAgWNY/Xmdqinuf4/oTFymrEJtHr7K0NWl55xOs=)
+  google:
+    id: ENC(mUX6rlJeYrk3jSFEHzK39bIQP3hdoBwwyzd3rIHEtHa/dKlZ/qelkrhbYBd0FJqf/c9EW+VIOOQu6ox+RPkYHY5ah+2vjEadENF2+F3pOYb0ZWoIXQx4bA==)
+    secret: ENC(/o4Q2q62U+Nlyn3XGXrlzFz9jQZySMjMeupWcS7JbFZAU87nUrzYGvkPUI4yWP6R)
+    redirect-uri: ENC(2iFa8FLbKO3cAlSOiXKgDBBopDMyO8+GZSymeWbCNOh7rJ+pHNvS2vpDxema06YJnREbNUJeHgE=)

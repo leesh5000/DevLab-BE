@@ -1,15 +1,16 @@
 package com.leesh.devlab.domain.member;
 
+import com.leesh.devlab.constant.OauthType;
+import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.domain.BaseEntity;
-import com.leesh.devlab.domain.member.constant.Oauth2Type;
-import com.leesh.devlab.domain.member.constant.Role;
 import com.leesh.devlab.domain.post.Post;
+import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
+import com.leesh.devlab.jwt.AuthToken;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +30,7 @@ public class Member extends BaseEntity {
     private Long id;
 
     @Column(name = "name", length = 30, nullable = false)
-    private String username;
+    private String name;
 
     @Column(name = "email", length = 255, unique = true, nullable = false)
     private String email;
@@ -42,11 +43,11 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 10)
-    private Role role;
+    private Role role = Role.MEMBER;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "oauth2_type", nullable = false, length = 10)
-    private Oauth2Type oauth2Type;
+    @Column(name = "oauth_type", nullable = true, length = 10)
+    private OauthType oauthType;
 
     @Column(name = "profile_img_url", length = 255, nullable = true)
     private String profileImgUrl;
@@ -55,7 +56,7 @@ public class Member extends BaseEntity {
     private String refreshToken;
 
     @Column(name = "refresh_token_expired_at", nullable = true)
-    private LocalDateTime refreshTokenExpiredAt;
+    private Long refreshTokenExpiredAt;
 
     @OrderBy("id")
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
@@ -75,4 +76,48 @@ public class Member extends BaseEntity {
         return id != null && id.equals(member.id);
     }
 
+    /* 생성 메서드 */
+    public static Member createMember(String name, String email, OauthType oauthType) {
+
+        Member member = new Member();
+        member.name = name;
+        member.email = email;
+        member.oauthType = oauthType;
+
+        return member;
+    }
+
+    /* 도메인 비즈니스 로직 */
+
+    /**
+     * 탈퇴한 유저를 재가입 시키는 매소드
+     * @param memberInfo
+     */
+    public void reRegister(OauthMemberInfo memberInfo) {
+
+        // 기존의 소셜 로그인 정보 제공 업체를 재가입을 시도한 업체로 변경한다.
+        this.oauthType = memberInfo.getOauthType();
+        this.deleted = false;
+        this.name = memberInfo.getName();
+        this.email = memberInfo.getEmail();
+        this.profileImgUrl = memberInfo.getProfileImgUrl();
+
+    }
+
+    /**
+     * 소셜 로그인을 시도한 유저가 올바른 소셜 업체로 로그인 했는지 체크하는 메서드
+     * @param oauthType
+     */
+    public void validateOauthType(OauthType oauthType) {
+        OauthType.validateOauthType(this.oauthType, oauthType);
+    }
+
+    public void updateRefreshToken(AuthToken refreshToken, Long expiredAt) {
+        this.refreshToken = refreshToken.getValue();
+        this.refreshTokenExpiredAt = expiredAt;
+    }
+
+    public void logout() {
+        this.refreshTokenExpiredAt = System.currentTimeMillis();
+    }
 }

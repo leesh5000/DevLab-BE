@@ -41,7 +41,7 @@ _Reference_
 - email : 사용자의 이메일 (소셜 회원가입을 하지 않은 사용자의 경우에는 NULL 값 허용)
 - password : 암호화 된 비밀번호
 - role : 유저 권한
-- oauth2_type : 어떤 소셜 로그인을 통해 회원가입을 했는지에 대한 필드
+- oauth_type : 어떤 소셜 로그인을 통해 회원가입을 했는지에 대한 필드 (null인 경우, 소셜 계정 회원가입이 아닌 일반 회원가입)
 - refresh_token : 액세스 토큰 만료 시, 토큰 재발급을 위한 갱신 토큰
 - refresh_token_expired_at : 리프레시 토큰 만료 시간
 
@@ -82,14 +82,14 @@ create table members
     email                    varchar(255) not null unique,
     password                 varchar(255),
     role                     varchar(10)  not null,
-    oauth2_type              varchar(10)  not null,
+    oauth_type               varchar(10),
     profile_img_url          varchar(255),
     refresh_token            varchar(255),
-    refresh_token_expired_at datetime,
+    refresh_token_expired_at bigint,
     created_by               varchar(255) not null,
     modified_by              varchar(255) not null,
-    created_at               timestamp    not null,
-    modified_at              timestamp    not null,
+    created_at               bigint       not null,
+    modified_at              bigint       not null,
     deleted                  tinyint(1)   not null default 0,
     primary key (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
@@ -106,8 +106,8 @@ create table posts
     contents    text         not null,
     created_by  varchar(255) not null,
     modified_by varchar(255) not null,
-    created_at  timestamp    not null,
-    modified_at timestamp    not null,
+    created_at  bigint       not null,
+    modified_at bigint       not null,
     deleted     tinyint(1)   not null default 0,
     primary key (id),
     foreign key (member_id) references members (id)
@@ -120,13 +120,13 @@ create index posts_member_id_idx on posts (member_id);
 create table comments
 (
     id          bigint auto_increment,
-    member_id     bigint       not null,
+    member_id   bigint       not null,
     post_id     bigint       not null,
     contents    text         not null,
     created_by  varchar(255) not null,
     modified_by varchar(255) not null,
-    created_at  timestamp    not null,
-    modified_at timestamp    not null,
+    created_at  bigint       not null,
+    modified_at bigint       not null,
     deleted     tinyint(1)   not null default 0,
     primary key (id),
     foreign key (member_id) references members (id),
@@ -145,8 +145,8 @@ create table posts_likes
     value       tinyint      not null,
     created_by  varchar(255) not null,
     modified_by varchar(255) not null,
-    created_at  timestamp    not null,
-    modified_at timestamp    not null,
+    created_at  bigint       not null,
+    modified_at bigint       not null,
     primary key (id),
     foreign key (member_id) references members (id),
     foreign key (post_id)   references posts (id)
@@ -163,8 +163,8 @@ create table comments_likes
     value       tinyint      not null,
     created_by  varchar(255) not null,
     modified_by varchar(255) not null,
-    created_at  timestamp    not null,
-    modified_at timestamp    not null,
+    created_at  bigint       not null,
+    modified_at bigint       not null,
     primary key (id),
     foreign key (member_id) references members (id),
     foreign key (comment_id) references comments (id)
