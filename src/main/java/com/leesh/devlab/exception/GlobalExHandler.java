@@ -10,6 +10,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -64,6 +65,20 @@ public class GlobalExHandler {
                 HttpStatus.METHOD_NOT_ALLOWED.toString(), e.getMessage());
 
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
+    }
+
+    /**
+     * 지원하지 않은 HTTP Content Type 으로 호출 할 경우 발생
+     */
+    @ExceptionHandler(HttpMediaTypeException.class)
+    protected ResponseEntity<ErrorResponse> handleHttpMediaTypeException(HttpMediaTypeException e) {
+
+        log.error("handleHttpMediaTypeException", e);
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST.toString(), e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     /**

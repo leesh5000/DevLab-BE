@@ -1,33 +1,18 @@
 package com.leesh.devlab.external.implementation.kakao.dto;
 
-import com.leesh.devlab.external.abstraction.dto.OauthTokenRequest;
-import com.leesh.devlab.external.abstraction.dto.OauthTokenResponse;
-import lombok.Builder;
-import lombok.Getter;
+import com.leesh.devlab.external.abstraction.OauthToken;
 
-public class KakaoToken {
+import java.util.Objects;
 
-    @Getter
-    @Builder
-    public static class Request implements OauthTokenRequest {
+public record KakaoToken(String access_token, String token_type, String refresh_toke, int expires_in, String scope, int refresh_token_expires_in) implements OauthToken {
 
-        private String grant_type;
-        private String client_id;
-        private String redirect_uri;
-        private String code;
-        private String client_secret;
-        private String state;
-
+    public KakaoToken {
+        Objects.requireNonNull(access_token, "KakaoToken access_token must not be null");
     }
 
-    public record Response(
-            String access_token, String token_type, String refresh_token,
-            int expires_in, String scope, int refresh_token_expires_in
-    ) implements OauthTokenResponse {
-        @Override
-        public String getAccessToken() {
-            return access_token;
-        }
+    @Override
+    public String getAccessToken() {
+        return access_token;
     }
 
 }

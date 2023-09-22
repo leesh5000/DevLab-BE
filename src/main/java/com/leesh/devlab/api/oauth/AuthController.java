@@ -2,10 +2,12 @@ package com.leesh.devlab.api.oauth;
 
 import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
 import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
+import com.leesh.devlab.api.oauth.dto.SignupDto;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +53,17 @@ public class AuthController {
         authService.logout(memberInfo);
 
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 일반 계정 회원가입 API
+     */
+    @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<OauthLoginDto.Response> register(@RequestBody SignupDto.Request request) {
+
+        OauthLoginDto.Response response = authService.register(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }

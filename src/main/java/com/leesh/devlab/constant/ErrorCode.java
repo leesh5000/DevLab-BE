@@ -1,12 +1,17 @@
 package com.leesh.devlab.constant;
 
-import com.leesh.devlab.exception.GlobalExHandler;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
+/**
+ * <p>
+ *     예외 발생 시, 클라이언트에게 전달할 에러 코드를 정의한다.<br>
+ *     각 에러코드는 resources/messages 폴더 내에 있는 messages.properties 파일에 정의된 메세지와 매핑되어 클라이언트에게로 응답한다.
+ * </p>
+ */
 @Getter
 public enum ErrorCode {
 
@@ -25,21 +30,15 @@ public enum ErrorCode {
 
     /* Member */
     NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "M-001"),
+    ALREADY_REGISTERED_MEMBER(CONFLICT, "M-002"),
 
     /* Common */
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C-001"),
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-002")
-
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-002"),
     ;
 
     private final HttpStatus httpStatus;
-
-    /**
-     * 이 필드를 통해 messages_properties 파일에서 해당하는 에러 메세지를 가져온다. <br>
-     * {@link GlobalExHandler#messageSource}
-     */
     private final String code;
-
 
     ErrorCode(HttpStatus httpStatus, String code) {
         this.httpStatus = httpStatus;

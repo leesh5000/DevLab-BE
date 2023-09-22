@@ -78,11 +78,11 @@ use DevLab;
 create table members
 (
     id                       bigint auto_increment,
-    name                     varchar(30)  not null,
-    email                    varchar(255) not null unique,
+    nickname                 varchar(30)  not null unique,
+    email                    varchar(255) unique,
     password                 varchar(255),
     role                     varchar(10)  not null,
-    oauth_type               varchar(10),
+    oauth_id                 varchar(255) unique,
     profile_img_url          varchar(255),
     refresh_token            varchar(255),
     refresh_token_expired_at bigint,
@@ -94,7 +94,7 @@ create table members
     primary key (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
-create index members_name_idx on members (name);
+create index members_name_idx on members (nickname);
 create index members_email_idx on members (email);
 create index members_created_at_idx on members (created_at);
 

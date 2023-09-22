@@ -2,16 +2,17 @@ package com.leesh.devlab.api.oauth;
 
 import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
 import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
+import com.leesh.devlab.api.oauth.dto.SignupDto;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.exception.ex.AuthException;
-import com.leesh.devlab.external.OauthClient;
-import com.leesh.devlab.external.OauthClientFactory;
-import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
-import com.leesh.devlab.external.abstraction.dto.OauthTokenResponse;
+import com.leesh.devlab.external.OauthServiceFactory;
+import com.leesh.devlab.external.abstraction.OauthMemberInfo;
+import com.leesh.devlab.external.abstraction.OauthService;
+import com.leesh.devlab.external.abstraction.OauthToken;
 import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
@@ -26,24 +27,25 @@ import static com.leesh.devlab.api.oauth.dto.OauthLoginDto.Request;
 @Service
 public class AuthService {
 
-    private final OauthClientFactory oauthClientFactory;
+    private final OauthServiceFactory oauthServiceFactory;
     private final MemberRepository memberRepository;
     private final AuthTokenService authTokenService;
 
     public OauthLoginDto.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
-        OauthMemberInfo oauthMemberInfo = getOauthMemberInfo(request);
+        OauthMemberInfo oauthMember = getOauthMemberInfo(request);
 
-        // Oauth Provider 에서 가져온 사용자 정보를 이용하여 DB에서 가입된 회원을 찾는다. 만약 회원가입한 유저가 아니라면, 신규 가입을 하고 가져온다.
-        Member findMember = memberRepository.findByEmail(oauthMemberInfo.getEmail())
+        // Oauth Provider 에서 가져온 사용자 식별값을 이용하여 DB에서 가입된 회원을 찾는다. 만약 회원가입한 유저가 아니라면, 신규 가입을 하고 가져온다.
+        String oauthId = oauthMember.getOauthType() + "@" + oauthMember.getId();
+        Member findMember = memberRepository.findByOauthId(oauthId)
                 .orElseGet(() -> {
-                    Member m = Member.createMember(oauthMemberInfo.getName(), oauthMemberInfo.getEmail(), oauthMemberInfo.getOauthType());
-                    return memberRepository.save(m);
+                    Member entity = oauthMember.toEntity();
+                    return memberRepository.save(entity);
                 });
 
         // 소셜 계정으로 로그인 시도한 사용자의 유효성을 검증한다.
-        validateOauthMember(findMember, oauthMemberInfo);
+        validateOauthMember(findMember);
 
         // 인증 토큰을 생성한다.
         MemberInfo memberInfo = MemberInfo.from(findMember);
@@ -51,10 +53,7 @@ public class AuthService {
         AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
 
         // 유저의 refresh token을 업데이트한다.
-        findMember.updateRefreshToken(
-                refreshToken,
-                System.currentTimeMillis() + TokenType.REFRESH.getExpiresInMills()
-        );
+        findMember.updateRefreshToken(refreshToken);
 
         // 응답 DTO를 생성 후 반환한다.
         return new OauthLoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
@@ -89,30 +88,24 @@ public class AuthService {
     /**
      * 소셜 계정으로 로그인 시도한 사용자의 유효성 검증 메서드
      * @param findMember
-     * @param oauthMemberInfo
      */
-    private static void validateOauthMember(Member findMember, OauthMemberInfo oauthMemberInfo) {
-
+    private void validateOauthMember(Member findMember) {
         // 찾은 유저가 탈퇴한 상태라면 재가입 로직을 진행한다.
         if (findMember.isDeleted()) {
-            findMember.reRegister(oauthMemberInfo);
+            findMember.reRegister();
         }
-
-        // 소셜 계정으로 로그인을 시도한 유저가 올바른 소셜 계정으로 로그인을 한 것인지 체크한다.
-        findMember.validateOauthType(oauthMemberInfo.getOauthType());
-
     }
 
     private OauthMemberInfo getOauthMemberInfo(Request request) {
 
         // oauth 타입에 맞는 oauth api service 구현체를 가져온다.
-        OauthClient oauthClient = oauthClientFactory.getService(request.oauthType());
+        OauthService oauthService = oauthServiceFactory.getService(request.oauthType());
 
         // 현재 로그인을 시도한 유저 정보를 가져오기 위해 먼저 토큰을 발급받는다.
-        OauthTokenResponse oauthTokenResponse = oauthClient.requestToken(request.authorizationCode());
+        OauthToken oauthToken = oauthService.requestToken(request.authorizationCode());
 
         // 토큰을 이용하여 유저 정보를 가져온다.
-        return oauthClient.requestMemberInfo(oauthTokenResponse.getAccessToken());
+        return oauthService.requestMemberInfo(oauthToken.getAccessToken());
 
     }
 
@@ -124,5 +117,30 @@ public class AuthService {
 
             // 사용자의 리프레시 토큰을 만료 처리한다.
             member.logout();
+    }
+
+    public OauthLoginDto.Response register(SignupDto.Request request) {
+
+        // 이미 가입된 유저인지 확인한다.
+        if (memberRepository.existsByEmail(request.email()) || memberRepository.existsByNickname(request.name())) {
+            throw new AuthException(ErrorCode.ALREADY_REGISTERED_MEMBER, "already registered member");
+        }
+
+        // 회원가입을 진행한다.
+        Member newMember = request.toEntity();
+        MemberInfo memberInfo = MemberInfo.from(newMember);
+
+        // 인증 토큰을 생성한다.
+        AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
+        AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
+
+        // 유저의 refresh token을 업데이트한다.
+        newMember.updateRefreshToken(refreshToken);
+
+        // DB에 저장한다.
+        memberRepository.save(newMember);
+
+        // 응답 객체를 만든다.
+        return new OauthLoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 }
