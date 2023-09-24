@@ -126,13 +126,13 @@ public class AuthService {
     public void register(RegisterDto.Request request) {
 
         // 이미 가입된 유저인지 확인한다.
-        if (memberRepository.existsByEmailOrNickname(request.email(), request.nickname())) {
+        if (memberRepository.existsByLoginIdOrNickname(request.loginId(), request.nickname())) {
             throw new BusinessException(ErrorCode.ALREADY_REGISTERED_MEMBER, "already registered member");
         }
 
         // 회원가입을 진행한다.
         Member newMember = Member.builder()
-                .email(request.email())
+                .loginId(request.loginId())
                 .nickname(request.nickname())
                 .password(passwordEncoder.encode(request.password()))
                 .build();
@@ -141,7 +141,7 @@ public class AuthService {
 
     public LoginDto.Response login(LoginDto.Request request) {
 
-        Member findMember = memberRepository.findByEmail(request.email())
+        Member findMember = memberRepository.findByLoginId(request.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
 
         // 비밀번호가 일치하는지 확인한다.

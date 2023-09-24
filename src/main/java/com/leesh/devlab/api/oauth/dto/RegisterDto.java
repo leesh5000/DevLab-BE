@@ -1,17 +1,18 @@
 package com.leesh.devlab.api.oauth.dto;
 
-import com.leesh.devlab.validator.Email;
-import com.leesh.devlab.validator.Nickname;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.AuthToken;
+import com.leesh.devlab.validator.LoginId;
+import com.leesh.devlab.validator.Nickname;
+import jakarta.validation.constraints.Size;
 
 public class RegisterDto {
 
     protected RegisterDto() {
     }
 
-    public record Request(@Email String email, String password, @Nickname String nickname) {
+    public record Request(@LoginId String loginId, @Size(min = 4, max = 255) String password, @Nickname String nickname) {
 
     }
 

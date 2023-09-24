@@ -78,6 +78,7 @@ use DevLab;
 create table members
 (
     id                       bigint auto_increment,
+    login_id                  varchar(30)  not null unique,
     nickname                 varchar(30)  not null unique,
     email                    varchar(255) unique,
     password                 varchar(255),
@@ -91,11 +92,12 @@ create table members
     created_at               bigint       not null,
     modified_at              bigint       not null,
     deleted                  tinyint(1)   not null default 0,
+    email_verified           tinyint(1)   not null default 0,
     primary key (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
 create index members_name_idx on members (nickname);
-create index members_email_idx on members (email);
+create index members_login_id_idx on members (login_id);
 create index members_created_at_idx on members (created_at);
 
 create table posts

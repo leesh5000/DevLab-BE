@@ -19,15 +19,19 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "members", indexes = {
+        @Index(columnList = "login_id"),
         @Index(columnList = "nickname"),
-        @Index(columnList = "email"),
         @Index(columnList = "created_at")
 })
 @Entity
 public class Member extends BaseEntity {
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
+
+    @Column(name = "login_id", length = 255, nullable = true, unique = true)
+    private String loginId;
 
     @Column(name = "nickname", length = 30, nullable = false, unique = true)
     private String nickname;
@@ -60,6 +64,9 @@ public class Member extends BaseEntity {
     @Column(name = "refresh_token_expired_at", nullable = true)
     private Long refreshTokenExpiredAt;
 
+    @Column(name = "email_verified", nullable = false, columnDefinition = "TINYINT(1) default 0")
+    private boolean emailVerified = false;
+
     @OrderBy("id")
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private final List<Post> posts = new ArrayList<>();
@@ -89,9 +96,9 @@ public class Member extends BaseEntity {
     }
 
     @Builder
-    private Member(String nickname, String email, String password) {
+    private Member(String nickname, String loginId, String password) {
         this.nickname = nickname;
-        this.email = email;
+        this.loginId = loginId;
         this.password = password;
     }
 

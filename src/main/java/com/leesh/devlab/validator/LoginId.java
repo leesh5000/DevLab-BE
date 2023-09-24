@@ -15,16 +15,16 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({FIELD})
 @Retention(RUNTIME)
-@Constraint(validatedBy = Email.EmailValidator.class)
+@Constraint(validatedBy = LoginId.LoginIdValidator.class)
 @Documented
-public @interface Email {
+public @interface LoginId {
 
-    String message() default "invalid email.";
+    String message() default "Nickname must be at least 2 characters and not more than 20 characters.";
     Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
 
-    class EmailValidator implements ConstraintValidator<Email, String> {
+    class LoginIdValidator implements ConstraintValidator<LoginId, String> {
 
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -33,7 +33,7 @@ public @interface Email {
                 return false;
             }
 
-            Pattern pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+            Pattern pattern = Pattern.compile("^.{2,20}$");
             return pattern.matcher(value).matches();
         }
     }
