@@ -17,6 +17,7 @@ import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class AuthService {
     private final OauthServiceFactory oauthServiceFactory;
     private final MemberRepository memberRepository;
     private final AuthTokenService authTokenService;
+    private final PasswordEncoder passwordEncoder;
 
     public OauthLoginDto.Response oauthLogin(Request request) {
 
@@ -122,23 +124,25 @@ public class AuthService {
     public OauthLoginDto.Response register(RegisterDto.Request request) {
 
         // 이미 가입된 유저인지 확인한다.
-        if (memberRepository.existsByEmail(request.email()) || memberRepository.existsByNickname(request.name())) {
+        if (memberRepository.existsByEmailOrNickname(request.email(), request.nickname())) {
             throw new AuthException(ErrorCode.ALREADY_REGISTERED_MEMBER, "already registered member");
         }
 
         // 회원가입을 진행한다.
-        Member newMember = request.toEntity();
-        MemberInfo memberInfo = MemberInfo.from(newMember);
+        Member newMember = Member.builder()
+                .email(request.email())
+                .nickname(request.nickname())
+                .password(passwordEncoder.encode(request.password()))
+                .build();
+        memberRepository.save(newMember);
 
         // 인증 토큰을 생성한다.
+        MemberInfo memberInfo = MemberInfo.from(newMember);
         AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
         AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
 
         // 유저의 refresh token을 업데이트한다.
         newMember.updateRefreshToken(refreshToken);
-
-        // DB에 저장한다.
-        memberRepository.save(newMember);
 
         // 응답 객체를 만든다.
         return new OauthLoginDto.Response(GrantType.BEARER, accessToken, refreshToken);

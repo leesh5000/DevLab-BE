@@ -1,10 +1,9 @@
 package com.leesh.devlab.api.oauth.dto;
 
-import com.leesh.devlab.api.oauth.validator.Email;
-import com.leesh.devlab.api.oauth.validator.Nickname;
+import com.leesh.devlab.validator.Email;
+import com.leesh.devlab.validator.Nickname;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
-import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.jwt.AuthToken;
 
 public class RegisterDto {
@@ -12,11 +11,7 @@ public class RegisterDto {
     protected RegisterDto() {
     }
 
-    public record Request(@Email String email, String password, @Nickname String name) {
-
-        public Member toEntity() {
-            return Member.of(email(), password(), name());
-        }
+    public record Request(@Email String email, String password, @Nickname String nickname) {
 
     }
 

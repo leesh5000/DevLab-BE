@@ -1,4 +1,4 @@
-package com.leesh.devlab.api.oauth.validator;
+package com.leesh.devlab.validator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -28,6 +28,11 @@ public @interface Email {
 
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
+
+            if (value == null) {
+                return false;
+            }
+
             Pattern pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
             return pattern.matcher(value).matches();
         }

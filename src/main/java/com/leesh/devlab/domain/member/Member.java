@@ -8,6 +8,7 @@ import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.jwt.AuthToken;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -88,14 +89,11 @@ public class Member extends BaseEntity {
         return member;
     }
 
-    public static Member of(String email, String name, String password) {
-
-        Member member = new Member();
-        member.email = email;
-        member.nickname = name;
-        member.password = password;
-
-        return member;
+    @Builder
+    private Member(String nickname, String email, String password) {
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
     }
 
     /* 도메인 비즈니스 로직 */

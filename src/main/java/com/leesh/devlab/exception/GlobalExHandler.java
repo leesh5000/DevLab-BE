@@ -21,7 +21,7 @@ public class GlobalExHandler {
     @ExceptionHandler(BindException.class)
     protected ResponseEntity<ErrorResponse> handleBindException(BindException e) {
 
-        log.error("[Bind Exception]", e);
+        log.warn("[Binding Exception]", e);
 
         ErrorCode errorCode = ErrorCode.INVALID_INPUT;
         ErrorResponse response = ErrorResponse.from(errorCode, e.getBindingResult());

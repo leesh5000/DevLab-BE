@@ -46,11 +46,11 @@ public class WebConfiguration implements WebMvcConfigurer {
                         "/api/health",
                         "/docs/**"
                 );
-
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(loginMemberArgResolver);
     }
+
 }

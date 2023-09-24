@@ -1,4 +1,4 @@
-package com.leesh.devlab.api.oauth.validator;
+package com.leesh.devlab.validator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -19,7 +19,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface Nickname {
 
-    String message() default "Nickname must be at least 2 characters and not more than 8 characters.";
+    String message() default "Nickname must be at least 2 characters and not more than 9 characters.";
     Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
@@ -28,8 +28,14 @@ public @interface Nickname {
 
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
-            Pattern pattern = Pattern.compile("^.{2,8}$");
+
+            if (value == null) {
+                return false;
+            }
+
+            Pattern pattern = Pattern.compile("^.{2,9}$");
             return pattern.matcher(value).matches();
+
         }
     }
 }
