@@ -2,13 +2,13 @@ package com.leesh.devlab.api.oauth;
 
 import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
 import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
-import com.leesh.devlab.api.oauth.dto.SignupDto;
+import com.leesh.devlab.api.oauth.dto.RegisterDto;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.exception.ex.AuthException;
+import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.external.OauthServiceFactory;
 import com.leesh.devlab.external.abstraction.OauthMemberInfo;
 import com.leesh.devlab.external.abstraction.OauthService;
@@ -119,7 +119,7 @@ public class AuthService {
             member.logout();
     }
 
-    public OauthLoginDto.Response register(SignupDto.Request request) {
+    public OauthLoginDto.Response register(RegisterDto.Request request) {
 
         // 이미 가입된 유저인지 확인한다.
         if (memberRepository.existsByEmail(request.email()) || memberRepository.existsByNickname(request.name())) {

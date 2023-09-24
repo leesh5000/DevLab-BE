@@ -5,9 +5,9 @@ import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.jwt.AuthToken;
 
-public class SignupDto {
+public class RegisterDto {
 
-    protected SignupDto() {
+    protected RegisterDto() {
     }
 
     public record Request(String email, String password, String name) {

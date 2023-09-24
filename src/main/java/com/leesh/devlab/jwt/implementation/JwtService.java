@@ -3,7 +3,7 @@ package com.leesh.devlab.jwt.implementation;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.constant.TokenType;
-import com.leesh.devlab.exception.ex.AuthException;
+import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;

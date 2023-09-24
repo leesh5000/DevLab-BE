@@ -1,7 +1,7 @@
 package com.leesh.devlab.util;
 
 import com.leesh.devlab.constant.ErrorCode;
-import com.leesh.devlab.exception.ex.AuthException;
+import com.leesh.devlab.exception.custom.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;

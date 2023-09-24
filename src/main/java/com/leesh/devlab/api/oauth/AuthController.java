@@ -2,7 +2,7 @@ package com.leesh.devlab.api.oauth;
 
 import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
 import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
-import com.leesh.devlab.api.oauth.dto.SignupDto;
+import com.leesh.devlab.api.oauth.dto.RegisterDto;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,7 +59,7 @@ public class AuthController {
      * 일반 계정 회원가입 API
      */
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OauthLoginDto.Response> register(@RequestBody SignupDto.Request request) {
+    public ResponseEntity<OauthLoginDto.Response> register(@RequestBody RegisterDto.Request request) {
 
         OauthLoginDto.Response response = authService.register(request);
 
