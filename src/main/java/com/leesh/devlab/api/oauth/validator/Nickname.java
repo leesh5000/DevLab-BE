@@ -1,0 +1,35 @@
+package com.leesh.devlab.api.oauth.validator;
+
+import jakarta.validation.Constraint;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Payload;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.util.regex.Pattern;
+
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+@Target({FIELD})
+@Retention(RUNTIME)
+@Constraint(validatedBy = Nickname.NicknameValidator.class)
+@Documented
+public @interface Nickname {
+
+    String message() default "Nickname must be at least 2 characters and not more than 8 characters.";
+    Class<?>[] groups() default { };
+
+    Class<? extends Payload>[] payload() default { };
+
+    class NicknameValidator implements ConstraintValidator<Nickname, String> {
+
+        @Override
+        public boolean isValid(String value, ConstraintValidatorContext context) {
+            Pattern pattern = Pattern.compile("^.{2,8}$");
+            return pattern.matcher(value).matches();
+        }
+    }
+}

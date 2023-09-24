@@ -4,7 +4,9 @@ import com.leesh.devlab.constant.ErrorCode;
 import lombok.Getter;
 
 /**
- * 비즈니스 로직 중 발생하는 런타임 예외들에 대해서 알맞은 에러 메세지를 응답으로 보내주기 위한 클래스
+ * <p>
+ *     비즈니스 로직 중 발생하는 런타임 예외로 {@link ErrorCode}를 필드로 가지고 있으며, 이를 통해 세부 예외를 구분하고 각 예외 상황에 따른 대응 방안을 클라이언트에게 전달한다.
+ * </p>
  */
 @Getter
 public class BusinessException extends RuntimeException {

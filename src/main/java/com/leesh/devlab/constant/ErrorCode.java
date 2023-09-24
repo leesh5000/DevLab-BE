@@ -4,33 +4,37 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
+/**
+ * 비즈니스 로직 중
+ */
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @Getter
 public enum ErrorCode {
 
     /* Auth */
-    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A-001", "Expired Token"),
+    EXPIRED_TOKEN(UNAUTHORIZED, "A-001", "Expired Token"),
     INVALID_TOKEN(UNAUTHORIZED, "A-002", "Invalid Token"),
     INVALID_AUTHORIZATION_HEADER(UNAUTHORIZED, "A-003", "Invalid Authorization Header"),
     NOT_EXIST_AUTHORIZATION(UNAUTHORIZED, "A-004", "Authorization is empty"),
 
     /* Member */
-    NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "M-001", "Not Exist Member"),
+    NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),
     ALREADY_REGISTERED_MEMBER(CONFLICT, "M-002", "Already Registered Member"),
+
+    /* Common */
+    INVALID_INPUT(BAD_REQUEST, "C-001", "Bad Request"),
     ;
 
     private final HttpStatus status;
-    private final Error error;
+    private final String code;
+    private final String description;
 
     ErrorCode(HttpStatus status, String code, String description) {
         this.status = status;
-        this.error = new Error(code, description);
-    }
-
-    private record Error(String code, String message) {
+        this.code = code;
+        this.description = description;
     }
 
 }

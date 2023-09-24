@@ -6,6 +6,7 @@ import com.leesh.devlab.api.oauth.dto.RegisterDto;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,7 +60,7 @@ public class AuthController {
      * 일반 계정 회원가입 API
      */
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OauthLoginDto.Response> register(@RequestBody RegisterDto.Request request) {
+    public ResponseEntity<OauthLoginDto.Response> register(@RequestBody @Valid RegisterDto.Request request) {
 
         OauthLoginDto.Response response = authService.register(request);
 
