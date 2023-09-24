@@ -1,16 +1,16 @@
 package com.leesh.devlab.api.oauth.dto;
 
 import com.leesh.devlab.constant.GrantType;
-import com.leesh.devlab.constant.OauthType;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.AuthToken;
+import com.leesh.devlab.validator.Email;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OauthLoginDto {
+public class LoginDto {
 
-    public record Request(OauthType oauthType, String authorizationCode) {
+    public record Request(@Email String email, String password) {
     }
 
     public record Response(GrantType grantType, AuthToken accessToken, AuthToken refreshToken) {
@@ -27,4 +27,5 @@ public class OauthLoginDto {
             }
         }
     }
+
 }

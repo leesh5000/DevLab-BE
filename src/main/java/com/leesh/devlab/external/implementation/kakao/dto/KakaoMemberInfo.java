@@ -23,8 +23,8 @@ public record KakaoMemberInfo(String id, @JsonProperty("kakao_account") KakaoAcc
     }
 
     @Override
-    public String getId() {
-        return id;
+    public String getOauthId() {
+        return getOauthType() + "@" + id;
     }
 
     @Override

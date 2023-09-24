@@ -32,8 +32,8 @@ public class NaverMemberInfo implements OauthMemberInfo {
     }
 
     @Override
-    public String getId() {
-        return response.id;
+    public String getOauthId() {
+        return getOauthType() + "@" + response.id;
     }
 
     @Override

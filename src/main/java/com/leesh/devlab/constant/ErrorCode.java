@@ -22,6 +22,7 @@ public enum ErrorCode {
     /* Member */
     NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),
     ALREADY_REGISTERED_MEMBER(CONFLICT, "M-002", "Already Registered Member"),
+    WRONG_PASSWORD(UNAUTHORIZED, "M-003", "Wrong Password"),
 
     /* Common */
     INVALID_INPUT(BAD_REQUEST, "C-001", "Bad Request"),

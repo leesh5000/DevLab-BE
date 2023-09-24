@@ -1,5 +1,6 @@
 package com.leesh.devlab.api.oauth;
 
+import com.leesh.devlab.api.oauth.dto.LoginDto;
 import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
 import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
 import com.leesh.devlab.api.oauth.dto.RegisterDto;
@@ -9,6 +10,7 @@ import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.exception.custom.AuthException;
+import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.external.OauthServiceFactory;
 import com.leesh.devlab.external.abstraction.OauthMemberInfo;
 import com.leesh.devlab.external.abstraction.OauthService;
@@ -39,7 +41,7 @@ public class AuthService {
         OauthMemberInfo oauthMember = getOauthMemberInfo(request);
 
         // Oauth Provider 에서 가져온 사용자 식별값을 이용하여 DB에서 가입된 회원을 찾는다. 만약 회원가입한 유저가 아니라면, 신규 가입을 하고 가져온다.
-        String oauthId = oauthMember.getOauthType() + "@" + oauthMember.getId();
+        String oauthId = oauthMember.getOauthId();
         Member findMember = memberRepository.findByOauthId(oauthId)
                 .orElseGet(() -> {
                     Member entity = oauthMember.toEntity();
@@ -115,17 +117,17 @@ public class AuthService {
 
             // 로그아웃 요청한 유저의 리프레시 토큰을 삭제한다.
             Member member = memberRepository.findById(memberInfo.id())
-                    .orElseThrow(() -> new AuthException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
 
             // 사용자의 리프레시 토큰을 만료 처리한다.
             member.logout();
     }
 
-    public OauthLoginDto.Response register(RegisterDto.Request request) {
+    public void register(RegisterDto.Request request) {
 
         // 이미 가입된 유저인지 확인한다.
         if (memberRepository.existsByEmailOrNickname(request.email(), request.nickname())) {
-            throw new AuthException(ErrorCode.ALREADY_REGISTERED_MEMBER, "already registered member");
+            throw new BusinessException(ErrorCode.ALREADY_REGISTERED_MEMBER, "already registered member");
         }
 
         // 회원가입을 진행한다.
@@ -135,16 +137,23 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.password()))
                 .build();
         memberRepository.save(newMember);
+    }
 
-        // 인증 토큰을 생성한다.
-        MemberInfo memberInfo = MemberInfo.from(newMember);
+    public LoginDto.Response login(LoginDto.Request request) {
+
+        Member findMember = memberRepository.findByEmail(request.email())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+
+        // 비밀번호가 일치하는지 확인한다.
+        if (!passwordEncoder.matches(request.password(), findMember.getPassword())) {
+            throw new BusinessException(ErrorCode.WRONG_PASSWORD, "wrong password");
+        }
+
+        // 토큰을 생성한다.
+        MemberInfo memberInfo = MemberInfo.from(findMember);
         AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
         AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
 
-        // 유저의 refresh token을 업데이트한다.
-        newMember.updateRefreshToken(refreshToken);
-
-        // 응답 객체를 만든다.
-        return new OauthLoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new LoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 }

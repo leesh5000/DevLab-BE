@@ -1,5 +1,6 @@
 package com.leesh.devlab.api.oauth;
 
+import com.leesh.devlab.api.oauth.dto.LoginDto;
 import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
 import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
 import com.leesh.devlab.api.oauth.dto.RegisterDto;
@@ -60,11 +61,22 @@ public class AuthController {
      * 일반 계정 회원가입 API
      */
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OauthLoginDto.Response> register(@RequestBody @Valid RegisterDto.Request request) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterDto.Request request) {
 
-        OauthLoginDto.Response response = authService.register(request);
+        authService.register(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * 일반 계정 로그인 API
+     */
+    @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<LoginDto.Response> login(@RequestBody @Valid LoginDto.Request request) {
+
+        LoginDto.Response response = authService.login(request);
+
+        return ResponseEntity.ok(response);
     }
 
 }

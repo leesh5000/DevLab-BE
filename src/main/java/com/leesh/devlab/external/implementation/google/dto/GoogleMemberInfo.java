@@ -6,8 +6,8 @@ import com.leesh.devlab.external.abstraction.OauthMemberInfo;
 public record GoogleMemberInfo(String sub, String email, String picture) implements OauthMemberInfo {
 
     @Override
-    public String getId() {
-        return sub;
+    public String getOauthId() {
+        return getOauthType() + "@" + sub;
     }
 
     @Override

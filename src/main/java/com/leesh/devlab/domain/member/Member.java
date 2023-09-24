@@ -1,6 +1,5 @@
 package com.leesh.devlab.domain.member;
 
-import com.leesh.devlab.constant.OauthType;
 import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.BaseEntity;
@@ -80,11 +79,11 @@ public class Member extends BaseEntity {
     }
 
     /* 생성 메서드 */
-    public static Member of(OauthType oauthType, String id) {
+    public static Member of(String oauthId) {
 
         Member member = new Member();
         member.nickname = UUID.randomUUID().toString().split("-")[0];
-        member.oauthId = oauthType.name() + "@" + id;
+        member.oauthId = oauthId;
 
         return member;
     }
