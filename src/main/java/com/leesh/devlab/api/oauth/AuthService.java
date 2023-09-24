@@ -1,9 +1,6 @@
 package com.leesh.devlab.api.oauth;
 
-import com.leesh.devlab.api.oauth.dto.LoginDto;
-import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
-import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
-import com.leesh.devlab.api.oauth.dto.RegisterDto;
+import com.leesh.devlab.api.oauth.dto.*;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
@@ -18,6 +15,7 @@ import com.leesh.devlab.external.abstraction.OauthToken;
 import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
+import com.leesh.devlab.service.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,7 +32,13 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final AuthTokenService authTokenService;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
+    /**
+     * 소셜 로그인 API
+     * @param request
+     * @return
+     */
     public OauthLoginDto.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
@@ -155,5 +159,36 @@ public class AuthService {
         AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
 
         return new LoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
+    }
+
+    // TODO : 현재는 한글 문자열을 그대로 내보내주고 있습니다. 글로벌 서비스를 고려하면 문자열로 메일을 보내는 것보다는 HTML 템플릿을 만들고 다국어 처리하는 것이 좋은 선택이지만, 현재는 개발 초기단계이므로 빠르게 서비스를 런칭 후에 시장의 반응을 본 다음 결정할 예정입니다.
+    public void findIdAndPassword(FindDto.Request request) {
+
+        // 가입된 유저인지 확인한다.
+        Member findMember = memberRepository.findByEmail(request.email())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+
+        // 회원 가입은 되었는데 이메일 인증을 하지 않은 유저라면, 이메일 인증을 하라는 예외를 발생시킨다.
+        if (!findMember.isEmailVerified()) {
+            throw new BusinessException(ErrorCode.NO_VERIFIED_EMAIL, "no verified email");
+        }
+
+        // 임시 비밀번호를 생성 후 변경한다.
+        String tempPassword = createRandomPassword();
+        findMember.changePassword(passwordEncoder.encode(tempPassword));
+
+        // 변경된 비밀번호를 사용자에게 전달한다.
+        String title = "[DevLab] 아이디/비밀번호 정보 안내";
+        String content =
+                "[아이디] " + findMember.getLoginId() + "\n" +
+                "[닉네임] " + findMember.getNickname() + "\n" +
+                "[임시 비밀번호] " + tempPassword + "\n\n" +
+                "로그인 후 비밀번호를 변경해주세요.";
+
+        mailService.sendMail(findMember.getEmail(), title, content);
+    }
+
+    private String createRandomPassword() {
+        return String.valueOf((int) (Math.random() * 899999) + 100000);
     }
 }

@@ -115,4 +115,8 @@ public class Member extends BaseEntity {
     public void logout() {
         this.refreshTokenExpiredAt = System.currentTimeMillis();
     }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
 }

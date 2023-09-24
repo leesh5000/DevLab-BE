@@ -1,9 +1,6 @@
 package com.leesh.devlab.api.oauth;
 
-import com.leesh.devlab.api.oauth.dto.LoginDto;
-import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
-import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
-import com.leesh.devlab.api.oauth.dto.RegisterDto;
+import com.leesh.devlab.api.oauth.dto.*;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import jakarta.servlet.http.HttpServletRequest;
@@ -77,6 +74,17 @@ public class AuthController {
         LoginDto.Response response = authService.login(request);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 아이디/비밀번호 찾기 API
+     */
+    @PostMapping(path = "/find", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> findIdAndPassword(@RequestBody @Valid FindDto.Request request) {
+
+        authService.findIdAndPassword(request);
+
+        return ResponseEntity.noContent().build();
     }
 
 }
