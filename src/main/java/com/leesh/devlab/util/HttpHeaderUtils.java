@@ -51,7 +51,7 @@ public class HttpHeaderUtils {
             }
 
             // Bearer 타입은 맞는데, 토큰이 없는 경우
-            throw new AuthException(ErrorCode.NOT_EXIST_AUTHORIZATION, "Authorization header is empty");
+            throw new AuthException(ErrorCode.NOT_EXIST_TOKEN, "access token is empty");
         }
     }
 

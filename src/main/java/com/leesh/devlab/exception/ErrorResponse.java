@@ -1,11 +1,13 @@
 package com.leesh.devlab.exception;
 
 import com.leesh.devlab.constant.ErrorCode;
+import jakarta.validation.ConstraintViolation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -27,6 +29,10 @@ public record ErrorResponse(HttpStatus status, Error error) {
         return new ErrorResponse(errorCode.getStatus(), new Error(errorCode.getCode(), createErrorMessage(bindingResult)));
     }
 
+    public static ErrorResponse from(ErrorCode errorCode, Set<ConstraintViolation<?>> constraintViolations) {
+        return new ErrorResponse(errorCode.getStatus(), new Error(errorCode.getCode(), createErrorMessage(constraintViolations)));
+    }
+
     private static String createErrorMessage(BindingResult bindingResult) {
 
         StringBuilder sb = new StringBuilder();
@@ -43,6 +49,26 @@ public record ErrorResponse(HttpStatus status, Error error) {
             sb.append(fieldError.getField());
             sb.append("] ");
             sb.append(fieldError.getDefaultMessage());
+        }
+
+        return sb.toString();
+    }
+
+    private static String createErrorMessage(Set<ConstraintViolation<?>> constraintViolations) {
+
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+
+        for (ConstraintViolation<?> next : constraintViolations) {
+            if (!isFirst) {
+                sb.append(", ");
+            } else {
+                isFirst = false;
+            }
+            sb.append("[");
+            sb.append(next.getPropertyPath());
+            sb.append("] ");
+            sb.append(next.getMessage());
         }
 
         return sb.toString();

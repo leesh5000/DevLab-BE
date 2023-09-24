@@ -1,6 +1,9 @@
 package com.leesh.devlab.api.oauth;
 
-import com.leesh.devlab.api.oauth.dto.*;
+import com.leesh.devlab.api.oauth.dto.LoginDto;
+import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
+import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
+import com.leesh.devlab.api.oauth.dto.RegisterDto;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
@@ -16,6 +19,7 @@ import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.service.MailService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -158,15 +162,17 @@ public class AuthService {
         AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
         AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
 
+        // 유저의 refresh token을 업데이트한다.
+        findMember.updateRefreshToken(refreshToken);
+
         return new LoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     // TODO : 현재는 한글 문자열을 그대로 내보내주고 있습니다. 글로벌 서비스를 고려하면 문자열로 메일을 보내는 것보다는 HTML 템플릿을 만들고 다국어 처리하는 것이 좋은 선택이지만, 현재는 개발 초기단계이므로 빠르게 서비스를 런칭 후에 시장의 반응을 본 다음 결정할 예정입니다.
-    public void findIdAndPassword(FindDto.Request request) {
+    public void findIdAndPassword(String email) {
 
         // 가입된 유저인지 확인한다.
-        Member findMember = memberRepository.findByEmail(request.email())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+        Member findMember = checkRegisteredMember(email);
 
         // 회원 가입은 되었는데 이메일 인증을 하지 않은 유저라면, 이메일 인증을 하라는 예외를 발생시킨다.
         if (!findMember.isEmailVerified()) {
@@ -174,7 +180,7 @@ public class AuthService {
         }
 
         // 임시 비밀번호를 생성 후 변경한다.
-        String tempPassword = createRandomPassword();
+        String tempPassword = createRandomNumber();
         findMember.changePassword(passwordEncoder.encode(tempPassword));
 
         // 변경된 비밀번호를 사용자에게 전달한다.
@@ -188,7 +194,46 @@ public class AuthService {
         mailService.sendMail(findMember.getEmail(), title, content);
     }
 
-    private String createRandomPassword() {
+    private Member checkRegisteredMember(String email) throws BusinessException {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+    }
+
+    private String createRandomNumber() {
         return String.valueOf((int) (Math.random() * 899999) + 100000);
+    }
+
+    // TODO : 서비스 런칭 후, 스케일 아웃이 고려되면 Session 방식은 적절하지 않기 때문에 Redis와 같은 여러 서버가 공유할 수 있는 외부 저장소로 변경해야 합니다. 하지만, 아직은 개발 초기 단계이므로 우선은 빠른 개발을 목표로 하고 추후 시장의 반응에 따라 변경할 예정입니다.
+    public void emailVerify(String email, HttpSession session) {
+
+        // 인증번호를 생성하고, 세션에 저장한다.
+        String randomNumber = createRandomNumber();
+        session.setAttribute(email, randomNumber);
+        session.setMaxInactiveInterval(60 * 3); // 3분
+
+        // 이메일 인증을 진행한다.
+        String title = "[DevLab] 이메일 인증번호 안내";
+        String contents = "[이메일 인증번호] " + randomNumber;
+
+
+        mailService.sendMail(email, title, contents);
+    }
+
+    // TODO : 추후 스케일 아웃이 고려될 때 Redis와 같은 외부 저장소를 사용하여 세션을 관리해야 합니다.
+    public void emailConfirm(String email, String code, MemberInfo memberInfo, HttpSession session) {
+
+        // 세션에 저장된 인증번호를 가져온다.
+        String cert = (String) session.getAttribute(email);
+        if (!code.equals(cert)) {
+            throw new BusinessException(ErrorCode.WRONG_CERT_NUMBER, "wrong certification number");
+        }
+
+        // 인증번호가 일치하면, 토큰 정보를 통해서 유저를 조회한다.
+        Member member = memberRepository.findById(memberInfo.id())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+
+        // 유저의 이메일 정보를 업데이트한다.
+        member.verifyEmail(email);
+
     }
 }

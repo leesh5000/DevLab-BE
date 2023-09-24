@@ -1,20 +1,27 @@
 package com.leesh.devlab.api.oauth;
 
-import com.leesh.devlab.api.oauth.dto.*;
+import com.leesh.devlab.api.oauth.dto.LoginDto;
+import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
+import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
+import com.leesh.devlab.api.oauth.dto.RegisterDto;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
+import com.leesh.devlab.validator.Email;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static com.leesh.devlab.util.HttpHeaderUtils.extractAuthorization;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Validated
 @RestController
 public class AuthController {
 
@@ -79,10 +86,33 @@ public class AuthController {
     /**
      * 아이디/비밀번호 찾기 API
      */
-    @PostMapping(path = "/find", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> findIdAndPassword(@RequestBody @Valid FindDto.Request request) {
+    @GetMapping(path = "/find")
+    public ResponseEntity<Void> findIdAndPassword(@RequestParam @Email String email) {
 
-        authService.findIdAndPassword(request);
+        authService.findIdAndPassword(email);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 이메일 인증 API
+     */
+    @GetMapping(path = "/email-verify")
+    public ResponseEntity<Void> emailVerify(@RequestParam @Email String email, HttpServletRequest httpRequest) {
+
+        HttpSession session = httpRequest.getSession();
+
+        authService.emailVerify(email, session);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(path = "/email-confirm")
+    public ResponseEntity<Void> emailConfirm(@RequestParam String email, @RequestParam String code, @LoginMember MemberInfo memberInfo, HttpServletRequest httpRequest) {
+
+        HttpSession session = httpRequest.getSession();
+
+        authService.emailConfirm(email, code, memberInfo, session);
 
         return ResponseEntity.noContent().build();
     }

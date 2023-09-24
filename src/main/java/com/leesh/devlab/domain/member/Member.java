@@ -119,4 +119,9 @@ public class Member extends BaseEntity {
     public void changePassword(String password) {
         this.password = password;
     }
+
+    public void verifyEmail(String email) {
+        this.email = email;
+        this.emailVerified = true;
+    }
 }
