@@ -3,6 +3,7 @@ package com.leesh.devlab.domain.post;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
+import com.leesh.devlab.domain.post_tag.PostTag;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,8 +17,9 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "posts", indexes = {
-        @Index(columnList = "member_id"),
         @Index(columnList = "title"),
+        @Index(columnList = "contents"),
+        @Index(columnList = "member_id"),
         @Index(columnList = "created_at")
 })
 @Entity
@@ -33,9 +35,6 @@ public class Post extends BaseEntity {
     @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
     private String contents;
 
-    @Column(name = "deleted", nullable = false, columnDefinition = "TINYINT(1) default 0")
-    private boolean deleted = false;
-
     @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
@@ -43,6 +42,9 @@ public class Post extends BaseEntity {
     @OrderBy("id")
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<PostTag> postTags = new ArrayList<>();
 
     @Override
     public boolean equals(Object obj) {

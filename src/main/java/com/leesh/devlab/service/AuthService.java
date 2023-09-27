@@ -55,9 +55,6 @@ public class AuthService {
                     return memberRepository.save(entity);
                 });
 
-        // 소셜 계정으로 로그인 시도한 사용자의 유효성을 검증한다.
-        validateOauthMember(findMember);
-
         // 인증 토큰을 생성한다.
         MemberInfo memberInfo = MemberInfo.from(findMember);
         AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
@@ -94,17 +91,6 @@ public class AuthService {
 
         return new RefreshToken(GrantType.BEARER, accessToken);
 
-    }
-
-    /**
-     * 소셜 계정으로 로그인 시도한 사용자의 유효성 검증 메서드
-     * @param findMember
-     */
-    private void validateOauthMember(Member findMember) {
-        // 찾은 유저가 탈퇴한 상태라면 재가입 로직을 진행한다.
-        if (findMember.isDeleted()) {
-            findMember.reRegister();
-        }
     }
 
     private OauthMemberInfo getOauthMemberInfo(Request request) {
@@ -172,11 +158,6 @@ public class AuthService {
 
         // 가입된 유저인지 확인한다.
         Member findMember = checkRegisteredMember(email);
-
-        // 회원 가입은 되었는데 이메일 인증을 하지 않은 유저라면, 이메일 인증을 하라는 예외를 발생시킨다.
-        if (!findMember.isEmailVerified()) {
-            throw new BusinessException(ErrorCode.NO_VERIFIED_EMAIL, "no verified email");
-        }
 
         // 임시 비밀번호를 생성 후 변경한다.
         String tempPassword = createRandomNumber();
