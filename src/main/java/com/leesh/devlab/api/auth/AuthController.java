@@ -1,11 +1,12 @@
-package com.leesh.devlab.api.oauth;
+package com.leesh.devlab.api.auth;
 
-import com.leesh.devlab.api.oauth.dto.LoginDto;
-import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
-import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
-import com.leesh.devlab.api.oauth.dto.RegisterDto;
+import com.leesh.devlab.api.auth.dto.LoginInfo;
+import com.leesh.devlab.api.auth.dto.OauthLoginInfo;
+import com.leesh.devlab.api.auth.dto.RefreshToken;
+import com.leesh.devlab.api.auth.dto.RegisterInfo;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
+import com.leesh.devlab.service.AuthService;
 import com.leesh.devlab.validator.Email;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -33,9 +34,9 @@ public class AuthController {
      * @return
      */
     @PostMapping(path = "/oauth-login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OauthLoginDto.Response> oauthLogin(@RequestBody OauthLoginDto.Request request) {
+    public ResponseEntity<OauthLoginInfo.Response> oauthLogin(@RequestBody OauthLoginInfo.Request request) {
 
-        OauthLoginDto.Response response = authService.oauthLogin(request);
+        OauthLoginInfo.Response response = authService.oauthLogin(request);
 
         return ResponseEntity.ok(response);
     }
@@ -44,11 +45,11 @@ public class AuthController {
      * 액세스 토큰 갱신 API
      */
     @GetMapping(path = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RefreshTokenDto> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<RefreshToken> refreshToken(HttpServletRequest request) {
 
         String refreshToken = extractAuthorization(request);
 
-        RefreshTokenDto refreshTokenDto = authService.refreshToken(refreshToken);
+        RefreshToken refreshTokenDto = authService.refreshToken(refreshToken);
 
         return ResponseEntity.ok(refreshTokenDto);
     }
@@ -65,7 +66,7 @@ public class AuthController {
      * 일반 계정 회원가입 API
      */
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> register(@RequestBody @Valid RegisterDto.Request request) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterInfo.Request request) {
 
         authService.register(request);
 
@@ -76,9 +77,9 @@ public class AuthController {
      * 일반 계정 로그인 API
      */
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginDto.Response> login(@RequestBody @Valid LoginDto.Request request) {
+    public ResponseEntity<LoginInfo.Response> login(@RequestBody @Valid LoginInfo.Request request) {
 
-        LoginDto.Response response = authService.login(request);
+        LoginInfo.Response response = authService.login(request);
 
         return ResponseEntity.ok(response);
     }
@@ -86,7 +87,7 @@ public class AuthController {
     /**
      * 아이디/비밀번호 찾기 API
      */
-    @GetMapping(path = "/find")
+    @GetMapping(path = "/find?email={email}")
     public ResponseEntity<Void> findIdAndPassword(@RequestParam @Email String email) {
 
         authService.findIdAndPassword(email);

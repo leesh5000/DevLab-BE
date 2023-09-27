@@ -139,28 +139,11 @@ create index comments_created_at_idx on comments (created_at);
 create index comments_member_id_idx on comments (member_id);
 create index comments_post_id_idx on comments (post_id);
 
-create table posts_likes
+create table likes
 (
     id          bigint auto_increment,
     member_id   bigint       not null,
     post_id     bigint       null,
-    value       tinyint      not null,
-    created_by  varchar(255) not null,
-    modified_by varchar(255) not null,
-    created_at  bigint       not null,
-    modified_at bigint       not null,
-    primary key (id),
-    foreign key (member_id) references members (id),
-    foreign key (post_id)   references posts (id)
-) default character set utf8mb4 collate utf8mb4_general_ci;
-
-create index posts_likes_member_id_idx on posts_likes (member_id);
-create index posts_likes_post_id_idx on posts_likes (post_id);
-
-create table comments_likes
-(
-    id          bigint auto_increment,
-    member_id   bigint       not null,
     comment_id  bigint       null,
     value       tinyint      not null,
     created_by  varchar(255) not null,
@@ -169,11 +152,13 @@ create table comments_likes
     modified_at bigint       not null,
     primary key (id),
     foreign key (member_id) references members (id),
-    foreign key (comment_id) references comments (id)
+    foreign key (comment_id) references comments (id),
+    foreign key (post_id)   references posts (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
-create index comments_likes_member_id on comments_likes (member_id);
-create index comments_likes_comment_id on comments_likes (comment_id);
+create index likes_member_id_idx on likes (member_id);
+create index likes_comment_id_idx on likes (comment_id);
+create index likes_post_id_idx on likes (post_id);
 ```
 
 ## API Endpoints

@@ -1,13 +1,17 @@
 package com.leesh.devlab.domain.comment;
 
 import com.leesh.devlab.domain.BaseEntity;
+import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.post.Post;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -37,6 +41,10 @@ public class Comment extends BaseEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Post post;
 
+    @OrderBy("id")
+    @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Like> likes = new ArrayList<>();
+
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
@@ -49,4 +57,11 @@ public class Comment extends BaseEntity {
         return id != null && id.equals(comment.id);
     }
 
+    /* 생성 메서드 */
+    @Builder
+    private Comment(String contents, Member member, Post post) {
+        this.contents = contents;
+        this.member = member;
+        this.post = post;
+    }
 }

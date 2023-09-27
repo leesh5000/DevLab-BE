@@ -3,6 +3,8 @@ package com.leesh.devlab.domain.member;
 import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.BaseEntity;
+import com.leesh.devlab.domain.comment.Comment;
+import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.jwt.AuthToken;
 import jakarta.persistence.*;
@@ -68,8 +70,16 @@ public class Member extends BaseEntity {
     private boolean emailVerified = false;
 
     @OrderBy("id")
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Post> posts = new ArrayList<>();
+
+    @OrderBy("id")
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Comment> comments = new ArrayList<>();
+
+    @OrderBy("id")
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Like> likes = new ArrayList<>();
 
     @Override
     public int hashCode() {
@@ -124,4 +134,51 @@ public class Member extends BaseEntity {
         this.email = email;
         this.emailVerified = true;
     }
+
+    public Post posting(String title, String contents) {
+
+        Post post = Post.builder()
+                .title(title)
+                .contents(contents)
+                .member(this)
+                .build();
+
+        this.posts.add(post);
+
+        return post;
+    }
+
+    public Comment comment(Post post, String contents) {
+
+        Comment comment = Comment.builder()
+                .contents(contents)
+                .member(this)
+                .post(post)
+                .build();
+
+        this.comments.add(comment);
+
+        return comment;
+    }
+
+    public Like like(Post post) {
+        Like like = Like.builder()
+                .member(this)
+                .post(post)
+                .build();
+        this.likes.add(like);
+        post.getLikes().add(like);
+        return like;
+    }
+
+    public Like like(Comment comment) {
+        Like like = Like.builder()
+                .member(this)
+                .comment(comment)
+                .build();
+        this.likes.add(like);
+        comment.getLikes().add(like);
+        return like;
+    }
+
 }

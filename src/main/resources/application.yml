@@ -26,19 +26,19 @@ spring:
       mail.smtp:
         auth: true
         ssl.enable: true
-
-  # ENUM Deserializer 대소문자 무시
   jackson:
     mapper:
-      accept-case-insensitive-enums: true
-
+      accept-case-insensitive-enums: true # ENUM Deserializer 대소문자 무시
+    property-naming-strategy: SNAKE_CASE
 jasypt:
   encryptor:
     password: ${PASSWORD}
-
 token:
   secret: ENC(Xe8iKP7YUyeuieJwi6NUMnHTYC1Nsh42jYCNQR7hRnekV0YPYkI7gMOr286oRFRsmG3zjOKqucs=)
-
 custom:
   locale: en_US
   timezone: Asia/Seoul
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true # MyBatis Result Type 바인딩 시 필드 이름을 camelCase로 자동변환

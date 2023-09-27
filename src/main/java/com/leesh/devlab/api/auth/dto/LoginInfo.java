@@ -1,4 +1,4 @@
-package com.leesh.devlab.api.oauth.dto;
+package com.leesh.devlab.api.auth.dto;
 
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
@@ -9,7 +9,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LoginDto {
+public class LoginInfo {
 
     public record Request(@LoginId String loginId, @Size(min = 4, max = 255) String password) {
     }

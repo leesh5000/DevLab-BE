@@ -26,6 +26,7 @@ public enum ErrorCode {
     WRONG_PASSWORD(UNAUTHORIZED, "M-003", "Wrong Password"),
     NO_VERIFIED_EMAIL(UNAUTHORIZED, "M-004", "no verified email"),
     WRONG_CERT_NUMBER(UNAUTHORIZED, "M-005", "wrong certification number"),
+    NO_PERMISSION(FORBIDDEN, "M-006", "no permission member."),
 
 
     /* Common */

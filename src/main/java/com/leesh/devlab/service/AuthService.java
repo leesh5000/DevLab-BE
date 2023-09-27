@@ -1,9 +1,9 @@
-package com.leesh.devlab.api.oauth;
+package com.leesh.devlab.service;
 
-import com.leesh.devlab.api.oauth.dto.LoginDto;
-import com.leesh.devlab.api.oauth.dto.OauthLoginDto;
-import com.leesh.devlab.api.oauth.dto.RefreshTokenDto;
-import com.leesh.devlab.api.oauth.dto.RegisterDto;
+import com.leesh.devlab.api.auth.dto.LoginInfo;
+import com.leesh.devlab.api.auth.dto.OauthLoginInfo;
+import com.leesh.devlab.api.auth.dto.RefreshToken;
+import com.leesh.devlab.api.auth.dto.RegisterInfo;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.TokenType;
@@ -18,14 +18,13 @@ import com.leesh.devlab.external.abstraction.OauthToken;
 import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
-import com.leesh.devlab.service.MailService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.leesh.devlab.api.oauth.dto.OauthLoginDto.Request;
+import static com.leesh.devlab.api.auth.dto.OauthLoginInfo.Request;
 
 @RequiredArgsConstructor
 @Transactional
@@ -43,7 +42,7 @@ public class AuthService {
      * @param request
      * @return
      */
-    public OauthLoginDto.Response oauthLogin(Request request) {
+    public OauthLoginInfo.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
         OauthMemberInfo oauthMember = getOauthMemberInfo(request);
@@ -68,14 +67,14 @@ public class AuthService {
         findMember.updateRefreshToken(refreshToken);
 
         // 응답 DTO를 생성 후 반환한다.
-        return new OauthLoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new OauthLoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     /**
      * 유저의 리프레시 토큰을 사용하여 새로운 인증 토큰을 발급하는 메서드
      * @param refreshToken
      */
-    public RefreshTokenDto refreshToken(String refreshToken) {
+    public RefreshToken refreshToken(String refreshToken) {
 
         // 리프레시 토큰 검증
         authTokenService.validateAuthToken(refreshToken, TokenType.REFRESH);
@@ -93,7 +92,7 @@ public class AuthService {
         // 새로운 액세스 토큰을 발급한다.
         AuthToken accessToken = authTokenService.createAuthToken(MemberInfo.from(member), TokenType.ACCESS);
 
-        return new RefreshTokenDto(GrantType.BEARER, accessToken);
+        return new RefreshToken(GrantType.BEARER, accessToken);
 
     }
 
@@ -131,7 +130,7 @@ public class AuthService {
             member.logout();
     }
 
-    public void register(RegisterDto.Request request) {
+    public void register(RegisterInfo.Request request) {
 
         // 이미 가입된 유저인지 확인한다.
         if (memberRepository.existsByLoginIdOrNickname(request.loginId(), request.nickname())) {
@@ -147,7 +146,7 @@ public class AuthService {
         memberRepository.save(newMember);
     }
 
-    public LoginDto.Response login(LoginDto.Request request) {
+    public LoginInfo.Response login(LoginInfo.Request request) {
 
         Member findMember = memberRepository.findByLoginId(request.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
@@ -165,7 +164,7 @@ public class AuthService {
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(refreshToken);
 
-        return new LoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new LoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     // TODO : 현재는 한글 문자열을 그대로 내보내주고 있습니다. 글로벌 서비스를 고려하면 문자열로 메일을 보내는 것보다는 HTML 템플릿을 만들고 다국어 처리하는 것이 좋은 선택이지만, 현재는 개발 초기단계이므로 빠르게 서비스를 런칭 후에 시장의 반응을 본 다음 결정할 예정입니다.
@@ -213,13 +212,13 @@ public class AuthService {
 
         // 이메일 인증을 진행한다.
         String title = "[DevLab] 이메일 인증번호 안내";
-        String contents = "[이메일 인증번호] " + randomNumber;
-
+        String contents = "[이메일 인증번호] " + randomNumber + "\n" +
+                "인증번호 유효시간은 3분 입니다.";
 
         mailService.sendMail(email, title, contents);
     }
 
-    // TODO : 추후 스케일 아웃이 고려될 때 Redis와 같은 외부 저장소를 사용하여 세션을 관리해야 합니다.
+    // TODO : 추후 스케일 아웃이 고려될 때 Redis와 같은 외부 저장소를 사용하여 인증 번호를 관리해야 합니다.
     public void emailConfirm(String email, String code, MemberInfo memberInfo, HttpSession session) {
 
         // 세션에 저장된 인증번호를 가져온다.

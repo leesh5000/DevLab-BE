@@ -1,12 +1,16 @@
 package com.leesh.devlab.domain.post;
 
 import com.leesh.devlab.domain.BaseEntity;
+import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -36,6 +40,10 @@ public class Post extends BaseEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
+    @OrderBy("id")
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Like> likes = new ArrayList<>();
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -48,4 +56,13 @@ public class Post extends BaseEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    /* 생성 메서드 */
+    @Builder
+    private Post(String title, String contents, Member member) {
+        this.title = title;
+        this.contents = contents;
+        this.member = member;
+    }
+
 }
