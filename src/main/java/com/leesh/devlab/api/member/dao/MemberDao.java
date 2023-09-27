@@ -1,5 +1,6 @@
 package com.leesh.devlab.api.member.dao;
 
+import com.leesh.devlab.api.member.dto.MemberProfile;
 import com.leesh.devlab.api.member.dto.MyProfile;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface MemberDao {
 
-    MyProfile getMyProfile(Long memberId);
+    MyProfile getMyProfile(Long id);
+
+    MemberProfile getMemberProfile(Long memberId);
 
 }

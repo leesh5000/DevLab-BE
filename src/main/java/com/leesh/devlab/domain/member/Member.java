@@ -130,6 +130,10 @@ public class Member extends BaseEntity {
         this.password = password;
     }
 
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     public void verifyEmail(String email) {
         this.email = email;
         this.emailVerified = true;
