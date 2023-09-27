@@ -1,7 +1,5 @@
 package com.leesh.devlab.resolver;
 
-import com.leesh.devlab.constant.ErrorCode;
-import com.leesh.devlab.exception.ex.AuthException;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +45,7 @@ public class LoginMemberArgResolver implements HandlerMethodArgumentResolver {
 
         // 2. 유저 정보가 없으면 예외 발생
         if (memberInfo == null) {
-            throw new AuthException(ErrorCode.BAD_REQUEST, "memberInfo is null");
+            throw new IllegalStateException("no member info in request");
         }
 
         return memberInfo;

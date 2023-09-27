@@ -1,72 +1,48 @@
 package com.leesh.devlab.constant;
 
-import com.leesh.devlab.exception.GlobalExHandler;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
+/**
+ * 비즈니스 로직 중
+ */
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @Getter
 public enum ErrorCode {
 
     /* Auth */
-    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A-001"),
-    INVALID_TOKEN(UNAUTHORIZED, "A-002"),
-    INVALID_AUTHORIZATION_HEADER(UNAUTHORIZED, "A-003"),
-    NOT_EXIST_AUTHORIZATION(UNAUTHORIZED, "A-004"),
-
-    /* Oauth */
-    NOT_SUPPORT_OAUTH_TYPE(HttpStatus.BAD_REQUEST, "O-001"),
-    ALREADY_REGISTERED_FROM_KAKAO(CONFLICT, "O-002"),
-    ALREADY_REGISTERED_FROM_GOOGLE(CONFLICT, "O-003"),
-    ALREADY_REGISTERED_FROM_NAVER(CONFLICT, "O-004"),
-    INVALID_OAUTH_TYPE(HttpStatus.BAD_REQUEST, "O-005"),
+    EXPIRED_TOKEN(UNAUTHORIZED, "A-001", "Expired Token"),
+    INVALID_TOKEN(UNAUTHORIZED, "A-002", "Invalid Token"),
+    INVALID_AUTHORIZATION_HEADER(UNAUTHORIZED, "A-003", "Invalid Authorization Header"),
+    NOT_EXIST_AUTHORIZATION(UNAUTHORIZED, "A-004", "Authorization is empty"),
+    NOT_EXIST_TOKEN(UNAUTHORIZED, "A-005", "Token is empty"),
 
     /* Member */
-    NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "M-001"),
+    NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),
+    ALREADY_REGISTERED_MEMBER(CONFLICT, "M-002", "Already Registered Member"),
+    WRONG_PASSWORD(UNAUTHORIZED, "M-003", "Wrong Password"),
+    NO_VERIFIED_EMAIL(UNAUTHORIZED, "M-004", "no verified email"),
+    WRONG_CERT_NUMBER(UNAUTHORIZED, "M-005", "wrong certification number"),
+    NO_PERMISSION(FORBIDDEN, "M-006", "no permission member."),
+
 
     /* Common */
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C-001"),
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-002")
+    INVALID_INPUT(BAD_REQUEST, "C-001", "Bad Request"),
+    EMAIL_SEND_FAILED(INTERNAL_SERVER_ERROR, "C-002", "Email Send Failed"),
 
     ;
 
-    private final HttpStatus httpStatus;
-
-    /**
-     * 이 필드를 통해 messages_properties 파일에서 해당하는 에러 메세지를 가져온다. <br>
-     * {@link GlobalExHandler#messageSource}
-     */
+    private final HttpStatus status;
     private final String code;
+    private final String description;
 
-
-    ErrorCode(HttpStatus httpStatus, String code) {
-        this.httpStatus = httpStatus;
+    ErrorCode(HttpStatus status, String code, String description) {
+        this.status = status;
         this.code = code;
+        this.description = description;
     }
-
-/*
-    /**
-     * 앱이 실행될 때, properties에 있는 에러 메세지들을 주입시킨다.
-     * FIXME : 이 코드는 애플리케이션 실행 시점에 에러 코드에 현재 로케일에 해당하는 메세지를 주입하기 때문에 추후 Locale이 바뀌더라도 메세지는 바뀌지 않음 -> GlobalExHandler에서 messageSourceAccessor를 주입받아서 직접 메세지를 가져오는 방식으로 변경
-     *//*
-
-    @Component
-    public static class ErrorMessageInjector {
-        private final MessageSourceAccessor messageSource;
-
-        private ErrorMessageInjector(MessageSourceAccessor messageSource) {
-            this.messageSource = messageSource;
-        }
-
-        @PostConstruct
-        private void init() {
-            for (ErrorCode errorCode : ErrorCode.values()) {
-                errorCode.message = messageSource.getMessage(errorCode.code);
-            }
-        }
-    }
-*/
 
 }

@@ -17,19 +17,28 @@ spring:
     multipart:
       max-file-size: 10MB # 파일 업로드 요청 시, 하나의 파일 크기를 10MB로 제한
       max-request-size: 100MB # 파일 업로드 요청 시, 전체 요청 크기를 100MB로 제한
-
-  # ENUM Deserializer 대소문자 무시
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: ENC(nvm7UuFGfEFQuinssW92Hu5wqlhd/fr2RweMESxNAh0=)
+    password: ENC(yJ9a5zcyIX/ykcE7F0kHmvtLELXZux9h)
+    properties:
+      mail.smtp:
+        auth: true
+        ssl.enable: true
   jackson:
     mapper:
-      accept-case-insensitive-enums: true
-
+      accept-case-insensitive-enums: true # ENUM Deserializer 대소문자 무시
+    property-naming-strategy: SNAKE_CASE
 jasypt:
   encryptor:
     password: ${PASSWORD}
-
 token:
   secret: ENC(Xe8iKP7YUyeuieJwi6NUMnHTYC1Nsh42jYCNQR7hRnekV0YPYkI7gMOr286oRFRsmG3zjOKqucs=)
-
 custom:
   locale: en_US
   timezone: Asia/Seoul
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true # MyBatis Result Type 바인딩 시 필드 이름을 camelCase로 자동변환

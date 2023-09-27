@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.leesh.devlab.api.member.dao.MemberDao">
+    <select id="getMyProfile"
+            parameterType="java.lang.Long"
+            resultMap="myProfile">
+        select mp.id,
+               mp.login_id,
+               mp.nickname,
+               mp.email,
+               mp.email_verified,
+               mp.created_at,
+               mp.post_count,
+               mp.post_like_count,
+               count(c.id) as 'comment_count',
+               sum(l.value) as 'comment_like_count'
+        from (
+                 select m.id, m.login_id, m.nickname, m.email,
+                        m.created_at,
+                        m.email_verified, count(p.id) as 'post_count', count(l.value) as 'post_like_count'
+                 from members m
+                          inner join posts p on m.id = p.member_id
+                          inner join likes l on p.id = l.post_id
+                 group by m.id
+             ) mp
+                 left join comments c on mp.id = c.member_id
+                 inner join likes l on c.id = l.comment_id
+        where mp.id = #{id}
+        group by mp.id;
+    </select>
+    
+    <resultMap id="myProfile" type="com.leesh.devlab.api.member.dto.MyProfile">
+        <id property="id" column="id"/>
+        <result property="loginId" column="login_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="email" column="email"/>
+        <result property="emailVerified" column="email_verified"/>
+        <result property="createdAt" column="created_at"/>
+        <association property="activity" javaType="com.leesh.devlab.api.member.dto.MyProfile$Activity">
+            <result property="postCount" column="post_count"/>
+            <result property="postLikeCount" column="post_like_count"/>
+            <result property="commentCount" column="comment_count"/>
+            <result property="commentLikeCount" column="comment_like_count"/>
+        </association>
+    </resultMap>
+</mapper>

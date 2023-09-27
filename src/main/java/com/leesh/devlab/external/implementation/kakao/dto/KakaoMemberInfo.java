@@ -2,40 +2,34 @@ package com.leesh.devlab.external.implementation.kakao.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.leesh.devlab.constant.OauthType;
-import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
+import com.leesh.devlab.external.abstraction.OauthMemberInfo;
+import lombok.Getter;
 
-public record KakaoMemberInfo() {
+public record KakaoMemberInfo(String id, @JsonProperty("kakao_account") KakaoAccount kakaoAccount) implements OauthMemberInfo {
 
-    public record Response(String id, @JsonProperty("kakao_account") KakaoAccount kakaoAccount) implements OauthMemberInfo {
+    @Getter
+    public static class KakaoAccount {
 
-        public record KakaoAccount(String email, Profile profile) {
+        private String email;
+        private Profile profile;
 
-            public record Profile(String nickname,
-                                  @JsonProperty("thumbnail_image_url") String thumbnailImageUrl) {
+        @Getter
+        public static class Profile {
 
-            }
+            private String nickname;
+            private @JsonProperty("thumbnail_image_url") String thumbnailImageUrl;
+
         }
+    }
 
-        @Override
-        public String getName() {
-            return kakaoAccount.profile != null ? kakaoAccount.profile.nickname : null;
-        }
+    @Override
+    public String getOauthId() {
+        return getOauthType() + "@" + id;
+    }
 
-        @Override
-        public String getEmail() {
-            return kakaoAccount.email;
-        }
-
-        @Override
-        public String getProfileImgUrl() {
-            return kakaoAccount.profile != null ? kakaoAccount.profile.thumbnailImageUrl : null;
-        }
-
-        @Override
-        public OauthType getOauthType() {
-            return OauthType.KAKAO;
-        }
-
+    @Override
+    public OauthType getOauthType() {
+        return OauthType.KAKAO;
     }
 
 }

@@ -1,34 +1,19 @@
 package com.leesh.devlab.external.implementation.google.dto;
 
-import com.leesh.devlab.external.abstraction.dto.OauthTokenRequest;
-import com.leesh.devlab.external.abstraction.dto.OauthTokenResponse;
-import lombok.Builder;
-import lombok.Getter;
+import com.leesh.devlab.external.abstraction.OauthToken;
 
-public class GoogleToken {
+import java.util.Objects;
 
-    @Getter
-    @Builder
-    public static class Request implements OauthTokenRequest {
+public record GoogleToken(String token_type, String access_token, Integer expires_in, String refresh_token, String scope, String id_token) implements OauthToken {
 
-        private String client_id;
-        private String client_secret;
-        private String code;
-        private String grant_type;
-        private String redirect_uri;
-        private String code_verifier;
-
+    public GoogleToken {
+        Objects.requireNonNull(id_token, "GoogleToken id_token must not be null");
+        Objects.requireNonNull(access_token, "GoogleToken access_token must not be null");
     }
 
-    public record Response(String token_type, String access_token, Integer expires_in,
-                           String refresh_token, String scope, String id_token) implements OauthTokenResponse {
-
-        @Override
-        public String getAccessToken() {
-            return access_token;
-        }
-
+    @Override
+    public String getAccessToken() {
+        return id_token;
     }
-
 
 }

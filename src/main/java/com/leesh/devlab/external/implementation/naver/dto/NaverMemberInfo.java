@@ -2,34 +2,43 @@ package com.leesh.devlab.external.implementation.naver.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.leesh.devlab.constant.OauthType;
-import com.leesh.devlab.external.abstraction.dto.OauthMemberInfo;
+import com.leesh.devlab.external.abstraction.OauthMemberInfo;
+import lombok.Getter;
 
-public record NaverMemberInfo() {
+/**
+ * <p>
+ *      네이버 로그인 API를 통해 받아온 사용자 정보를 담는 DTO
+ * </p>
+ * <a href={https://developers.naver.com/docs/login/profile/profile.md}>공식문서 링크</a>
+ */
+@Getter
+public class NaverMemberInfo implements OauthMemberInfo {
 
-    public record Response(@JsonProperty("resultcode") String resultCode, String message, @JsonProperty("response") Profile profile) implements OauthMemberInfo {
+    private @JsonProperty("resultcode") String resultCode;
+    private String message;
+    private Response response;
 
-        public record Profile(String id, String nickname, String email, String name, @JsonProperty("profile_image") String profileImage) {
-
-        }
-
-        @Override
-        public String getName() {
-            return profile.nickname;
-        }
-
-        @Override
-        public String getEmail() {
-            return profile.email;
-        }
-
-        @Override
-        public String getProfileImgUrl() {
-            return profile.profileImage;
-        }
-
-        @Override
-        public OauthType getOauthType() {
-            return OauthType.NAVER;
-        }
+    private NaverMemberInfo() {
     }
+
+    @Getter
+    private static class Response {
+
+        private Response() {
+        }
+
+        private String id;
+
+    }
+
+    @Override
+    public String getOauthId() {
+        return getOauthType() + "@" + response.id;
+    }
+
+    @Override
+    public OauthType getOauthType() {
+        return OauthType.NAVER;
+    }
+
 }

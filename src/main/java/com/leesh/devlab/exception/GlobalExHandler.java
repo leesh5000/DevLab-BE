@@ -1,109 +1,69 @@
 package com.leesh.devlab.exception;
 
 import com.leesh.devlab.constant.ErrorCode;
-import com.leesh.devlab.exception.dto.ErrorResponse;
-import com.leesh.devlab.exception.ex.BusinessException;
+import com.leesh.devlab.exception.custom.BusinessException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @RestControllerAdvice
 public class GlobalExHandler {
 
-    private final MessageSourceAccessor messageSource;
-
     /**
-     * {@link org.springframework.validation.annotation.Validated} 예외가 발생할 경우
+     * {@link jakarta.validation.Valid} 또는 {@link org.springframework.validation.annotation.Validated} 예외를 처리하는 핸들러
      */
-    @ExceptionHandler(BindException.class)
+    @ExceptionHandler({BindException.class})
     protected ResponseEntity<ErrorResponse> handleBindException(BindException e) {
 
-        log.error("handleBindException", e);
+        log.warn("[Binding Exception]", e);
 
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.toString(), e.getBindingResult());
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT;
+        ErrorResponse response = ErrorResponse.from(errorCode, e.getBindingResult());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(errorResponse);
+        return ResponseEntity
+                .status(response.status())
+                .body(response);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+
+        log.warn("[Constraint Violation Exception]", e);
+
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT;
+        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
+        ErrorResponse response = ErrorResponse.from(errorCode, constraintViolations);
+
+        return ResponseEntity
+                .status(response.status())
+                .body(response);
     }
 
     /**
-     * 주로 @RequestParam enum으로 binding 못했을 경우 발생 혹은 @PathVariable 형식에 잘못된 타입을 넣었을 때
+     * 비즈니스 로직 실행 중 발생하는 오류를 처리하는 핸들러
+     * {@link BusinessException}
      */
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-
-        log.error("handleMethodArgumentTypeMismatchException", e);
-
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.toString(), e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(errorResponse);
-    }
-
-    /**
-     * 지원하지 않은 HTTP method 호출 할 경우 발생
-     */
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    protected ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-
-        log.error("handleHttpRequestMethodNotSupportedException", e);
-
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.METHOD_NOT_ALLOWED.toString(), e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
-    }
-
-    /**
-     * 비즈니스 로직 실행 중 오류 발생
-     */
-    @ExceptionHandler(value = { BusinessException.class })
+    @ExceptionHandler(value = {BusinessException.class})
     protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
 
         log.error("[Business Exception]", e);
 
-        String errorMessage = convertErrorMessage(e.getErrorCode().getCode());
+        ErrorCode errorCode = e.getErrorCode();
+        ErrorResponse response = ErrorResponse.from(errorCode);
 
-        ErrorResponse errorResponse = ErrorResponse.of(
-                e.getErrorCode().getCode(),
-                errorMessage);
-
-        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
-                .body(errorResponse);
-    }
-
-    /**
-     * 예외 처리하지 못한 나머지 예외 발생
-     */
-    @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ErrorResponse> handleException(Exception e) {
-
-        log.error("[Business Exception]", e);
-
-        ErrorCode errorCode = ErrorCode.INTERNAL_ERROR;
-
-        String errorMessage = convertErrorMessage(errorCode.getCode());
-
-        ErrorResponse errorResponse = ErrorResponse.of(errorCode.getCode(),
-                errorMessage);
-
-        return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
-    }
-
-    private String convertErrorMessage(String code) {
-        return messageSource.getMessage(code);
+        return ResponseEntity
+                .status(response.status())
+                .body(response);
     }
 
 }

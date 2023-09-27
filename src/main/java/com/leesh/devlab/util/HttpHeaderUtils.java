@@ -1,7 +1,7 @@
 package com.leesh.devlab.util;
 
 import com.leesh.devlab.constant.ErrorCode;
-import com.leesh.devlab.exception.ex.AuthException;
+import com.leesh.devlab.exception.custom.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
@@ -51,7 +51,7 @@ public class HttpHeaderUtils {
             }
 
             // Bearer 타입은 맞는데, 토큰이 없는 경우
-            throw new AuthException(ErrorCode.NOT_EXIST_AUTHORIZATION, "Authorization header is empty");
+            throw new AuthException(ErrorCode.NOT_EXIST_TOKEN, "access token is empty");
         }
     }
 

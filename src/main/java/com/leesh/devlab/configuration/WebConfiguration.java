@@ -42,15 +42,14 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .order(1)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/api/auth/register", "/api/auth/login", "/api/auth/oauth-login", "/api/auth/refresh",
-                        "/api/health",
+                        "/api/auth/register", "/api/auth/login", "/api/auth/oauth-login", "/api/auth/refresh", "/api/auth/find",
                         "/docs/**"
                 );
-
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(loginMemberArgResolver);
     }
+
 }

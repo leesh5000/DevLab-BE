@@ -3,7 +3,7 @@ package com.leesh.devlab.jwt.implementation;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.constant.TokenType;
-import com.leesh.devlab.exception.ex.AuthException;
+import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
@@ -42,8 +42,7 @@ public class JwtService implements AuthTokenService {
 
         return new MemberInfo(
                 claims.get("id", Long.class),
-                claims.get("name", String.class),
-                claims.get("email", String.class),
+                claims.get("nickname", String.class),
                 Role.valueOf(claims.get("role", String.class))
         );
     }
@@ -69,8 +68,7 @@ public class JwtService implements AuthTokenService {
                 .setIssuedAt(new Date())                   // 토큰 발급 시간
                 .setExpiration(new Date(expiredAt))        // 토큰 만료되는 시간
                 .claim("id", memberInfo.id())        // 회원 아이디 (PK값)
-                .claim("name", memberInfo.name())    // 회원 이름
-                .claim("email", memberInfo.email())  // 회원 이메일
+                .claim("nickname", memberInfo.nickname())    // 회원 닉네임
                 .claim("role", memberInfo.role())    // 유저 role
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .setHeaderParam("typ", "JWT")
