@@ -78,8 +78,8 @@ use DevLab;
 create table members
 (
     id                       bigint auto_increment,
-    login_id                  varchar(30)  not null unique,
-    nickname                 varchar(30)  not null unique,
+    login_id                 varchar(20)  not null unique,
+    nickname                 varchar(9)   not null unique,
     email                    varchar(255) unique,
     password                 varchar(255),
     role                     varchar(10)  not null,

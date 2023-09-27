@@ -8,6 +8,7 @@ import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import com.leesh.devlab.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,10 +39,10 @@ public class MemberController {
         return ResponseEntity.ok(memberProfile);
     }
 
-    @PutMapping(value = "/{member-id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{member-id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateProfile(@PathVariable("member-id") Long memberId,
                                               @LoginMember MemberInfo memberInfo,
-                                              @RequestBody UpdateProfile updateProfile) {
+                                              @RequestBody @Valid UpdateProfile updateProfile) {
 
         // 현재 로그인 한 사용자가 수정하려는 사용자와 같은지 확인
         isAccessible(memberId, memberInfo);
@@ -49,6 +50,24 @@ public class MemberController {
         memberService.updateProfile(memberId, updateProfile);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(value = "/{member-id}")
+    public ResponseEntity<Void> deleteMember(@PathVariable("member-id") Long memberId,
+                                             @LoginMember MemberInfo memberInfo) {
+
+        // 현재 로그인 한 사용자가 자원을 수정하려는 사용자와 같은지 확인
+        isAccessible(memberId, memberInfo);
+
+        memberService.deleteMember(memberId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(value = "/{member-id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> getMemberPosts(@PathVariable("member-id") Long memberId) {
+
+        return null;
     }
 
     private void isAccessible(Long memberId, MemberInfo memberInfo) {

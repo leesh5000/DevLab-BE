@@ -130,8 +130,9 @@ public class Member extends BaseEntity {
         this.password = password;
     }
 
-    public void changeNickname(String nickname) {
+    public void updateProfile(String nickname, String email) {
         this.nickname = nickname;
+        this.email = email;
     }
 
     public void verifyEmail(String email) {
@@ -174,7 +175,6 @@ public class Member extends BaseEntity {
         post.getLikes().add(like);
         return like;
     }
-
     public Like like(Comment comment) {
         Like like = Like.builder()
                 .member(this)
