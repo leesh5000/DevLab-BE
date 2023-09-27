@@ -5,27 +5,19 @@
     <select id="getMyProfile"
             parameterType="java.lang.Long"
             resultMap="myProfile">
-        select mp.id,
-               mp.login_id,
-               mp.nickname,
-               mp.email,
-               mp.email_verified,
-               mp.created_at,
-               mp.post_count,
-               mp.post_like_count,
-               count(c.id) as 'comment_count',
-               sum(l.value) as 'comment_like_count'
+        select mp.id, mp.login_id, mp.nickname, mp.created_at,
+               mp.post_count, mp.post_like_count,
+               count(c.id) as 'comment_count', sum(cl.value) as 'comment_like_count'
         from (
-                 select m.id, m.login_id, m.nickname, m.email,
-                        m.created_at,
-                        m.email_verified, count(p.id) as 'post_count', count(l.value) as 'post_like_count'
+                 select m.id, m.login_id, m.nickname, m.created_at,
+                        count(p.id) as 'post_count', sum(pl.value) as 'post_like_count'
                  from members m
                           inner join posts p on m.id = p.member_id
-                          inner join likes l on p.id = l.post_id
+                          left join likes pl on p.id = pl.post_id
                  group by m.id
              ) mp
-                 left join comments c on mp.id = c.member_id
-                 inner join likes l on c.id = l.comment_id
+                 inner join comments c on mp.id = c.member_id
+                 left join likes cl on c.id = cl.comment_id
         where mp.id = #{id}
         group by mp.id;
     </select>
@@ -37,7 +29,39 @@
         <result property="email" column="email"/>
         <result property="emailVerified" column="email_verified"/>
         <result property="createdAt" column="created_at"/>
-        <association property="activity" javaType="com.leesh.devlab.api.member.dto.MyProfile$Activity">
+        <association property="activities" javaType="com.leesh.devlab.api.member.dto.Activities">
+            <result property="postCount" column="post_count"/>
+            <result property="postLikeCount" column="post_like_count"/>
+            <result property="commentCount" column="comment_count"/>
+            <result property="commentLikeCount" column="comment_like_count"/>
+        </association>
+    </resultMap>
+
+    <select id="getMemberProfile"
+            parameterType="java.lang.Long"
+            resultMap="memberProfile">
+        select mp.id, mp.nickname, mp.created_at,
+               mp.post_count, mp.post_like_count,
+               count(c.id) as 'comment_count', sum(cl.value) as 'comment_like_count'
+        from (
+                 select m.id, m.nickname, m.created_at,
+                        count(p.id) as 'post_count', sum(pl.value) as 'post_like_count'
+                 from members m
+                          inner join posts p on m.id = p.member_id
+                          left join likes pl on p.id = pl.post_id
+                 group by m.id
+             ) mp
+                 inner join comments c on mp.id = c.member_id
+                 left join likes cl on c.id = cl.comment_id
+        where mp.id = #{id}
+        group by mp.id;
+    </select>
+
+    <resultMap id="memberProfile" type="com.leesh.devlab.api.member.dto.MemberProfile">
+        <id property="id" column="id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="createdAt" column="created_at"/>
+        <association property="activities" javaType="com.leesh.devlab.api.member.dto.Activities">
             <result property="postCount" column="post_count"/>
             <result property="postLikeCount" column="post_like_count"/>
             <result property="commentCount" column="comment_count"/>

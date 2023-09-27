@@ -16,16 +16,16 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({FIELD})
 @Retention(RUNTIME)
-@Constraint(validatedBy = LoginId.LoginIdValidator.class)
+@Constraint(validatedBy = Password.PasswordValidator.class)
 @Documented
-public @interface LoginId {
+public @interface Password {
 
-    String message() default "Nickname must be at least 2 characters and not more than 20 characters.";
+    String message() default "Password must be at least 4 characters and not more than 30 characters.";
     Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
 
-    class LoginIdValidator implements ConstraintValidator<LoginId, String> {
+    class PasswordValidator implements ConstraintValidator<Password, String> {
 
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -34,7 +34,7 @@ public @interface LoginId {
                 return false;
             }
 
-            Pattern pattern = Pattern.compile("^.{2,20}$");
+            Pattern pattern = Pattern.compile("^.{4,30}$");
             return pattern.matcher(value).matches();
         }
     }

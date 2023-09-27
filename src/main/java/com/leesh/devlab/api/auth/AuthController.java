@@ -87,7 +87,7 @@ public class AuthController {
     /**
      * 아이디/비밀번호 찾기 API
      */
-    @GetMapping(path = "/find?email={email}")
+    @GetMapping(path = "/find")
     public ResponseEntity<Void> findIdAndPassword(@RequestParam @Email String email) {
 
         authService.findIdAndPassword(email);
@@ -109,7 +109,7 @@ public class AuthController {
     }
 
     @GetMapping(path = "/email-confirm")
-    public ResponseEntity<Void> emailConfirm(@RequestParam String email, @RequestParam String code, @LoginMember MemberInfo memberInfo, HttpServletRequest httpRequest) {
+    public ResponseEntity<Void> emailConfirm(@RequestParam @Email String email, @RequestParam String code, @LoginMember MemberInfo memberInfo, HttpServletRequest httpRequest) {
 
         HttpSession session = httpRequest.getSession();
 

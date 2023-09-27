@@ -4,6 +4,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -29,13 +30,12 @@ public @interface Nickname {
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
 
-            if (value == null) {
+            if (!StringUtils.hasText(value)) {
                 return false;
             }
 
             Pattern pattern = Pattern.compile("^.{2,9}$");
             return pattern.matcher(value).matches();
-
         }
     }
 }
