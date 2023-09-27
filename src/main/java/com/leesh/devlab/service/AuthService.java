@@ -2,7 +2,7 @@ package com.leesh.devlab.service;
 
 import com.leesh.devlab.api.auth.dto.LoginInfo;
 import com.leesh.devlab.api.auth.dto.OauthLoginInfo;
-import com.leesh.devlab.api.auth.dto.RefreshToken;
+import com.leesh.devlab.api.auth.dto.TokenRefreshDto;
 import com.leesh.devlab.api.auth.dto.RegisterInfo;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
@@ -11,10 +11,10 @@ import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
+import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.external.OauthService;
 import com.leesh.devlab.external.OauthServiceFactory;
-import com.leesh.devlab.external.abstraction.OauthMemberInfo;
-import com.leesh.devlab.external.abstraction.OauthService;
-import com.leesh.devlab.external.abstraction.OauthToken;
+import com.leesh.devlab.external.OauthToken;
 import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
@@ -71,7 +71,7 @@ public class AuthService {
      * 유저의 리프레시 토큰을 사용하여 새로운 인증 토큰을 발급하는 메서드
      * @param refreshToken
      */
-    public RefreshToken refreshToken(String refreshToken) {
+    public TokenRefreshDto refresh(String refreshToken) {
 
         // 리프레시 토큰 검증
         authTokenService.validateAuthToken(refreshToken, TokenType.REFRESH);
@@ -81,15 +81,15 @@ public class AuthService {
         Member member = memberRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new AuthException(ErrorCode.INVALID_TOKEN, "not invalid refresh token"));
 
-        // 현재 시간이 토큰 만료 시간보다 더 미래이면, 만료된 토큰이므로 액세스 토큰 갱신을 거부한다.
-        if (member.getRefreshTokenExpiredAt() < System.currentTimeMillis()) {
-            throw new AuthException(ErrorCode.EXPIRED_TOKEN, "refresh token is expired");
+        // 리프레시 토큰이 만료됐으면, 예외를 던진다.
+        if (member.getRefreshToken().isExpired()) {
+            throw new AuthException(ErrorCode.INVALID_TOKEN, "not invalid refresh token");
         }
 
         // 새로운 액세스 토큰을 발급한다.
         AuthToken accessToken = authTokenService.createAuthToken(MemberInfo.from(member), TokenType.ACCESS);
 
-        return new RefreshToken(GrantType.BEARER, accessToken);
+        return new TokenRefreshDto(GrantType.BEARER, accessToken);
 
     }
 
@@ -108,11 +108,10 @@ public class AuthService {
 
     public void logout(MemberInfo memberInfo) {
 
-            // 로그아웃 요청한 유저의 리프레시 토큰을 삭제한다.
             Member member = memberRepository.findById(memberInfo.id())
                     .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
 
-            // 사용자의 리프레시 토큰을 만료 처리한다.
+            // 사용자를 로그아웃 처리한다.
             member.logout();
     }
 

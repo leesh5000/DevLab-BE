@@ -62,19 +62,34 @@ public class JwtService implements AuthTokenService {
     public AuthToken createAuthToken(MemberInfo memberInfo, TokenType tokenType) {
 
         long expiredAt = System.currentTimeMillis() + tokenType.getExpiresInMills();
+        String value;
 
-        String value = Jwts.builder()
-                .setSubject(tokenType.name())              // 토큰 제목
-                .setIssuedAt(new Date())                   // 토큰 발급 시간
-                .setExpiration(new Date(expiredAt))        // 토큰 만료되는 시간
-                .claim("id", memberInfo.id())        // 회원 아이디 (PK값)
-                .claim("nickname", memberInfo.nickname())    // 회원 닉네임
-                .claim("role", memberInfo.role())    // 유저 role
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .setHeaderParam("typ", "JWT")
-                .compact();
+        if (tokenType == TokenType.ACCESS) {
 
-        return new Jwt(tokenType, value, tokenType.getExpiresInMills());
+            value = Jwts.builder()
+                    .setSubject(tokenType.name())              // 토큰 제목
+                    .setIssuedAt(new Date())                   // 토큰 발급 시간
+                    .setExpiration(new Date(expiredAt))        // 토큰 만료되는 시간
+                    .claim("id", memberInfo.id())        // 회원 아이디 (PK값)
+                    .claim("nickname", memberInfo.nickname())    // 회원 닉네임
+                    .claim("role", memberInfo.role())    // 유저 role
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .setHeaderParam("typ", "JWT")
+                    .compact();
+
+        } else {
+
+            value = Jwts.builder()
+                    .setSubject(tokenType.name())              // 토큰 제목
+                    .setIssuedAt(new Date())                   // 토큰 발급 시간
+                    .setExpiration(new Date(expiredAt))        // 토큰 만료되는 시간
+                    .claim("id", memberInfo.id())        // 회원 아이디 (PK값)
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .setHeaderParam("typ", "JWT")
+                    .compact();
+        }
+
+        return new Jwt(tokenType, value, expiredAt);
     }
 
     // 이 메소드의 파라미터인 토큰은 해당 시점에서는 Access Token 또는 Refresh Token 인지 알 수 없다.

@@ -1,4 +1,4 @@
-package com.leesh.devlab.external.abstraction;
+package com.leesh.devlab.external;
 
 import com.leesh.devlab.constant.OauthType;
 import com.leesh.devlab.domain.member.Member;
@@ -17,7 +17,7 @@ public interface OauthMemberInfo {
      * @return Member
      */
     default Member toEntity() {
-        return Member.of(getOauthId());
+        return Member.of(getOauthType(), getOauthId());
     }
 
 }

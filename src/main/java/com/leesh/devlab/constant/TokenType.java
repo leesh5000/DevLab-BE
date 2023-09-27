@@ -8,7 +8,7 @@ public enum TokenType {
     REFRESH(7 * 24 * 60 * 60 * 1000) // 7일
     ;
 
-    // 토큰의 유효 기간 (초)
+    // 토큰의 유효 기간 (밀리 초)
     private final long expiresInMills;
 
     TokenType(Integer expiresIn) {

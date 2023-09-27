@@ -1,8 +1,8 @@
 package com.leesh.devlab.external.implementation.kakao;
 
-import com.leesh.devlab.external.abstraction.OauthService;
-import com.leesh.devlab.external.abstraction.OauthMemberInfo;
-import com.leesh.devlab.external.abstraction.OauthToken;
+import com.leesh.devlab.external.OauthService;
+import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.external.OauthToken;
 import com.leesh.devlab.external.implementation.kakao.client.KakaoApiClient;
 import com.leesh.devlab.external.implementation.kakao.client.KakaoAuthClient;
 import org.springframework.beans.factory.annotation.Value;

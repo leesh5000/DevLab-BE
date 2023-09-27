@@ -1,4 +1,4 @@
-package com.leesh.devlab.external.abstraction;
+package com.leesh.devlab.external;
 
 public interface OauthToken {
 

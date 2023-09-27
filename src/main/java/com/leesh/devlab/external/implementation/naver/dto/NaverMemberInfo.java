@@ -2,7 +2,7 @@ package com.leesh.devlab.external.implementation.naver.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.leesh.devlab.constant.OauthType;
-import com.leesh.devlab.external.abstraction.OauthMemberInfo;
+import com.leesh.devlab.external.OauthMemberInfo;
 import lombok.Getter;
 
 /**

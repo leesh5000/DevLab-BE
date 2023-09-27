@@ -2,7 +2,6 @@
 
  import com.leesh.devlab.configuration.ApplicationContextProvider;
  import com.leesh.devlab.constant.OauthType;
- import com.leesh.devlab.external.abstraction.OauthService;
  import com.leesh.devlab.external.implementation.google.GoogleOauthService;
  import com.leesh.devlab.external.implementation.kakao.KakaoOauthService;
  import com.leesh.devlab.external.implementation.naver.NaverOauthService;

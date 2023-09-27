@@ -1,6 +1,6 @@
 package com.leesh.devlab.external.implementation.kakao.dto;
 
-import com.leesh.devlab.external.abstraction.OauthToken;
+import com.leesh.devlab.external.OauthToken;
 
 import java.util.Objects;
 

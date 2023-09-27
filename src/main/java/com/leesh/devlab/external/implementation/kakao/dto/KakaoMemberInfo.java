@@ -2,7 +2,7 @@ package com.leesh.devlab.external.implementation.kakao.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.leesh.devlab.constant.OauthType;
-import com.leesh.devlab.external.abstraction.OauthMemberInfo;
+import com.leesh.devlab.external.OauthMemberInfo;
 import lombok.Getter;
 
 public record KakaoMemberInfo(String id, @JsonProperty("kakao_account") KakaoAccount kakaoAccount) implements OauthMemberInfo {

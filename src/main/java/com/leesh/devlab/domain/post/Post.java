@@ -1,5 +1,6 @@
 package com.leesh.devlab.domain.post;
 
+import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
@@ -19,6 +20,7 @@ import java.util.Objects;
 @Table(name = "posts", indexes = {
         @Index(columnList = "title"),
         @Index(columnList = "contents"),
+        @Index(columnList = "category"),
         @Index(columnList = "member_id"),
         @Index(columnList = "created_at")
 })
@@ -34,6 +36,10 @@ public class Post extends BaseEntity {
 
     @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
     private String contents;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 10, nullable = false)
+    private Category category;
 
     @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
