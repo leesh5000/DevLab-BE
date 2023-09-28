@@ -88,7 +88,7 @@ create table posts
     member_id   bigint       not null,
     title       varchar(255) not null,
     contents    text         not null,
-    category    varchar(10)  not null,
+    category    varchar(20)  not null,
     created_by  varchar(255) not null,
     modified_by varchar(255) not null,
     created_at  bigint       not null,
