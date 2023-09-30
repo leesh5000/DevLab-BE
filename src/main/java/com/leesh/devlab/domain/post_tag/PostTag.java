@@ -22,11 +22,17 @@ public class PostTag {
     private Long id;
 
     @JoinColumn(name = "post_id", nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Post post;
 
     @JoinColumn(name = "tag_id", nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Tag tag;
 
+    public PostTag(Post post, Tag tag) {
+        this.post = post;
+        this.tag = tag;
+        post.getPostTags().add(this);
+        tag.getPostTags().add(this);
+    }
 }

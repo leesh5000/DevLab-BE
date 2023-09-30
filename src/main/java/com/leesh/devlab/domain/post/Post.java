@@ -5,6 +5,7 @@ import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.post_tag.PostTag;
+import com.leesh.devlab.domain.tag.Tag;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -67,10 +68,14 @@ public class Post extends BaseEntity {
 
     /* 생성 메서드 */
     @Builder
-    private Post(String title, String contents, Member member) {
+    private Post(String title, String contents, Category category, Member member) {
         this.title = title;
         this.contents = contents;
+        this.category = category;
         this.member = member;
     }
 
+    public PostTag tagging(Tag tag) {
+        return new PostTag(this, tag);
+    }
 }

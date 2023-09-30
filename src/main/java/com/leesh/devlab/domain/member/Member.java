@@ -1,5 +1,6 @@
 package com.leesh.devlab.domain.member;
 
+import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.constant.OauthType;
 import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.domain.BaseEntity;
@@ -120,11 +121,12 @@ public class Member extends BaseEntity {
         this.email = email;
     }
 
-    public Post posting(String title, String contents) {
+    public Post posting(String title, String contents, Category category) {
 
         Post post = Post.builder()
                 .title(title)
                 .contents(contents)
+                .category(category)
                 .member(this)
                 .build();
 

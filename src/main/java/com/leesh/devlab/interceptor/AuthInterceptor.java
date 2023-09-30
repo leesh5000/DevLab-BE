@@ -3,7 +3,7 @@ package com.leesh.devlab.interceptor;
 import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.dto.MemberInfo;
-import com.leesh.devlab.util.HttpHeaderUtils;
+import com.leesh.devlab.util.HttpHeaderUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         // 1. Authorization Header 에서 액세스 토큰 추출 후 JWT 객체 생성
-        String accessToken = HttpHeaderUtils.extractAuthorization(request);
+        String accessToken = HttpHeaderUtil.extractAuthorization(request);
 
         // 2. 올바른 토큰인지 검증
         authTokenService.validateAuthToken(accessToken, TokenType.ACCESS);

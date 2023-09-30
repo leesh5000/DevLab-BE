@@ -8,10 +8,10 @@ import org.springframework.util.StringUtils;
 
 import static com.leesh.devlab.constant.GrantType.isBearerType;
 
-public class HttpHeaderUtils {
+public class HttpHeaderUtil {
 
     // 인스턴스화 방지
-    private HttpHeaderUtils() {
+    private HttpHeaderUtil() {
     }
 
     /**

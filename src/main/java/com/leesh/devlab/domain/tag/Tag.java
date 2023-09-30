@@ -28,4 +28,11 @@ public class Tag extends BaseEntity {
     @OneToMany(mappedBy = "tag", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<PostTag> postTags = new ArrayList<>();
 
+    private Tag(String name) {
+        this.name = name;
+    }
+
+    public static Tag from(String name) {
+        return new Tag(name);
+    }
 }

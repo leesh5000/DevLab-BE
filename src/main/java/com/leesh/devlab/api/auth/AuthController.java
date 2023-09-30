@@ -17,7 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.leesh.devlab.util.HttpHeaderUtils.extractAuthorization;
+import static com.leesh.devlab.util.HttpHeaderUtil.extractAuthorization;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")

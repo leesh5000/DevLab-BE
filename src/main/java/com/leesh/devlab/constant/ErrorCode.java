@@ -28,6 +28,9 @@ public enum ErrorCode {
     WRONG_CERT_NUMBER(UNAUTHORIZED, "M-005", "wrong certification number"),
     NO_PERMISSION(FORBIDDEN, "M-006", "no permission member."),
 
+    /* Post */
+    POST_SAVE_FAILED(INTERNAL_SERVER_ERROR, "P-001", "post save failed. please try again later."),
+
 
     /* Common */
     INVALID_INPUT(BAD_REQUEST, "C-001", "Bad Request"),

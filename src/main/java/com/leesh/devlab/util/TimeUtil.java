@@ -7,7 +7,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public class TimeUtils {
+public class TimeUtil {
 
     public static LocalDateTime convertLocalDateTime(Date date) {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
