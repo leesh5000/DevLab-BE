@@ -49,9 +49,9 @@ DevLab은 개발과 관련된 정보들을 서로 공유하고 질문할 수 있
 
 - name : 태그 이름
 
-### Posts_Tags (게시글-태그)
+### Hashtags (해시태그)
 
-- 게시글:태그의 N:M 관계를 풀어내기 위한 테이블
+- 게시글:태그의 N:M 관계를 풀어내기 위한 테이블로, 독립적인 Tags, Posts 두 테이블이 서로 관계를 맺어 새로운 의미를 가진 Hashtags 테이블이 생성된다. 
 
 ## SQL
 
@@ -135,7 +135,9 @@ create table likes
     created_at  bigint       not null,
     modified_at bigint       not null,
     primary key (id),
-    foreign key (member_id) references members (id)
+    foreign key (member_id) references members (id),
+    foreign key (post_id) references posts (id),
+    foreign key (comment_id) references comments (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
 create index likes_member_id_idx on likes (member_id);
@@ -153,16 +155,18 @@ create table tags
 
 create index tags_name_idx on tags (name);
 
-create table posts_tags
+create table hashtags
 (
     id          bigint auto_increment,
     post_id     bigint       not null,
     tag_id      bigint       not null,
-    primary key (id)
+    primary key (id),
+    foreign key (post_id) references posts (id),
+    foreign key (tag_id) references tags (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
-create index posts_tags_post_id_idx on posts_tags (post_id);
-create index posts_tags_tag_id_idx on posts_tags (tag_id);
+create index hashtags_post_id_idx on hashtags (post_id);
+create index hashtags_tag_id_idx on hashtags (tag_id);
 ```
 
 ## API Endpoints

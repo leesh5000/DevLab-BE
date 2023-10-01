@@ -1,7 +1,7 @@
 package com.leesh.devlab.domain.tag;
 
 import com.leesh.devlab.domain.BaseEntity;
-import com.leesh.devlab.domain.post_tag.PostTag;
+import com.leesh.devlab.domain.hashtag.Hashtag;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,26 +26,23 @@ public class Tag extends BaseEntity {
     @Column(name = "name", length = 30, nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "tag", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<PostTag> postTags = new ArrayList<>();
+    @OneToMany(mappedBy = "tag", fetch = FetchType.LAZY)
+    private final List<Hashtag> hashtags = new ArrayList<>();
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name);
+        return Objects.hashCode(id);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof Tag tag)) return false;
-        return name != null && name.equals(tag.name);
+        return id != null && id.equals(tag.id);
     }
 
-    private Tag(String name) {
+    public Tag(String name) {
         this.name = name;
     }
 
-    public static Tag from(String name) {
-        return new Tag(name);
-    }
 }

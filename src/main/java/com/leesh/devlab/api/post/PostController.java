@@ -34,4 +34,13 @@ public class PostController {
 
     }
 
+    @DeleteMapping(value = "/{post-id}")
+    public ResponseEntity<Void> delete(@PathVariable("post-id") Long postId, @LoginMember MemberInfo memberInfo) {
+
+        postService.delete(postId, memberInfo);
+
+        return ResponseEntity.noContent().build();
+
+    }
+
 }

@@ -3,9 +3,9 @@ package com.leesh.devlab.domain.post;
 import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.domain.BaseEntity;
+import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
-import com.leesh.devlab.domain.post_tag.PostTag;
 import com.leesh.devlab.domain.tag.Tag;
 import com.leesh.devlab.exception.custom.BusinessException;
 import jakarta.persistence.*;
@@ -14,10 +14,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -54,7 +52,7 @@ public class Post extends BaseEntity {
     private final List<Like> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<PostTag> postTags = new ArrayList<>();
+    private final List<Hashtag> hashtags = new ArrayList<>();
 
     @Override
     public boolean equals(Object obj) {
@@ -78,26 +76,59 @@ public class Post extends BaseEntity {
         this.member = member;
     }
 
-    /* 비즈니스 로직 */
-    public void tagging(Set<Tag> tags) {
+    /* 연관관계 메서드 */
+    public void tagging(List<Tag> newTags) {
 
-        // 10개 이상 태그 불가능
-        if (tags.size() > 10) {
-            throw new BusinessException(ErrorCode.EXCEED_TAG_COUNT, "tag count must be less than 10");
+        // 한 게시글 당 태그는 10개 이하
+        if (newTags.size() > 10) {
+            throw new BusinessException(ErrorCode.EXCEED_HASHTAG_COUNT, "maximum size");
         }
 
-        for (Tag tag : tags) {
-            PostTag postTag = PostTag.of(this, tag);
-            this.postTags.add(postTag);
-        }
+        // 현재 게시글의 해시태그 중에서 입력으로 새로 들어온 태그가 존재하지 않으면, 해당 해시태그를 삭제한다.
+        // hashtags.clear(); 하고, newTags를 새로 넣으면, 태그가 같은 항목이라도 새로운 hashtag 테이블을 생성하게 되므로 위와 같은 방식을 사용한다.
+        Set<Tag> untagTarget = hashtags.stream()
+                .map(Hashtag::getTag)
+                .collect(Collectors.toSet());
 
-        // tag.getPostTags()를 하는 순간 Lazy Loading이 되는데, 게시글에 매번 태그를 추가할 때마다 태그에 딸린 게시글들을 가져오는 것은
-        // 자원낭비이고, 게시글에 태그를 붙일떄 태그에서 PostTag를 가져오는 일이 없으므로 굳이 연관관계를 맺을 필요가 없다.
-        // tag.getPostTags().add(postTag);
+        untagging(untagTarget);
+
+        // 입력으로 새로 들어온 태그 목록들을 태깅한다.
+        for (Tag tag : newTags) {
+            tagging(tag);
+        }
     }
 
-    public void edit(Long memberId, String title, String contents, Category category, Set<Tag> tags) {
+    private void untagging(Set<Tag> target) {
 
+        Set<Hashtag> hashtagsCopy = new HashSet<>(this.getHashtags());
+        for (Hashtag hashtag : hashtagsCopy) {
+            Tag tag = hashtag.getTag();
+            if (target.contains(tag)) {
+                this.hashtags.remove(hashtag);
+            }
+        }
+    }
+
+    private void tagging(Tag tag) {
+
+        // 한 게시글 당 태그는 10개 이하
+        if (hashtags.size() == 10) {
+            throw new BusinessException(ErrorCode.EXCEED_HASHTAG_COUNT, "maximum size");
+        }
+
+        // 이 게시글의 해시태그 목록에 이미 존재하는 태그이면, 넘긴다.
+        if (this.getHashtags().stream().anyMatch(hashtag -> hashtag.getTag().equals(tag))) {
+            return;
+        }
+
+        Hashtag newHashtag = new Hashtag(this, tag);
+        this.getHashtags().add(newHashtag);
+    }
+
+    /* 비즈니스 로직 */
+    public void edit(Long memberId, String title, String contents, Category category, List<Tag> newTags) {
+
+        // 게시글의 작성자만 수정 가능
         if (!Objects.equals(this.member.getId(), memberId)) {
             throw new BusinessException(ErrorCode.NOT_POST_AUTHOR, "not post author");
         }
@@ -105,12 +136,8 @@ public class Post extends BaseEntity {
         this.title = title;
         this.contents = contents;
         this.category = category;
-
-        // 기존 태그를 모두 삭제한다.
-        this.postTags.clear();
-
-        // 새로운 태그를 추가한다.
-        this.tagging(tags);
+        this.tagging(newTags);
 
     }
+
 }

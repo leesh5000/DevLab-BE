@@ -1,8 +1,8 @@
 package com.leesh.devlab.api.auth;
 
-import com.leesh.devlab.api.auth.dto.LoginInfo;
-import com.leesh.devlab.api.auth.dto.OauthLoginInfo;
-import com.leesh.devlab.api.auth.dto.RegisterInfo;
+import com.leesh.devlab.api.auth.dto.LoginDto;
+import com.leesh.devlab.api.auth.dto.OauthLoginDto;
+import com.leesh.devlab.api.auth.dto.RegisterDto;
 import com.leesh.devlab.api.auth.dto.TokenRefreshDto;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.resolver.LoginMember;
@@ -32,9 +32,9 @@ public class AuthController {
      * @return
      */
     @PostMapping(path = "/oauth-login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OauthLoginInfo.Response> oauthLogin(@RequestBody OauthLoginInfo.Request request) {
+    public ResponseEntity<OauthLoginDto.Response> oauthLogin(@RequestBody OauthLoginDto.Request request) {
 
-        OauthLoginInfo.Response response = authService.oauthLogin(request);
+        OauthLoginDto.Response response = authService.oauthLogin(request);
 
         return ResponseEntity.ok(response);
     }
@@ -64,20 +64,20 @@ public class AuthController {
      * 일반 계정 회원가입 API
      */
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> register(@RequestBody @Valid RegisterInfo.Request request) {
+    public ResponseEntity<RegisterDto.Response> register(@RequestBody @Valid RegisterDto.Request requestDto) {
 
-        authService.register(request);
+        RegisterDto.Response responseDto = authService.register(requestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     /**
      * 일반 계정 로그인 API
      */
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginInfo.Response> login(@RequestBody @Valid LoginInfo.Request request) {
+    public ResponseEntity<LoginDto.Response> login(@RequestBody @Valid LoginDto.Request request) {
 
-        LoginInfo.Response response = authService.login(request);
+        LoginDto.Response response = authService.login(request);
 
         return ResponseEntity.ok(response);
     }

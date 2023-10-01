@@ -1,4 +1,4 @@
-package com.leesh.devlab.domain.post_tag;
+package com.leesh.devlab.domain.hashtag;
 
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.tag.Tag;
@@ -7,14 +7,16 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "posts_tags", indexes = {
+@Table(name = "hashtags", indexes = {
         @Index(columnList = "post_id"),
         @Index(columnList = "tag_id"),
 })
 @Entity
-public class PostTag {
+public class Hashtag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,15 +28,24 @@ public class PostTag {
     private Post post;
 
     @JoinColumn(name = "tag_id", nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Tag tag;
 
-    private PostTag(Post post, Tag tag) {
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Hashtag hashtag)) return false;
+        return id != null && id.equals(hashtag.id);
+    }
+
+    public Hashtag(Post post, Tag tag) {
         this.post = post;
         this.tag = tag;
     }
 
-    public static PostTag of(Post post, Tag tag) {
-        return new PostTag(post, tag);
-    }
 }

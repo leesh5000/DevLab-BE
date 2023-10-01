@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
@@ -28,13 +28,15 @@ public class PostService {
 
         Member member = memberRepository.getReferenceById(memberInfo.id());
 
-        // 유저가 등록한 태그들을 가져온다.
-        Set<Tag> tags = tagService.getAll(requestDto.tagNames());
-
         // 게시글을 생성한다.
-        Post newPost = member.posting(requestDto.title(), requestDto.contents(), requestDto.category(), tags);
+        Post newPost = requestDto.toEntity(member);
 
-        // 응답으로 보낼 ID를 얻기위해 변경감지를 통하지 않고 명시적으로 저장한다.
+        // DB에서 태그 목록을 조회한다.
+        List<Tag> findTags = tagService.getAllByNames(requestDto.tagNames());
+
+        // 게시글에 해시태그를 추가한다.
+        newPost.tagging(findTags);
+
         postRepository.saveAndFlush(newPost);
 
         return PostDto.Response.from(newPost.getId());
@@ -42,13 +44,20 @@ public class PostService {
 
     public void edit(Long postId, PostDto.Request requestDto, MemberInfo memberInfo) {
 
-        Post post = postRepository.findById(postId)
+        Post findPost = postRepository.findByIdWithHashtags(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_POST, "not found"));
 
-        // 유저가 입력한 태그 목록을 조회한다.
-        Set<Tag> tags = tagService.getAll(requestDto.tagNames());
+        // 유저가 새로 입력한 태그 목록을 조회한다.
+        List<Tag> newTags = tagService.getAllByNames(requestDto.tagNames());
 
-        post.edit(memberInfo.id(), requestDto.title(), requestDto.contents(), requestDto.category(), tags);
+        // 게시글을 수정한다.
+        findPost.edit(memberInfo.id(), requestDto.title(), requestDto.contents(), requestDto.category(), newTags);
+
+    }
+
+    public void delete(Long postId, MemberInfo memberInfo) {
+
+
 
     }
 }

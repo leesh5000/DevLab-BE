@@ -1,8 +1,8 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.api.auth.dto.LoginInfo;
-import com.leesh.devlab.api.auth.dto.OauthLoginInfo;
-import com.leesh.devlab.api.auth.dto.RegisterInfo;
+import com.leesh.devlab.api.auth.dto.LoginDto;
+import com.leesh.devlab.api.auth.dto.OauthLoginDto;
+import com.leesh.devlab.api.auth.dto.RegisterDto;
 import com.leesh.devlab.api.auth.dto.TokenRefreshDto;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.GrantType;
@@ -24,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.leesh.devlab.api.auth.dto.OauthLoginInfo.Request;
+import static com.leesh.devlab.api.auth.dto.OauthLoginDto.Request;
 
 @RequiredArgsConstructor
 @Transactional
@@ -42,7 +42,7 @@ public class AuthService {
      * @param request
      * @return
      */
-    public OauthLoginInfo.Response oauthLogin(Request request) {
+    public OauthLoginDto.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
         OauthMemberInfo oauthMember = getOauthMemberInfo(request);
@@ -64,7 +64,7 @@ public class AuthService {
         findMember.updateRefreshToken(refreshToken);
 
         // 응답 DTO를 생성 후 반환한다.
-        return new OauthLoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new OauthLoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     /**
@@ -115,12 +115,10 @@ public class AuthService {
             member.logout();
     }
 
-    public void register(RegisterInfo.Request request) {
+    public RegisterDto.Response register(RegisterDto.Request request) {
 
         // 이미 가입된 유저인지 확인한다.
-        if (memberRepository.existsByLoginIdOrNickname(request.loginId(), request.nickname())) {
-            throw new BusinessException(ErrorCode.ALREADY_REGISTERED_MEMBER, "already registered member");
-        }
+        validate(request);
 
         // 회원가입을 진행한다.
         Member newMember = Member.builder()
@@ -128,10 +126,23 @@ public class AuthService {
                 .nickname(request.nickname())
                 .password(passwordEncoder.encode(request.password()))
                 .build();
-        memberRepository.save(newMember);
+
+        memberRepository.saveAndFlush(newMember);
+
+        return new RegisterDto.Response(newMember.getId());
     }
 
-    public LoginInfo.Response login(LoginInfo.Request request) {
+    private void validate(RegisterDto.Request request) {
+        if (memberRepository.existsByLoginId(request.loginId())) {
+            throw new BusinessException(ErrorCode.ALREADY_REGISTERED_ID, "already registered id");
+        }
+
+        if (memberRepository.existsByNickname(request.nickname())) {
+            throw new BusinessException(ErrorCode.ALREADY_REGISTERED_NICKNAME, "already registered nickname");
+        }
+    }
+
+    public LoginDto.Response login(LoginDto.Request request) {
 
         Member findMember = memberRepository.findByLoginId(request.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
@@ -149,7 +160,7 @@ public class AuthService {
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(refreshToken);
 
-        return new LoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new LoginDto.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     // TODO : 현재는 한글 문자열을 그대로 내보내주고 있습니다. 글로벌 서비스를 고려하면 문자열로 메일을 보내는 것보다는 HTML 템플릿을 만들고 다국어 처리하는 것이 좋은 선택이지만, 현재는 개발 초기단계이므로 빠르게 서비스를 런칭 후에 시장의 반응을 본 다음 결정할 예정입니다.

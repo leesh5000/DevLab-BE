@@ -9,7 +9,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LoginInfo {
+public class LoginDto {
 
     public record Request(@LoginId String loginId, @Size(min = 4, max = 255) String password) {
     }
