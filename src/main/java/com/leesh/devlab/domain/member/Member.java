@@ -7,6 +7,7 @@ import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.post.Post;
+import com.leesh.devlab.domain.tag.Tag;
 import com.leesh.devlab.jwt.AuthToken;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -14,10 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -121,8 +119,9 @@ public class Member extends BaseEntity {
         this.email = email;
     }
 
-    public Post posting(String title, String contents, Category category) {
+    public Post posting(String title, String contents, Category category, Set<Tag> tags) {
 
+        // 게시글을 생성한다.
         Post post = Post.builder()
                 .title(title)
                 .contents(contents)
@@ -131,6 +130,9 @@ public class Member extends BaseEntity {
                 .build();
 
         this.posts.add(post);
+
+        // 게시글에 태깅 목록을 생성한다.
+        post.tagging(tags);
 
         return post;
     }

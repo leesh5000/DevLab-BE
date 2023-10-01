@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,6 +28,18 @@ public class Tag extends BaseEntity {
 
     @OneToMany(mappedBy = "tag", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<PostTag> postTags = new ArrayList<>();
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Tag tag)) return false;
+        return name != null && name.equals(tag.name);
+    }
 
     private Tag(String name) {
         this.name = name;
