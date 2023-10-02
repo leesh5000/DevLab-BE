@@ -4,6 +4,7 @@ import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.tag.Tag;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -43,6 +44,7 @@ public class Hashtag {
         return id != null && id.equals(hashtag.id);
     }
 
+    @Builder
     public Hashtag(Post post, Tag tag) {
         this.post = post;
         this.tag = tag;

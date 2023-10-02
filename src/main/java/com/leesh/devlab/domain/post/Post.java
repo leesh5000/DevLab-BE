@@ -3,6 +3,7 @@ package com.leesh.devlab.domain.post;
 import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.domain.BaseEntity;
+import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
@@ -15,7 +16,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,6 +46,10 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
+
+    @OrderBy("id")
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private final List<Comment> comments = new ArrayList<>();
 
     @OrderBy("id")
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -84,32 +88,20 @@ public class Post extends BaseEntity {
             throw new BusinessException(ErrorCode.EXCEED_HASHTAG_COUNT, "maximum size");
         }
 
-        // 현재 게시글의 해시태그 중에서 입력으로 새로 들어온 태그가 존재하지 않으면, 해당 해시태그를 삭제한다.
-        // hashtags.clear(); 하고, newTags를 새로 넣으면, 태그가 같은 항목이라도 새로운 hashtag 테이블을 생성하게 되므로 위와 같은 방식을 사용한다.
-        Set<Tag> untagTarget = hashtags.stream()
-                .map(Hashtag::getTag)
-                .collect(Collectors.toSet());
-
-        untagging(untagTarget);
-
-        // 입력으로 새로 들어온 태그 목록들을 태깅한다.
-        for (Tag tag : newTags) {
-            tagging(tag);
-        }
-    }
-
-    private void untagging(Set<Tag> target) {
-
-        Set<Hashtag> hashtagsCopy = new HashSet<>(this.getHashtags());
-        for (Hashtag hashtag : hashtagsCopy) {
+        // 기존 해시태그들 중에서 입력으로 새로 들어온 태그가 없으면 삭제한다.
+        Set<Hashtag> defaultHashtags = new HashSet<>(this.getHashtags());
+        for (Hashtag hashtag : defaultHashtags) {
             Tag tag = hashtag.getTag();
-            if (target.contains(tag)) {
+            if (!newTags.contains(tag)) {
                 this.hashtags.remove(hashtag);
             }
         }
+
+        // 입력으로 새로 들어온 태그 목록들을 태깅한다.
+        newTags.forEach(this::tagging);
     }
 
-    private void tagging(Tag tag) {
+    private void tagging(Tag newTag) {
 
         // 한 게시글 당 태그는 10개 이하
         if (hashtags.size() == 10) {
@@ -117,21 +109,16 @@ public class Post extends BaseEntity {
         }
 
         // 이 게시글의 해시태그 목록에 이미 존재하는 태그이면, 넘긴다.
-        if (this.getHashtags().stream().anyMatch(hashtag -> hashtag.getTag().equals(tag))) {
+        if (hashtags.stream().anyMatch(hashtag -> hashtag.getTag().equals(newTag))) {
             return;
         }
 
-        Hashtag newHashtag = new Hashtag(this, tag);
+        Hashtag newHashtag = new Hashtag(this, newTag);
         this.getHashtags().add(newHashtag);
     }
 
     /* 비즈니스 로직 */
-    public void edit(Long memberId, String title, String contents, Category category, List<Tag> newTags) {
-
-        // 게시글의 작성자만 수정 가능
-        if (!Objects.equals(this.member.getId(), memberId)) {
-            throw new BusinessException(ErrorCode.NOT_POST_AUTHOR, "not post author");
-        }
+    public void edit(String title, String contents, Category category, List<Tag> newTags) {
 
         this.title = title;
         this.contents = contents;

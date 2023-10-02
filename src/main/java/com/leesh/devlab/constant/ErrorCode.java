@@ -33,7 +33,7 @@ public enum ErrorCode {
     POST_SAVE_FAILED(INTERNAL_SERVER_ERROR, "P-001", "post save failed. please try again later."),
     NOT_EXIST_POST(NOT_FOUND, "P-002", "not exist post"),
     EXCEED_HASHTAG_COUNT(BAD_REQUEST, "P-002", "post's hashtag count can't exceed 10."),
-    NOT_POST_AUTHOR(FORBIDDEN, "P-003", "only post's author can edit."),
+    NOT_POST_AUTHOR(FORBIDDEN, "P-003", "not post author."),
 
     /* Common */
     INVALID_INPUT(BAD_REQUEST, "C-001", "Bad Request"),

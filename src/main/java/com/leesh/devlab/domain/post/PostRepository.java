@@ -13,6 +13,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("select p from Post p " +
             "left join fetch p.hashtags h " +
             "left join fetch h.tag t " +
+            "inner join fetch p.member m " +
             "where p.id = :id")
     Optional<Post> findByIdWithHashtags(@Param("id") Long id);
 

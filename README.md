@@ -115,7 +115,7 @@ create table comments
     modified_at bigint       not null,
     primary key (id),
     foreign key (member_id) references members (id),
-    foreign key (post_id) references posts (id)
+    foreign key (post_id) references posts (id) on delete set null
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
 create index comments_member_id_idx on comments (member_id);

@@ -38,11 +38,12 @@ public class TagService {
         tagNames.removeAll(findTagNames);
 
         // 이전에 저장되지 않은 태그를 저장하고, findTags에 추가한다.
-        tagNames.forEach(tagName -> {
-            Tag newTag = new Tag(tagName);
-            tagRepository.save(newTag);
-            findTags.add(newTag);
-        });
+        List<Tag> newTags = tagNames.stream()
+                .map(Tag::new)
+                .toList();
+
+        tagRepository.saveAll(newTags);
+        findTags.addAll(newTags);
 
         return findTags;
     }

@@ -37,7 +37,7 @@ public class Comment extends BaseEntity {
     private Member member;
 
     @JoinColumn(name = "post_id", nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     private Post post;
 
     @OrderBy("id")
