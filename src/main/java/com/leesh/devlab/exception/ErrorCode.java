@@ -1,4 +1,4 @@
-package com.leesh.devlab.constant;
+package com.leesh.devlab.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -22,17 +22,22 @@ public enum ErrorCode {
 
     /* Member */
     NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),
-    ALREADY_REGISTERED_MEMBER(CONFLICT, "M-002", "Already Registered Member"),
-    WRONG_PASSWORD(UNAUTHORIZED, "M-003", "Wrong Password"),
-    NO_VERIFIED_EMAIL(UNAUTHORIZED, "M-004", "no verified email"),
-    WRONG_CERT_NUMBER(UNAUTHORIZED, "M-005", "wrong certification number"),
-    NO_PERMISSION(FORBIDDEN, "M-006", "no permission member."),
+    ALREADY_REGISTERED_ID(CONFLICT, "M-002", "already registered Id"),
+    ALREADY_REGISTERED_NICKNAME(CONFLICT, "M-003", "already registered nickname"),
+    WRONG_PASSWORD(UNAUTHORIZED, "M-004", "Wrong Password"),
+    NO_VERIFIED_EMAIL(UNAUTHORIZED, "M-005", "no verified email"),
+    WRONG_CERT_NUMBER(UNAUTHORIZED, "M-006", "wrong certification number"),
+    NO_PERMISSION(FORBIDDEN, "M-007", "no permission member."),
 
+    /* Post */
+    POST_SAVE_FAILED(INTERNAL_SERVER_ERROR, "P-001", "post save failed. please try again later."),
+    NOT_EXIST_POST(NOT_FOUND, "P-002", "not exist post"),
+    EXCEED_HASHTAG_COUNT(BAD_REQUEST, "P-002", "post's hashtag count can't exceed 10."),
+    NOT_POST_AUTHOR(FORBIDDEN, "P-003", "not post author."),
 
     /* Common */
     INVALID_INPUT(BAD_REQUEST, "C-001", "Bad Request"),
     EMAIL_SEND_FAILED(INTERNAL_SERVER_ERROR, "C-002", "Email Send Failed"),
-
     ;
 
     private final HttpStatus status;

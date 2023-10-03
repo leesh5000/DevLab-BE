@@ -1,6 +1,4 @@
-package com.leesh.devlab.external.abstraction;
-
-import com.leesh.devlab.external.OauthServiceFactory;
+package com.leesh.devlab.external;
 
 /**
  * <p>

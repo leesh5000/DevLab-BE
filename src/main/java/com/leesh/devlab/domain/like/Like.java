@@ -15,8 +15,6 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "likes", indexes = {
-        @Index(columnList = "post_id"),
-        @Index(columnList = "comment_id"),
         @Index(columnList = "member_id")
 })
 @Entity
@@ -60,4 +58,9 @@ public class Like extends BaseEntity {
         this.post = post;
         this.comment = comment;
     }
+
+    public boolean getValue() {
+        return value;
+    }
+
 }

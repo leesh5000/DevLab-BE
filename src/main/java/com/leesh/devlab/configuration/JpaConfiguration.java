@@ -13,7 +13,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Optional;
 
 /**
- * Base Entity의 createdBy, modifiedBy 필드에 이벤트로 값을 넣어주는 설정
+ * <p>
+ *  Base Entity의 createdBy, modifiedBy 필드에 이벤트로 값을 넣어주는 설정<br>
+ *  영속성 컨텍스트의 관리 하에 저장되어야 값이 Audit 가능
+ * </p>
  * {@link com.leesh.devlab.domain.BaseEntity#createdBy}
  * {@link com.leesh.devlab.domain.BaseEntity#modifiedBy}
  *

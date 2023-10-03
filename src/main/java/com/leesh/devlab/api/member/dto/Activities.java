@@ -1,13 +1,8 @@
 package com.leesh.devlab.api.member.dto;
 
-import lombok.Getter;
+import lombok.Builder;
 
-@Getter
-public class Activities {
-
-    private int postCount;
-    private int postLikeCount;
-    private int commentCount;
-    private int commentLikeCount;
+@Builder
+public record Activities(int postCount, int postLikeCount, int commentCount, int commentLikeCount) {
 
 }

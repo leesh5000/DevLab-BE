@@ -18,6 +18,8 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comments", indexes = {
         @Index(columnList = "member_id"),
+        @Index(columnList = "contents"),
+        @Index(columnList = "post_id"),
         @Index(columnList = "created_at")
 })
 @Entity
@@ -30,15 +32,12 @@ public class Comment extends BaseEntity {
     @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
     private String contents;
 
-    @Column(name = "deleted", nullable = false, columnDefinition = "TINYINT(1) default 0")
-    private boolean deleted = false;
-
     @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
     @JoinColumn(name = "post_id", nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     private Post post;
 
     @OrderBy("id")

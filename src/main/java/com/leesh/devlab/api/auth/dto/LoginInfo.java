@@ -1,9 +1,9 @@
 package com.leesh.devlab.api.auth.dto;
 
-import com.leesh.devlab.constant.GrantType;
-import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.AuthToken;
-import com.leesh.devlab.validator.LoginId;
+import com.leesh.devlab.jwt.GrantType;
+import com.leesh.devlab.jwt.TokenType;
+import com.leesh.devlab.validation.LoginId;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

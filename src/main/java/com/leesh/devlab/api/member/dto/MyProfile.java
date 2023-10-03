@@ -1,16 +1,10 @@
 package com.leesh.devlab.api.member.dto;
 
-import lombok.Getter;
+import lombok.Builder;
 
-@Getter
-public class MyProfile {
-
-    private Long id;
-    private String loginId;
-    private String nickname;
-    private String email;
-    private boolean emailVerified;
-    private Long createdAt;
-    private Activities activities;
+@Builder
+public record MyProfile(
+        Long id, String loginId, String nickname, String email, Long createdAt,
+        Activities activities) {
 
 }

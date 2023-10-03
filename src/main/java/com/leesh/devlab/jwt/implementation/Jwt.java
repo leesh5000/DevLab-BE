@@ -1,20 +1,19 @@
 package com.leesh.devlab.jwt.implementation;
 
-import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.jwt.AuthToken;
 
 import java.util.Objects;
 
-public record Jwt(TokenType tokenType, String value, long expiresInMills) implements AuthToken {
+public record Jwt(TokenType tokenType, String value, long expiredAt) implements AuthToken {
 
     public Jwt {
         Objects.requireNonNull(tokenType, "tokenType must be not null");
         Objects.requireNonNull(value, "value must be not null");
 
-        if (expiresInMills <= 0) {
-            throw new IllegalArgumentException("expiresInMills must be greater than 0");
+        if (expiredAt <= System.currentTimeMillis()) {
+            throw new IllegalArgumentException("expiredAt must be not expired");
         }
-
     }
 
     @Override
@@ -27,10 +26,9 @@ public record Jwt(TokenType tokenType, String value, long expiresInMills) implem
         return this.value;
     }
 
-    // 단위 : 밀리 초
     @Override
-    public long getExpiresInMills() {
-        return this.expiresInMills;
+    public long getExpiredAt() {
+        return this.expiredAt;
     }
 
 }

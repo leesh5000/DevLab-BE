@@ -1,8 +1,8 @@
 package com.leesh.devlab.api.member.dto;
 
-import com.leesh.devlab.validator.Email;
-import com.leesh.devlab.validator.Nickname;
-import com.leesh.devlab.validator.Password;
+import com.leesh.devlab.validation.Email;
+import com.leesh.devlab.validation.Nickname;
+import com.leesh.devlab.validation.Password;
 
 public record UpdateProfile(@Nickname String nickname,
                             @Password String password,

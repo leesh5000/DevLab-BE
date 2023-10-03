@@ -1,7 +1,5 @@
 package com.leesh.devlab.domain.member;
 
-import com.leesh.devlab.constant.Role;
-import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.like.Like;
@@ -21,7 +19,6 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "members", indexes = {
-        @Index(columnList = "login_id"),
         @Index(columnList = "nickname"),
         @Index(columnList = "created_at")
 })
@@ -32,10 +29,10 @@ public class Member extends BaseEntity {
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "login_id", length = 255, nullable = true, unique = true)
+    @Column(name = "login_id", length = 20, nullable = true, unique = true)
     private String loginId;
 
-    @Column(name = "nickname", length = 30, nullable = false, unique = true)
+    @Column(name = "nickname", length = 10, nullable = false, unique = true)
     private String nickname;
 
     @Column(name = "email", length = 255, unique = true, nullable = true)
@@ -44,30 +41,15 @@ public class Member extends BaseEntity {
     @Column(name = "password", length = 255, nullable = true)
     private String password;
 
-    @Column(name = "deleted", nullable = false, columnDefinition = "TINYINT(1) default 0")
-    private boolean deleted = false;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 10)
     private Role role = Role.MEMBER;
 
-    /**
-     * 소셜 로그인을 시도한 유저의 소셜 업체 고유값 ID
-     */
-    @Column(name = "oauth_id", nullable = true, length = 255, unique = true)
-    private String oauthId;
+    @Embedded
+    private Oauth oauth;
 
-    @Column(name = "profile_img_url", length = 255, nullable = true)
-    private String profileImgUrl;
-
-    @Column(name = "refresh_token", length = 255, nullable = true)
-    private String refreshToken;
-
-    @Column(name = "refresh_token_expired_at", nullable = true)
-    private Long refreshTokenExpiredAt;
-
-    @Column(name = "email_verified", nullable = false, columnDefinition = "TINYINT(1) default 0")
-    private boolean emailVerified = false;
+    @Embedded
+    private RefreshToken refreshToken;
 
     @OrderBy("id")
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -96,11 +78,13 @@ public class Member extends BaseEntity {
     }
 
     /* 생성 메서드 */
-    public static Member of(String oauthId) {
+    public static Member of(OauthType oauthType, String oauthId) {
 
         Member member = new Member();
+
+        // 유저 닉네임에 임의의 값을 부여한다. TODO 추후 소셜 로그인 동의항목을 추가하여 닉네임 값을 받아올지 고민해볼 것
         member.nickname = UUID.randomUUID().toString().split("-")[0];
-        member.oauthId = oauthId;
+        member.oauth = new Oauth(oauthType, oauthId);
 
         return member;
     }
@@ -113,17 +97,12 @@ public class Member extends BaseEntity {
     }
 
     /* 도메인 비즈니스 로직 */
-    public void reRegister() {
-        this.deleted = false;
-    }
-
     public void updateRefreshToken(AuthToken refreshToken) {
-        this.refreshToken = refreshToken.getValue();
-        this.refreshTokenExpiredAt = System.currentTimeMillis() + TokenType.REFRESH.getExpiresInMills();
+        this.refreshToken = new RefreshToken(refreshToken.getValue(), refreshToken.getExpiredAt());
     }
 
     public void logout() {
-        this.refreshTokenExpiredAt = System.currentTimeMillis();
+        this.refreshToken.expiration();
     }
 
     public void changePassword(String password) {
@@ -137,20 +116,6 @@ public class Member extends BaseEntity {
 
     public void verifyEmail(String email) {
         this.email = email;
-        this.emailVerified = true;
-    }
-
-    public Post posting(String title, String contents) {
-
-        Post post = Post.builder()
-                .title(title)
-                .contents(contents)
-                .member(this)
-                .build();
-
-        this.posts.add(post);
-
-        return post;
     }
 
     public Comment comment(Post post, String contents) {

@@ -1,28 +1,19 @@
 package com.leesh.devlab.util;
 
-import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
-import static com.leesh.devlab.constant.GrantType.isBearerType;
+import static com.leesh.devlab.jwt.GrantType.isBearerType;
 
-public class HttpHeaderUtils {
+public class HttpHeaderUtil {
 
     // 인스턴스화 방지
-    private HttpHeaderUtils() {
+    private HttpHeaderUtil() {
     }
 
-    /**
-     * <p>
-     *     Authorization 헤더에서 토큰 추출하는 메서드<br>
-     *     ex) Bearer XXXXXXX -> XXXXXXX 추출
-     * </p>
-     * @param request
-     * @return
-     * @throws AuthException
-     */
     public static String extractAuthorization(HttpServletRequest request) throws AuthException {
 
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -40,7 +31,7 @@ public class HttpHeaderUtils {
             throw new AuthException(ErrorCode.NOT_EXIST_AUTHORIZATION, "Authorization header is empty");
         }
 
-        String[] authorizations =authorization.split(" ");
+        String[] authorizations = authorization.split(" ");
 
         // Authorization 헤더가 Bearer 타입이 아니거나, 토큰이 없으면 예외 발생
         if (authorizations.length != 2) {
