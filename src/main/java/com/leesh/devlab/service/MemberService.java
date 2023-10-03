@@ -1,10 +1,8 @@
 package com.leesh.devlab.service;
 
 import com.leesh.devlab.api.member.dto.*;
-import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
@@ -15,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
@@ -32,7 +28,7 @@ public class MemberService {
     public MyProfile getMyProfile(LoginInfo loginInfo) {
 
         Member member = getById(loginInfo.id());
-        Activities activities = getActivities(member.getId());
+        Activities activities = getActivities(member);
 
         return MyProfile.builder()
                 .id(member.getId())
@@ -44,18 +40,15 @@ public class MemberService {
                 .build();
     }
 
-    private Activities getActivities(Long memberId) {
+    private Activities getActivities(Member member) {
 
-        List<Post> memberPosts = postService.getByMemberIdWithLikes(memberId);
-        List<Comment> memberComments = commentService.getByMemberIdWithLikes(memberId);
-
-        int postCount = memberPosts.size();
-        int postLikeCount = memberPosts.stream()
+        int postCount = member.getPosts().size();
+        int postLikeCount = member.getPosts().stream()
                 .mapToInt(post -> post.getLikes().size())
                 .sum();
 
-        int commentCount = memberComments.size();
-        int commentLikeCount = memberComments.stream()
+        int commentCount = member.getComments().size();
+        int commentLikeCount = member.getComments().stream()
                 .mapToInt(comment -> comment.getLikes().size())
                 .sum();
 
@@ -70,7 +63,7 @@ public class MemberService {
     public MemberProfile getMemberProfile(Long memberId) {
 
         Member member = getById(memberId);
-        Activities activities = getActivities(memberId);
+        Activities activities = getActivities(member);
 
         return MemberProfile.builder()
                 .id(member.getId())
@@ -90,13 +83,11 @@ public class MemberService {
         }
 
         member.updateProfile(updateProfile.nickname(), updateProfile.email());
-
     }
 
     public void deleteMember(Long memberId) {
 
         memberRepository.deleteById(memberId);
-
     }
 
     private String generateRandom6Digits() {
@@ -116,10 +107,7 @@ public class MemberService {
                 "인증번호 유효시간은 3분 입니다.";
 
         mailService.sendMail(requestDto.email(), title, contents);
-
-
     }
-
 
     public Member getByRefreshToken(String refreshToken) {
         return memberRepository.findByRefreshToken(refreshToken)

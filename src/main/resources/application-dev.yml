@@ -30,3 +30,5 @@ oauth:
     id: ENC(mUX6rlJeYrk3jSFEHzK39bIQP3hdoBwwyzd3rIHEtHa/dKlZ/qelkrhbYBd0FJqf/c9EW+VIOOQu6ox+RPkYHY5ah+2vjEadENF2+F3pOYb0ZWoIXQx4bA==)
     secret: ENC(/o4Q2q62U+Nlyn3XGXrlzFz9jQZySMjMeupWcS7JbFZAU87nUrzYGvkPUI4yWP6R)
     redirect-uri: ENC(2iFa8FLbKO3cAlSOiXKgDBBopDMyO8+GZSymeWbCNOh7rJ+pHNvS2vpDxema06YJnREbNUJeHgE=)
+
+decorator.datasource.p6spy.enable-logging: true

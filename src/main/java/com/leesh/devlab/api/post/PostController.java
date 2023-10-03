@@ -6,6 +6,9 @@ import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import com.leesh.devlab.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +29,13 @@ public class PostController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping()
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<PostDetails>> getLists(@PageableDefault(size = 20) Pageable pageable) {
+
+        Page<PostDetails> responseDto = postService.getLists(pageable);
+
+        return ResponseEntity.ok(responseDto);
+    }
 
     @PostMapping()
     public ResponseEntity<CreatePost.Response> create(@RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
