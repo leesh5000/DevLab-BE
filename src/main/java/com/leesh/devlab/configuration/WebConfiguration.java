@@ -1,8 +1,10 @@
 package com.leesh.devlab.configuration;
 
 import com.leesh.devlab.interceptor.AuthInterceptor;
+import com.leesh.devlab.interceptor.AuthInterceptorProxy;
 import com.leesh.devlab.resolver.LoginMemberArgResolver;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -11,6 +13,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
+
+import static com.leesh.devlab.interceptor.AuthInterceptorProxy.RequestMethod;
 
 @RequiredArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Configuration
@@ -38,13 +42,24 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        registry.addInterceptor(authInterceptor)
+        registry.addInterceptor(authInterceptorProxy())
                 .order(1)
-                .addPathPatterns("/api/**")
-                .excludePathPatterns(
-                        "/api/auth/register", "/api/auth/login", "/api/auth/oauth-login", "/api/auth/refresh", "/api/auth/find",
-                        "/docs/**"
-                );
+                .addPathPatterns("/api/**");
+    }
+
+    @Bean
+    public AuthInterceptorProxy authInterceptorProxy() {
+
+        AuthInterceptorProxy proxy = new AuthInterceptorProxy(authInterceptor);
+
+        proxy
+                .excludePathPatterns("/**", RequestMethod.OPTIONS) // Preflight 요청은 인증 필터를 타지 않도록 설정
+                .excludePathPatterns("/api/**", RequestMethod.GET) // GET 요청은 인증 필터를 타지 않도록 설정
+                .excludePathPatterns("/api/auth/**", RequestMethod.ANY) // 인증 API는 인증 필터를 타지 않도록 설정
+                .addPathPatterns("/api/members/me", RequestMethod.GET)
+        ;
+
+        return proxy;
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.leesh.devlab.jwt.implementation;
 
-import com.leesh.devlab.constant.ErrorCode;
-import com.leesh.devlab.constant.Role;
-import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.domain.member.Role;
+import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;

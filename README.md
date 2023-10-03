@@ -106,7 +106,7 @@ create index posts_created_at_idx on posts (created_at);
 create table comments
 (
     id          bigint auto_increment,
-    post_id     bigint       not null,
+    post_id     bigint       null,
     member_id   bigint       not null,
     contents    text         not null,
     created_by  varchar(255) not null,

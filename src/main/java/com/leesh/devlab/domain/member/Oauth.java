@@ -1,6 +1,5 @@
 package com.leesh.devlab.domain.member;
 
-import com.leesh.devlab.constant.OauthType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;

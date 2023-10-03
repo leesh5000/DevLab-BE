@@ -1,7 +1,5 @@
 package com.leesh.devlab.domain.member;
 
-import com.leesh.devlab.constant.OauthType;
-import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.like.Like;

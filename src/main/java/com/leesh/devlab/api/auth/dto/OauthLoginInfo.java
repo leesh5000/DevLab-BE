@@ -1,14 +1,14 @@
 package com.leesh.devlab.api.auth.dto;
 
-import com.leesh.devlab.constant.GrantType;
-import com.leesh.devlab.constant.OauthType;
-import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.jwt.GrantType;
+import com.leesh.devlab.domain.member.OauthType;
+import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.jwt.AuthToken;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OauthLoginDto {
+public class OauthLoginInfo {
 
     public record Request(OauthType oauthType, String authorizationCode) {
     }

@@ -1,4 +1,4 @@
-package com.leesh.devlab.validator;
+package com.leesh.devlab.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;

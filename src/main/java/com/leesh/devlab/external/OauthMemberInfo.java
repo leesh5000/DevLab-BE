@@ -1,6 +1,6 @@
 package com.leesh.devlab.external;
 
-import com.leesh.devlab.constant.OauthType;
+import com.leesh.devlab.domain.member.OauthType;
 import com.leesh.devlab.domain.member.Member;
 
 /**

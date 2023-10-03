@@ -1,16 +1,16 @@
 package com.leesh.devlab.api.post.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.domain.member.Member;
+import com.leesh.devlab.domain.post.Category;
 import com.leesh.devlab.domain.post.Post;
-import com.leesh.devlab.validator.Tags;
+import com.leesh.devlab.validation.Tags;
 
 import java.util.Set;
 
-public class PostDto {
+public class PostInfo {
 
-    private PostDto() {
+    private PostInfo() {
     }
 
     public record Request(String title, String contents, Category category, @Tags @JsonProperty("tags") Set<String> tagNames) {

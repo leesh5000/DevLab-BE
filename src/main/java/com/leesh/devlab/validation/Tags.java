@@ -1,4 +1,4 @@
-package com.leesh.devlab.validator;
+package com.leesh.devlab.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -8,7 +8,6 @@ import jakarta.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.List;
 import java.util.Set;
 
 import static java.lang.annotation.ElementType.FIELD;

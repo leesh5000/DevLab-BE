@@ -1,6 +1,4 @@
-package com.leesh.devlab.constant;
-
-import com.leesh.devlab.jwt.AuthToken;
+package com.leesh.devlab.jwt;
 
 public enum TokenType {
 

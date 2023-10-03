@@ -1,6 +1,5 @@
 package com.leesh.devlab.exception;
 
-import com.leesh.devlab.constant.ErrorCode;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;

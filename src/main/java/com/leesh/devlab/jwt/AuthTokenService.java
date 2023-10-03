@@ -1,6 +1,5 @@
 package com.leesh.devlab.jwt;
 
-import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import com.leesh.devlab.jwt.implementation.JwtService;

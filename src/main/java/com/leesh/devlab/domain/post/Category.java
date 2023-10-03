@@ -1,4 +1,4 @@
-package com.leesh.devlab.constant;
+package com.leesh.devlab.domain.post;
 
 public enum Category {
 

@@ -1,7 +1,6 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.api.post.dto.PostDto;
-import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.api.post.dto.PostInfo;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.hashtag.HashtagRepository;
 import com.leesh.devlab.domain.like.Like;
@@ -11,6 +10,7 @@ import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.post.PostRepository;
 import com.leesh.devlab.domain.tag.Tag;
+import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.MemberInfo;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +30,8 @@ public class PostService {
     private final TagService tagService;
     private final HashtagRepository hashtagRepository;
     private final LikeRepository likeRepository;
-    private final HashtagService hashtagService;
 
-    public PostDto.Response create(PostDto.Request requestDto, MemberInfo memberInfo) {
+    public PostInfo.Response create(PostInfo.Request requestDto, MemberInfo memberInfo) {
 
         Member member = memberRepository.getReferenceById(memberInfo.id());
 
@@ -47,10 +46,10 @@ public class PostService {
 
         Long postId = postRepository.save(post).getId();
 
-        return PostDto.Response.from(postId);
+        return PostInfo.Response.from(postId);
     }
 
-    public void edit(Long postId, PostDto.Request requestDto, MemberInfo memberInfo) {
+    public void edit(Long postId, PostInfo.Request requestDto, MemberInfo memberInfo) {
 
         Post findPost = getById(postId);
 
@@ -110,5 +109,9 @@ public class PostService {
         if (!Objects.equals(memberInfo.id(), post.getMember().getId())) {
             throw new BusinessException(ErrorCode.NOT_POST_AUTHOR, "not post author");
         }
+    }
+
+    public PostInfo.Response getDetail(Long postId) {
+        return null;
     }
 }
