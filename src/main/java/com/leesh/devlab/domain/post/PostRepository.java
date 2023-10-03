@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,5 +17,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "inner join fetch p.member m " +
             "where p.id = :id")
     Optional<Post> findByIdWithHashtags(@Param("id") Long id);
+
+    @Query("select p from Post p " +
+            "inner join fetch p.member m " +
+            "left join fetch p.likes l " +
+            "where m.id = :memberId")
+    List<Post> findAllByMemberIdWithLikes(@Param("memberId") Long memberId);
 
 }

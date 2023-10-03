@@ -1,20 +1,22 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.api.auth.dto.LoginInfo;
-import com.leesh.devlab.api.member.dao.MemberDao;
 import com.leesh.devlab.api.member.dto.*;
+import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
+import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.external.OauthMemberInfo;
-import com.leesh.devlab.jwt.dto.MemberInfo;
+import com.leesh.devlab.jwt.dto.LoginInfo;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
@@ -22,30 +24,60 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final MemberDao memberDao;
+    private final PostService postService;
     private final PasswordEncoder passwordEncoder;
+    private final CommentService commentService;
     private final MailService mailService;
 
-    public MyProfile getMyProfile(MemberInfo memberInfo) {
+    public MyProfile getMyProfile(LoginInfo loginInfo) {
 
-        MyProfile myProfile = memberDao.getMyProfile(memberInfo.id());
+        Member member = getById(loginInfo.id());
+        Activities activities = getActivities(member.getId());
 
-        if (myProfile == null) {
-            throw new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member");
-        }
-
-        return myProfile;
+        return MyProfile.builder()
+                .id(member.getId())
+                .loginId(member.getLoginId())
+                .nickname(member.getNickname())
+                .email(member.getEmail())
+                .createdAt(member.getCreatedAt())
+                .activities(activities)
+                .build();
     }
 
-    public MemberProfile getProfile(Long memberId) {
+    private Activities getActivities(Long memberId) {
 
-        MemberProfile memberProfile = memberDao.getMemberProfile(memberId);
+        List<Post> memberPosts = postService.getByMemberIdWithLikes(memberId);
+        List<Comment> memberComments = commentService.getByMemberIdWithLikes(memberId);
 
-        if (memberProfile == null) {
-            throw new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member");
-        }
+        int postCount = memberPosts.size();
+        int postLikeCount = memberPosts.stream()
+                .mapToInt(post -> post.getLikes().size())
+                .sum();
 
-        return memberProfile;
+        int commentCount = memberComments.size();
+        int commentLikeCount = memberComments.stream()
+                .mapToInt(comment -> comment.getLikes().size())
+                .sum();
+
+        return Activities.builder()
+                .postCount(postCount)
+                .postLikeCount(postLikeCount)
+                .commentCount(commentCount)
+                .commentLikeCount(commentLikeCount)
+                .build();
+    }
+
+    public MemberProfile getMemberProfile(Long memberId) {
+
+        Member member = getById(memberId);
+        Activities activities = getActivities(memberId);
+
+        return MemberProfile.builder()
+                .id(member.getId())
+                .nickname(member.getNickname())
+                .createdAt(member.getCreatedAt())
+                .activities(activities)
+                .build();
     }
 
     public void updateProfile(Long memberId, UpdateProfile updateProfile) {
@@ -112,7 +144,7 @@ public class MemberService {
                 });
     }
 
-    public Member getByLoginId(LoginInfo.Request request) {
+    public Member getByLoginId(com.leesh.devlab.api.auth.dto.LoginInfo.Request request) {
         return memberRepository.findByLoginId(request.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
@@ -127,7 +159,7 @@ public class MemberService {
         }
     }
 
-    public void emailConfirm(MemberInfo memberInfo, EmailConfirm requestDto, HttpSession session) {
+    public void emailConfirm(LoginInfo loginInfo, EmailConfirm requestDto, HttpSession session) {
 
         // 세션에 저장된 인증번호를 가져온다.
         String cert = (String) session.getAttribute(requestDto.email());
@@ -136,7 +168,7 @@ public class MemberService {
         }
 
         // 인증번호가 일치하면, 토큰 정보를 통해서 유저를 조회한 후 이메일 정보를 업데이트한다.
-        Member member = getById(memberInfo.id());
+        Member member = getById(loginInfo.id());
         member.verifyEmail(requestDto.email());
 
     }

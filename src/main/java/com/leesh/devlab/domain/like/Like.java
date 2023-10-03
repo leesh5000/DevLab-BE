@@ -58,4 +58,9 @@ public class Like extends BaseEntity {
         this.post = post;
         this.comment = comment;
     }
+
+    public boolean getValue() {
+        return value;
+    }
+
 }

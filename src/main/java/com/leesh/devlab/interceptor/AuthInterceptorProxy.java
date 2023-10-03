@@ -56,7 +56,7 @@ public class AuthInterceptorProxy implements HandlerInterceptor {
     }
 
     private boolean isMatchPath(HttpServletRequest request, PathPattern pathPattern) {
-        return pathMatcher.match(pathPattern.pathPattern(), request.getRequestURI());
+        return pathMatcher.match(pathPattern.pathPattern(), request.getServletPath());
     }
 
     public AuthInterceptorProxy addPathPatterns(String pathPattern, RequestMethod requestMethod) {

@@ -1,11 +1,13 @@
 package com.leesh.devlab.api.post;
 
-import com.leesh.devlab.api.post.dto.PostInfo;
-import com.leesh.devlab.jwt.dto.MemberInfo;
+import com.leesh.devlab.api.post.dto.CreatePost;
+import com.leesh.devlab.api.post.dto.PostDetails;
+import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import com.leesh.devlab.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,40 +18,38 @@ public class PostController {
 
     private final PostService postService;
 
-    @GetMapping(value = "/{post-id}")
-    public ResponseEntity<PostInfo.Response> getDetail(@PathVariable("post-id") Long postId) {
+    @GetMapping(value = "/{post-id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PostDetails> getDetail(@PathVariable("post-id") Long postId) {
 
-        PostInfo.Response responseDto = postService.getDetail(postId);
+        PostDetails responseDto = postService.getDetail(postId);
 
         return ResponseEntity.ok(responseDto);
-
     }
 
-    @PostMapping(value = "")
-    public ResponseEntity<PostInfo.Response> create(@RequestBody PostInfo.Request requestDto, @LoginMember MemberInfo memberInfo) {
+    @GetMapping()
 
-        PostInfo.Response responseDto = postService.create(requestDto, memberInfo);
+    @PostMapping()
+    public ResponseEntity<CreatePost.Response> create(@RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
+
+        CreatePost.Response responseDto = postService.create(requestDto, loginInfo);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-
     }
 
-    @PatchMapping(value = "/{post-id}")
-    public ResponseEntity<Void> edit(@PathVariable("post-id") Long postId, @RequestBody PostInfo.Request requestDto, @LoginMember MemberInfo memberInfo) {
+    @PutMapping(value = "/{post-id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> edit(@PathVariable("post-id") Long postId, @RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
 
-        postService.edit(postId, requestDto, memberInfo);
+        postService.put(postId, requestDto, loginInfo);
 
         return ResponseEntity.noContent().build();
-
     }
 
     @DeleteMapping(value = "/{post-id}")
-    public ResponseEntity<Void> delete(@PathVariable("post-id") Long postId, @LoginMember MemberInfo memberInfo) {
+    public ResponseEntity<Void> delete(@PathVariable("post-id") Long postId, @LoginMember LoginInfo loginInfo) {
 
-        postService.delete(postId, memberInfo);
+        postService.delete(postId, loginInfo);
 
         return ResponseEntity.noContent().build();
-
     }
 
 }

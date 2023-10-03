@@ -14,7 +14,7 @@ import com.leesh.devlab.jwt.AuthToken;
 import com.leesh.devlab.jwt.AuthTokenService;
 import com.leesh.devlab.jwt.GrantType;
 import com.leesh.devlab.jwt.TokenType;
-import com.leesh.devlab.jwt.dto.MemberInfo;
+import com.leesh.devlab.jwt.dto.LoginInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,9 +44,9 @@ public class AuthService {
         Member findMember = memberService.getOrSaveByOauthId(oauthId, oauthMemberInfo);
 
         // 인증 토큰을 생성한다.
-        MemberInfo memberInfo = MemberInfo.from(findMember);
-        AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
-        AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
+        LoginInfo loginInfo = LoginInfo.from(findMember);
+        AuthToken accessToken = authTokenService.createAuthToken(loginInfo, TokenType.ACCESS);
+        AuthToken refreshToken = authTokenService.createAuthToken(loginInfo, TokenType.REFRESH);
 
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(refreshToken);
@@ -70,7 +70,7 @@ public class AuthService {
         }
 
         // 새로운 액세스 토큰을 발급한다.
-        AuthToken accessToken = authTokenService.createAuthToken(MemberInfo.from(member), TokenType.ACCESS);
+        AuthToken accessToken = authTokenService.createAuthToken(LoginInfo.from(member), TokenType.ACCESS);
 
         return new RefreshTokenInfo(GrantType.BEARER, accessToken);
 
@@ -106,7 +106,7 @@ public class AuthService {
         return new RegisterInfo.Response(id);
     }
 
-    public LoginInfo.Response login(LoginInfo.Request request) {
+    public com.leesh.devlab.api.auth.dto.LoginInfo.Response login(com.leesh.devlab.api.auth.dto.LoginInfo.Request request) {
 
         Member findMember = memberService.getByLoginId(request);
 
@@ -116,14 +116,14 @@ public class AuthService {
         }
 
         // 토큰을 생성한다.
-        MemberInfo memberInfo = MemberInfo.from(findMember);
-        AuthToken accessToken = authTokenService.createAuthToken(memberInfo, TokenType.ACCESS);
-        AuthToken refreshToken = authTokenService.createAuthToken(memberInfo, TokenType.REFRESH);
+        LoginInfo loginInfo = LoginInfo.from(findMember);
+        AuthToken accessToken = authTokenService.createAuthToken(loginInfo, TokenType.ACCESS);
+        AuthToken refreshToken = authTokenService.createAuthToken(loginInfo, TokenType.REFRESH);
 
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(refreshToken);
 
-        return new LoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new com.leesh.devlab.api.auth.dto.LoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     // TODO : 추후 HTML 템플릿 처리 할 것

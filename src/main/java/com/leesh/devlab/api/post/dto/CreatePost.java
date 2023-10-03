@@ -8,9 +8,9 @@ import com.leesh.devlab.validation.Tags;
 
 import java.util.Set;
 
-public class PostInfo {
+public class CreatePost {
 
-    private PostInfo() {
+    private CreatePost() {
     }
 
     public record Request(String title, String contents, Category category, @Tags @JsonProperty("tags") Set<String> tagNames) {
