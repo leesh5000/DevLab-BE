@@ -8,7 +8,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OauthLoginInfo {
+public class OauthLogin {
 
     public record Request(OauthType oauthType, String authorizationCode) {
     }

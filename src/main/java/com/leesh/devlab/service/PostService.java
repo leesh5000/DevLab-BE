@@ -1,7 +1,8 @@
 package com.leesh.devlab.service;
 
+import com.leesh.devlab.api.comment.dto.CommentDetail;
 import com.leesh.devlab.api.post.dto.CreatePost;
-import com.leesh.devlab.api.post.dto.PostDetails;
+import com.leesh.devlab.api.post.dto.PostDetail;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.hashtag.HashtagRepository;
 import com.leesh.devlab.domain.like.Like;
@@ -35,6 +36,7 @@ public class PostService {
     private final TagService tagService;
     private final HashtagRepository hashtagRepository;
     private final LikeRepository likeRepository;
+    private final CommentService commentService;
 
     public CreatePost.Response create(CreatePost.Request requestDto, LoginInfo loginInfo) {
 
@@ -78,7 +80,7 @@ public class PostService {
 
     private Post getByIdWithMember(Long postId) {
         return postRepository.findByIdWithMember(postId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_POST, "not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_RESOURCE, "not found"));
     }
 
     public void delete(Long postId, LoginInfo loginInfo) {
@@ -113,19 +115,19 @@ public class PostService {
     public static void validateAuthor(LoginInfo loginInfo, Post post) {
         // 게시글의 작성자인지 검증
         if (!Objects.equals(loginInfo.id(), post.getMember().getId())) {
-            throw new BusinessException(ErrorCode.NOT_POST_AUTHOR, "not post author");
+            throw new BusinessException(ErrorCode.NOT_RESOURCE_OWNER, "not post author");
         }
     }
 
     @Transactional(readOnly = true)
-    public PostDetails getDetail(Long postId) {
+    public PostDetail getDetail(Long postId) {
 
         Post post = getByIdWithMember(postId);
 
-        return generatePostDetails(post);
+        return generatePostDetail(post);
     }
 
-    private static PostDetails generatePostDetails(Post post) {
+    private PostDetail generatePostDetail(Post post) {
 
         List<String> tags = post.getHashtags().stream()
                 .map(Hashtag::getTag)
@@ -134,7 +136,11 @@ public class PostService {
 
         int likeCount = post.getLikes().size();
 
-        return PostDetails.builder()
+        List<CommentDetail> commentDetails = post.getComments().stream()
+                .map(commentService::generateCommentDetail)
+                .toList();
+
+        return PostDetail.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .contents(post.getContents())
@@ -142,19 +148,20 @@ public class PostService {
                 .author(post.getMember().getNickname())
                 .tags(tags)
                 .likeCount(likeCount)
+                .commentDetails(commentDetails)
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public Page<PostDetails> getLists(Pageable pageable) {
+    public Page<PostDetail> getLists(Pageable pageable) {
 
         // 컬렉션은 페이징을 할 수 없으므로, 게시글만 먼저 가져온 뒤, Batch Size Fetch를 통해 1:1:1 쿼리로 해결한다.
         Page<Post> page = postRepository.findAllWithMember(pageable);
 
-        List<PostDetails> content = page.getContent().stream()
-                .map(PostService::generatePostDetails)
+        List<PostDetail> content = page.getContent().stream()
+                .map(this::generatePostDetail)
                 .toList();
 
         return PageableExecutionUtils.getPage(content, pageable, page::getTotalElements);

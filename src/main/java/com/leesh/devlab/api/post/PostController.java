@@ -1,7 +1,7 @@
 package com.leesh.devlab.api.post;
 
 import com.leesh.devlab.api.post.dto.CreatePost;
-import com.leesh.devlab.api.post.dto.PostDetails;
+import com.leesh.devlab.api.post.dto.PostDetail;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import com.leesh.devlab.service.PostService;
@@ -22,22 +22,22 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping(value = "/{post-id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostDetails> getDetail(@PathVariable("post-id") Long postId) {
+    public ResponseEntity<PostDetail> getDetail(@PathVariable("post-id") Long postId) {
 
-        PostDetails responseDto = postService.getDetail(postId);
+        PostDetail responseDto = postService.getDetail(postId);
 
         return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostDetails>> getLists(@PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<PostDetail>> getLists(@PageableDefault(size = 20) Pageable pageable) {
 
-        Page<PostDetails> responseDto = postService.getLists(pageable);
+        Page<PostDetail> responseDto = postService.getLists(pageable);
 
         return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping()
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CreatePost.Response> create(@RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
 
         CreatePost.Response responseDto = postService.create(requestDto, loginInfo);
@@ -46,7 +46,7 @@ public class PostController {
     }
 
     @PutMapping(value = "/{post-id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> edit(@PathVariable("post-id") Long postId, @RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
+    public ResponseEntity<Void> put(@PathVariable("post-id") Long postId, @RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
 
         postService.put(postId, requestDto, loginInfo);
 

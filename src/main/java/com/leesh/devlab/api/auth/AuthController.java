@@ -23,9 +23,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping(path = "/oauth-login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OauthLoginInfo.Response> oauthLogin(@RequestBody OauthLoginInfo.Request request) {
+    public ResponseEntity<OauthLogin.Response> oauthLogin(@RequestBody OauthLogin.Request request) {
 
-        OauthLoginInfo.Response response = authService.oauthLogin(request);
+        OauthLogin.Response response = authService.oauthLogin(request);
 
         return ResponseEntity.ok(response);
     }
@@ -49,9 +49,9 @@ public class AuthController {
     }
 
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginInfo.Response> login(@RequestBody @Valid LoginInfo.Request request) {
+    public ResponseEntity<Login.Response> login(@RequestBody @Valid Login.Request request) {
 
-        LoginInfo.Response response = authService.login(request);
+        Login.Response response = authService.login(request);
 
         return ResponseEntity.ok(response);
     }

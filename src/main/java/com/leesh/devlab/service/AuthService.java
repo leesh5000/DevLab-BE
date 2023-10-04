@@ -20,7 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.leesh.devlab.api.auth.dto.OauthLoginInfo.Request;
+import static com.leesh.devlab.api.auth.dto.OauthLogin.Request;
 
 @RequiredArgsConstructor
 @Transactional
@@ -34,7 +34,7 @@ public class AuthService {
     private final MailService mailService;
     private final MemberService memberService;
 
-    public OauthLoginInfo.Response oauthLogin(Request request) {
+    public OauthLogin.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
         OauthMemberInfo oauthMemberInfo = getOauthMemberInfo(request);
@@ -52,7 +52,7 @@ public class AuthService {
         findMember.updateRefreshToken(refreshToken);
 
         // 응답 DTO를 생성 후 반환한다.
-        return new OauthLoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new OauthLogin.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     public RefreshTokenInfo refresh(String refreshToken) {
@@ -106,7 +106,7 @@ public class AuthService {
         return new RegisterInfo.Response(id);
     }
 
-    public com.leesh.devlab.api.auth.dto.LoginInfo.Response login(com.leesh.devlab.api.auth.dto.LoginInfo.Request request) {
+    public Login.Response login(Login.Request request) {
 
         Member findMember = memberService.getByLoginId(request);
 
@@ -123,7 +123,7 @@ public class AuthService {
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(refreshToken);
 
-        return new com.leesh.devlab.api.auth.dto.LoginInfo.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new Login.Response(GrantType.BEARER, accessToken, refreshToken);
     }
 
     // TODO : 추후 HTML 템플릿 처리 할 것

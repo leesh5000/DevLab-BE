@@ -1,5 +1,6 @@
 package com.leesh.devlab.service;
 
+import com.leesh.devlab.api.auth.dto.Login;
 import com.leesh.devlab.api.member.dto.*;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
@@ -132,7 +133,7 @@ public class MemberService {
                 });
     }
 
-    public Member getByLoginId(com.leesh.devlab.api.auth.dto.LoginInfo.Request request) {
+    public Member getByLoginId(Login.Request request) {
         return memberRepository.findByLoginId(request.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
