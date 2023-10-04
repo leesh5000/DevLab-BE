@@ -1,6 +1,6 @@
 package com.leesh.devlab.external.implementation.google.client;
 
-import com.leesh.devlab.external.implementation.google.dto.GoogleMemberInfo;
+import com.leesh.devlab.external.implementation.google.dto.GoogleAttributes;
 import com.leesh.devlab.external.implementation.google.dto.GoogleToken;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +19,7 @@ public interface GoogleAuthClient {
     GoogleToken requestToken(@RequestHeader("Content-Type") String contentType, Map<String, Object> request);
 
     @PostMapping(value = "/tokeninfo?id_token={idToken}", consumes = "application/json")
-    GoogleMemberInfo requestMemberInfo(@RequestHeader("Content-type") String contentType,
+    GoogleAttributes requestMemberInfo(@RequestHeader("Content-type") String contentType,
                                        @PathVariable("idToken") String idToken);
 
 }

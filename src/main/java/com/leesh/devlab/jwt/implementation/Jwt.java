@@ -1,11 +1,11 @@
 package com.leesh.devlab.jwt.implementation;
 
 import com.leesh.devlab.jwt.TokenType;
-import com.leesh.devlab.jwt.AuthToken;
+import com.leesh.devlab.jwt.Token;
 
 import java.util.Objects;
 
-public record Jwt(TokenType tokenType, String value, long expiredAt) implements AuthToken {
+public record Jwt(TokenType tokenType, String value, long expiredAt) implements Token {
 
     public Jwt {
         Objects.requireNonNull(tokenType, "tokenType must be not null");

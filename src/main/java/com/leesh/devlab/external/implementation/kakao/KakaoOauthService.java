@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.kakao;
 
 import com.leesh.devlab.external.OauthService;
-import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.external.OauthToken;
 import com.leesh.devlab.external.implementation.kakao.client.KakaoApiClient;
 import com.leesh.devlab.external.implementation.kakao.client.KakaoAuthClient;
@@ -51,7 +51,7 @@ public class KakaoOauthService implements OauthService {
     }
 
     @Override
-    public OauthMemberInfo requestMemberInfo(String accessToken) {
+    public OauthAttributes requestMemberInfo(String accessToken) {
 
         String contentType = "application/x-www-form-urlencoded;charset=utf-8";
 

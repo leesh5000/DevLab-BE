@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.google;
 
 import com.leesh.devlab.external.OauthService;
-import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.external.OauthToken;
 import com.leesh.devlab.external.implementation.google.client.GoogleAuthClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +44,7 @@ public class GoogleOauthService implements OauthService {
     }
 
     @Override
-    public OauthMemberInfo requestMemberInfo(String accessToken) {
+    public OauthAttributes requestMemberInfo(String accessToken) {
         return googleAuthClient.requestMemberInfo(MediaType.APPLICATION_JSON_VALUE, accessToken);
     }
 }

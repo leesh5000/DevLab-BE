@@ -10,6 +10,6 @@ public interface OauthService {
 
     OauthToken requestToken(String authorizationCode);
 
-    OauthMemberInfo requestMemberInfo(String accessToken);
+    OauthAttributes requestMemberInfo(String accessToken);
 
 }

@@ -1,5 +1,8 @@
 package com.leesh.devlab.jwt;
 
+import lombok.Getter;
+
+@Getter
 public enum TokenType {
 
     ACCESS(20 * 60 * 10000), // 20분
@@ -13,16 +16,12 @@ public enum TokenType {
         this.expiresInMills = expiresIn;
     }
 
-    public long getExpiresInMills() {
-        return expiresInMills;
+    public static boolean isAccessToken(Token token) {
+        return TokenType.ACCESS == token.getTokenType();
     }
 
-    public static boolean isAccessToken(AuthToken authToken) {
-        return TokenType.ACCESS == authToken.getTokenType();
-    }
-
-    public static boolean isRefreshToken(AuthToken authToken) {
-        return TokenType.REFRESH == authToken.getTokenType();
+    public static boolean isRefreshToken(Token token) {
+        return TokenType.REFRESH == token.getTokenType();
     }
 
 }

@@ -1,7 +1,7 @@
 package com.leesh.devlab.jwt.dto;
 
-import com.leesh.devlab.domain.member.Role;
 import com.leesh.devlab.domain.member.Member;
+import com.leesh.devlab.domain.member.Role;
 
 import java.util.Objects;
 
