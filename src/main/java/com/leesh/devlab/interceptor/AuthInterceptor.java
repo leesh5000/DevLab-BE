@@ -1,6 +1,6 @@
 package com.leesh.devlab.interceptor;
 
-import com.leesh.devlab.jwt.AuthTokenService;
+import com.leesh.devlab.jwt.TokenService;
 import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.util.HttpHeaderUtil;
@@ -14,7 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
-    private final AuthTokenService authTokenService;
+    private final TokenService tokenService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -23,10 +23,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         String accessToken = HttpHeaderUtil.extractAuthorization(request);
 
         // 2. 올바른 토큰인지 검증
-        authTokenService.validateAuthToken(accessToken, TokenType.ACCESS);
+        tokenService.validateToken(accessToken, TokenType.ACCESS);
 
         // 3. 토큰으로부터 유저 정보 추출
-        LoginInfo loginInfo = authTokenService.extractMemberInfo(accessToken);
+        LoginInfo loginInfo = tokenService.extractLoginInfo(accessToken);
 
         // 4. 유저 정보를 Request에 저장 (LoginMemberArgResolver 에서 사용)
         request.setAttribute(LoginInfo.class.getName(), loginInfo);

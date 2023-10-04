@@ -4,7 +4,7 @@ import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.post.Post;
-import com.leesh.devlab.jwt.AuthToken;
+import com.leesh.devlab.jwt.Token;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -97,7 +97,7 @@ public class Member extends BaseEntity {
     }
 
     /* 도메인 비즈니스 로직 */
-    public void updateRefreshToken(AuthToken refreshToken) {
+    public void updateRefreshToken(Token refreshToken) {
         this.refreshToken = new RefreshToken(refreshToken.getValue(), refreshToken.getExpiredAt());
     }
 

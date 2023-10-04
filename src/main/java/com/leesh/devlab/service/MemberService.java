@@ -1,13 +1,12 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.api.auth.dto.Login;
-import com.leesh.devlab.api.member.dto.*;
+import com.leesh.devlab.dto.*;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
-import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -125,7 +124,7 @@ public class MemberService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
 
-    public Member getOrSaveByOauthId(String oauthId, OauthMemberInfo oauthMember) {
+    public Member getOrSaveByOauthId(String oauthId, OauthAttributes oauthMember) {
         return memberRepository.findByOauthId(oauthId)
                 .orElseGet(() -> {
                     Member entity = oauthMember.toEntity();

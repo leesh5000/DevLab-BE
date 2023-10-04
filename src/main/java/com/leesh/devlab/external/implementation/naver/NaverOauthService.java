@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.naver;
 
 import com.leesh.devlab.external.OauthService;
-import com.leesh.devlab.external.OauthMemberInfo;
+import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.external.OauthToken;
 import com.leesh.devlab.external.implementation.naver.client.NaverApiClient;
 import com.leesh.devlab.external.implementation.naver.client.NaverAuthClient;
@@ -48,7 +48,7 @@ public class NaverOauthService implements OauthService {
     }
 
     @Override
-    public OauthMemberInfo requestMemberInfo(String accessToken) {
+    public OauthAttributes requestMemberInfo(String accessToken) {
         return apiClient.requestMemberInfo(MediaType.APPLICATION_JSON_VALUE, "Bearer " + accessToken);
     }
 }

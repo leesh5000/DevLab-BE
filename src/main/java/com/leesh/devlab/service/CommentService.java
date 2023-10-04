@@ -1,7 +1,5 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.api.comment.dto.CommentDetail;
-import com.leesh.devlab.api.comment.dto.CreateComment;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.comment.CommentRepository;
 import com.leesh.devlab.domain.like.Like;
@@ -10,10 +8,14 @@ import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.post.repository.PostRepository;
+import com.leesh.devlab.dto.CommentDetail;
+import com.leesh.devlab.dto.CreateComment;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,12 +78,11 @@ public class CommentService {
     }
 
     @Transactional
-    public void delete(Long commentId, Long postId, LoginInfo loginInfo) {
+    public void delete(Long commentId, LoginInfo loginInfo) {
 
         Comment comment = getByIdWithEntities(commentId);
 
         validateAuthor(loginInfo, comment);
-        validatePost(postId, comment);
 
         deleteAllChildren(comment);
 
@@ -98,15 +99,24 @@ public class CommentService {
         likeRepository.deleteAllByIdInBatch(likeIds);
     }
 
-    private void validatePost(Long postId, Comment comment) {
-        if (!Objects.equals(comment.getPost().getId(), postId)) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT, "comment's post id = " + comment.getPost().getId() + ", post id = " + postId);
-        }
-    }
-
     private void validateAuthor(LoginInfo loginInfo, Comment comment) {
         if (!Objects.equals(comment.getMember().getId(), loginInfo.id())) {
             throw new BusinessException(ErrorCode.NOT_RESOURCE_OWNER, "login user is not comment's author, login user id = " + loginInfo.id() + ", comment's author id = " + comment.getMember().getId());
         }
+    }
+
+    public CommentDetail getDetails(Long commentId) {
+
+        Comment comment = getByIdWithEntities(commentId);
+
+        return generateCommentDetail(comment);
+    }
+
+    public Page<CommentDetail> getLists(Pageable pageable) {
+
+        Page<Comment> comments = commentRepository.findAllWithMemberAndPost(pageable);
+
+        return comments.map(this::generateCommentDetail);
+
     }
 }

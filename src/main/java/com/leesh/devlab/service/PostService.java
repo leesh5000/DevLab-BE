@@ -1,8 +1,8 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.api.comment.dto.CommentDetail;
-import com.leesh.devlab.api.post.dto.CreatePost;
-import com.leesh.devlab.api.post.dto.PostDetail;
+import com.leesh.devlab.dto.CommentDetail;
+import com.leesh.devlab.dto.CreatePost;
+import com.leesh.devlab.dto.PostDetail;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.hashtag.HashtagRepository;
 import com.leesh.devlab.domain.like.Like;
@@ -18,7 +18,6 @@ import com.leesh.devlab.jwt.dto.LoginInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -160,10 +159,6 @@ public class PostService {
         // 컬렉션은 페이징을 할 수 없으므로, 게시글만 먼저 가져온 뒤, Batch Size Fetch를 통해 1:1:1 쿼리로 해결한다.
         Page<Post> page = postRepository.findAllWithMember(pageable);
 
-        List<PostDetail> content = page.getContent().stream()
-                .map(this::generatePostDetail)
-                .toList();
-
-        return PageableExecutionUtils.getPage(content, pageable, page::getTotalElements);
+        return page.map(this::generatePostDetail);
     }
 }

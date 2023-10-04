@@ -4,8 +4,8 @@ import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.domain.member.Role;
 import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.exception.custom.AuthException;
-import com.leesh.devlab.jwt.AuthToken;
-import com.leesh.devlab.jwt.AuthTokenService;
+import com.leesh.devlab.jwt.Token;
+import com.leesh.devlab.jwt.TokenService;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -22,7 +22,7 @@ import java.util.Date;
 
 @Slf4j
 @Service
-public class JwtService implements AuthTokenService {
+public class JwtService implements TokenService {
 
     private final String tokenSecret;
 
@@ -31,9 +31,9 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public LoginInfo extractMemberInfo(String tokenValue) throws AuthException {
+    public LoginInfo extractLoginInfo(String value) throws AuthException {
 
-        Claims claims = extractAllClaims(tokenValue);
+        Claims claims = extractAllClaims(value);
 
         // 접근 토큰이 아니면, 예외 던지기
         if (!TokenType.ACCESS.name().equals(claims.getSubject())) {
@@ -48,9 +48,9 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public void validateAuthToken(String tokenValue, TokenType tokenType) throws AuthException {
+    public void validateToken(String value, TokenType tokenType) throws AuthException {
 
-        Claims claims = extractAllClaims(tokenValue);
+        Claims claims = extractAllClaims(value);
 
         // 토큰 타입 유효성 검증
         if (!tokenType.name().equals(claims.getSubject())) {
@@ -59,7 +59,7 @@ public class JwtService implements AuthTokenService {
     }
 
     @Override
-    public AuthToken createAuthToken(LoginInfo loginInfo, TokenType tokenType) {
+    public Token createToken(LoginInfo loginInfo, TokenType tokenType) {
 
         long expiredAt = System.currentTimeMillis() + tokenType.getExpiresInMills();
         String value;
