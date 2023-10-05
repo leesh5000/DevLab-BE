@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.1.3'
 	id 'io.spring.dependency-management' version '1.1.3'
+	// adoc 파일 변환, build 디렉토리에 복사를 위한 플러그인
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 group = 'com.leesh'
@@ -58,14 +60,34 @@ dependencies {
 	/* Spring Mail */
 	implementation 'org.springframework.boot:spring-boot-starter-mail:3.1.3'
 
-	/* MyBatis */
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2'
-
 	/* p6spy */
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
+	/* Spring Rest Docs */
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:3.0.0'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+/* Spring Rest Docs */
+ext{
+	snippetDir = file('build/generated-snippets')
+}
+
+
+// asciidoctor task 설정
+asciidoctor {
+	inputs.dir snippetDir
+	dependsOn test
+}
+
+// bootJar task 실행 시, asciidoctor task 수행 및 결과물을 jar 파일에 포함
+bootJar {
+	dependsOn asciidoctor
+	from("build/docs/asciidoc") {
+		into 'BOOT-INF/classes/static/docs'
+	}
+}
+/* Spring Rest Docs */

@@ -1,4 +1,4 @@
-package com.leesh.devlab.configuration;
+package com.leesh.devlab.config;
 
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableEncryptableProperties
-public class JasyptConfiguration {
+public class JasyptConfig {
 
     @Value("${jasypt.encryptor.password}")
     private String password;

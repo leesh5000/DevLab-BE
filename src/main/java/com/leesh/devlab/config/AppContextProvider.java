@@ -1,4 +1,4 @@
-package com.leesh.devlab.configuration;
+package com.leesh.devlab.config;
 
 import com.leesh.devlab.domain.member.OauthType;
 import com.leesh.devlab.external.OauthServiceFactory;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Getter
 @Component
-public class ApplicationContextProvider implements ApplicationContextAware {
+public class AppContextProvider implements ApplicationContextAware {
 
     private ApplicationContext context;
 

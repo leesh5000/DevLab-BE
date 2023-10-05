@@ -7,9 +7,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
-public record RefreshTokenInfo(GrantType grantType, Token accessToken) {
+public record TokenRefreshInfo(String grantType, Token accessToken) {
 
-    public RefreshTokenInfo {
+    public TokenRefreshInfo {
 
         Objects.requireNonNull(grantType, "grantType must be provided");
         Objects.requireNonNull(accessToken, "accessToken must be provided");

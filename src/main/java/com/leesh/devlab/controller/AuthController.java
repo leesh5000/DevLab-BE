@@ -23,27 +23,18 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping(path = "/oauth-login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OauthLogin.Response> oauthLogin(@RequestBody OauthLogin.Request request) {
+    public ResponseEntity<Login.Response> oauthLogin(@RequestBody OauthLogin.Request request) {
 
-        OauthLogin.Response response = authService.oauthLogin(request);
+        Login.Response response = authService.oauthLogin(request);
 
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(path = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RefreshTokenInfo> refreshToken(HttpServletRequest request) {
-
-        String refreshToken = extractAuthorization(request);
-
-        RefreshTokenInfo refreshDtoTokenInfo = authService.refreshToken(refreshToken);
-
-        return ResponseEntity.ok(refreshDtoTokenInfo);
-    }
 
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RegisterInfo.Response> register(@RequestBody @Valid RegisterInfo.Request requestDto) {
+    public ResponseEntity<RegisterInfo.Response> register(@RequestBody @Valid RegisterInfo.Request request) {
 
-        RegisterInfo.Response responseDto = authService.register(requestDto);
+        RegisterInfo.Response responseDto = authService.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
@@ -56,10 +47,20 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(path = "/find-account")
-    public ResponseEntity<Void> findAccount(@RequestBody FindAccount requestDto) {
+    @PostMapping(path = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<TokenRefreshInfo> refreshToken(HttpServletRequest request) {
 
-        authService.findAccount(requestDto);
+        String refreshToken = extractAuthorization(request);
+
+        TokenRefreshInfo refreshDtoTokenInfo = authService.refreshToken(refreshToken);
+
+        return ResponseEntity.ok(refreshDtoTokenInfo);
+    }
+
+    @PostMapping(path = "/find-account", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> findAccount(@RequestBody FindAccount request) {
+
+        authService.findAccount(request);
 
         return ResponseEntity.noContent().build();
     }
