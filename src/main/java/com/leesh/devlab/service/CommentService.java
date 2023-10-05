@@ -29,14 +29,17 @@ import java.util.Optional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
+    private final MemberService memberService;
+    private final PostRepository postRepository;
 
     @Transactional
     public CreateComment.Response create(CreateComment.Request requestDto, LoginInfo loginInfo, Long postId) {
 
-        Post post = postRepository.getReferenceById(postId);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_RESOURCE, "not found post with id : " + postId));
+
         Member member = memberRepository.getReferenceById(loginInfo.id());
 
         Comment comment = requestDto.toEntity(post, member);
@@ -118,5 +121,14 @@ public class CommentService {
 
         return comments.map(this::generateCommentDetail);
 
+    }
+
+    public Page<CommentDetail> getListsByMemberId(Long memberId, Pageable pageable) {
+
+        memberService.existById(memberId);
+
+        Page<Comment> page = commentRepository.findAllWithMemberByMemberId(memberId, pageable);
+
+        return page.map(this::generateCommentDetail);
     }
 }

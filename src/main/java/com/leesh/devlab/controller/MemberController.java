@@ -5,6 +5,7 @@ import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.resolver.LoginMember;
+import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
 import com.leesh.devlab.service.PostService;
 import jakarta.servlet.http.HttpSession;
@@ -26,6 +27,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MyProfile> getMyProfile(@LoginMember LoginInfo loginInfo) {
@@ -76,13 +78,21 @@ public class MemberController {
         return ResponseEntity.ok(memberPosts);
     }
 
+    @GetMapping(value = "/{member-id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<CommentDetail>> getMemberComments(@PathVariable("member-id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
+
+        Page<CommentDetail> memberComments = commentService.getListsByMemberId(memberId, pageable);
+
+        return ResponseEntity.ok(memberComments);
+    }
+
     private void isAccessible(Long memberId, LoginInfo loginInfo) {
         if (!Objects.equals(memberId, loginInfo.id())) {
             throw new BusinessException(ErrorCode.NO_PERMISSION, "no permission");
         }
     }
 
-    @PostMapping(path = "/{member-id}/email/verify")
+    @PostMapping(path = "/{member-id}/email/verify", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> emailVerify(@PathVariable("member-id") Long memberId, @LoginMember LoginInfo loginInfo, @RequestBody EmailVerify requestDto, HttpSession session) {
 
         isAccessible(memberId, loginInfo);
@@ -91,6 +101,7 @@ public class MemberController {
 
         return ResponseEntity.noContent().build();
     }
+
     @PostMapping(path = "/{member-id}/email/confirm")
     public ResponseEntity<Void> emailConfirm(@PathVariable("member-id") Long memberId, @LoginMember LoginInfo loginInfo, @RequestBody EmailConfirm requestDto, HttpSession session) {
 

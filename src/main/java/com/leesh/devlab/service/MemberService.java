@@ -140,6 +140,12 @@ public class MemberService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
 
+    public void existById(Long memberId) throws BusinessException {
+        if (!memberRepository.existsById(memberId)) {
+            throw new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member");
+        }
+    }
+
     public void checkExistMember(String loginId, String nickname) throws BusinessException {
         if (memberRepository.existsByLoginId(loginId)) {
             throw new BusinessException(ErrorCode.ALREADY_REGISTERED_ID, "already registered id");

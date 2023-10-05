@@ -10,9 +10,11 @@ import com.leesh.devlab.jwt.TokenService;
 import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.jwt.implementation.Jwt;
+import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
 import com.leesh.devlab.service.PostService;
 import config.WebMvcTestConfig;
+import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -40,8 +43,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -63,6 +65,9 @@ public class MemberControllerTest {
 
     @MockBean
     private PostService postService;
+
+    @MockBean
+    private CommentService commentService;
 
     @MockBean
     private TokenService tokenService;
@@ -115,7 +120,8 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.activities.post_count").value(postCount))
                 .andExpect(jsonPath("$.activities.post_like_count").value(postLikeCount))
                 .andExpect(jsonPath("$.activities.comment_count").value(commentCount))
-                .andExpect(jsonPath("$.activities.comment_like_count").value(commentLikeCount));
+                .andExpect(jsonPath("$.activities.comment_like_count").value(commentLikeCount))
+                .andDo(print());
 
         then(memberService).should().getMyProfile(testMember);
 
@@ -161,7 +167,8 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.activities.post_count").value(response.activities().postCount()))
                 .andExpect(jsonPath("$.activities.post_like_count").value(response.activities().postLikeCount()))
                 .andExpect(jsonPath("$.activities.comment_count").value(response.activities().commentCount()))
-                .andExpect(jsonPath("$.activities.comment_like_count").value(response.activities().commentLikeCount()));
+                .andExpect(jsonPath("$.activities.comment_like_count").value(response.activities().commentLikeCount()))
+                .andDo(print());
 
         then(memberService).should().getMemberProfile(testMember.id());
 
@@ -197,7 +204,7 @@ public class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue())
                         .content(om.writeValueAsString(request)))
-                        .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
 
         // then
         result.andExpect(status().isNoContent())
@@ -227,7 +234,7 @@ public class MemberControllerTest {
         var result = mvc.perform(delete("/api/members/{member-id}", memberId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue()))
-                        .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
 
         // then
         result.andExpect(status().isNoContent())
@@ -272,21 +279,22 @@ public class MemberControllerTest {
         List<PostDetail> postDetails = new ArrayList<>();
         postDetails.add(new PostDetail(postId, title, content, category, author, commentDetails, tags, postLikeCount, createdAt, createdAt));
 
-
         int pageNumber = 0;
         int pageSize = 5;
-        String sort = "created_at,desc";
+        Sort sort = Sort.by(
+                Sort.Order.desc("createdAt")
+        );
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<PostDetail> page = PageableExecutionUtils.getPage(postDetails, pageable, postDetails::size);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<PostDetail> page;
+        page = PageableExecutionUtils.getPage(postDetails, pageable, postDetails::size);
         given(postService.getListsByMemberId(eq(testMember.id()), any(Pageable.class)))
                 .willReturn(page);
 
         // when
-        var result = mvc.perform(get("/api/members/{member-id}/posts?page={page}&size={size}&sort={property,direction}", testMember.id(), pageNumber, pageSize, sort)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue()))
-                        .andExpect(status().isOk());
+        var result = mvc.perform(get("/api/members/{member-id}/posts?page={page}&size={size}&sort={property,direction}", testMember.id(), pageNumber, pageSize, "createdAt,desc")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
         // then
         result
@@ -302,6 +310,7 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.content[0].comment_details[0].created_at").value(commentCreatedAt))
                 .andExpect(jsonPath("$.content[0].comment_details[0].modified_at").value(commentModifiedAt))
                 .andExpect(jsonPath("$.content[0].comment_details[0].like_count").value(commentLikeCount))
+                .andExpect(jsonPath("$.content[0].comment_details[0].post_id").value(postId))
                 .andExpect(jsonPath("$.content[0].tags[0]").value(tags.get(0)))
                 .andExpect(jsonPath("$.content[0].tags[1]").value(tags.get(1)))
                 .andExpect(jsonPath("$.content[0].like_count").value(postLikeCount))
@@ -312,8 +321,11 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.pageable.paged").value(true))
                 .andExpect(jsonPath("$.pageable.unpaged").value(false))
                 .andExpect(jsonPath("$.pageable.page_number").value(page.getPageable().getPageNumber()))
-                .andExpect(jsonPath("$.pageable.sort").isArray())
-                .andExpect(jsonPath("$.total_page").value(page.getTotalPages()))
+                .andExpect(jsonPath("$.pageable.sort").isMap())
+                .andExpect(jsonPath("$.pageable.sort.empty").value(false))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value(true))
+                .andExpect(jsonPath("$.pageable.sort.unsorted").value(false))
+                .andExpect(jsonPath("$.total_pages").value(page.getTotalPages()))
                 .andExpect(jsonPath("$.total_elements").value(page.getTotalElements()))
                 .andExpect(jsonPath("$.last").value(page.isLast()))
                 .andExpect(jsonPath("$.first").value(page.isFirst()))
@@ -322,8 +334,8 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.number_of_elements").value(page.getNumberOfElements()))
                 .andExpect(jsonPath("$.empty").value(page.isEmpty()))
                 .andExpect(jsonPath("$.first").value(page.isFirst()))
-                .andExpect(jsonPath("$.sort").isArray())
-        ;
+                .andExpect(jsonPath("$.sort").isMap())
+                .andDo(print());
 
         then(postService).should().getListsByMemberId(testMember.id(), pageable);
 
@@ -336,9 +348,6 @@ public class MemberControllerTest {
                         parameterWithName("page").description("페이지 번호"),
                         parameterWithName("size").description("페이지 사이즈"),
                         parameterWithName("sort").description("정렬 방식")
-                ),
-                requestHeaders(
-                        headerWithName(HttpHeaders.AUTHORIZATION).description("액세스 토큰")
                 ),
                 responseFields(
                         fieldWithPath("content").description("게시글 목록"),
@@ -354,6 +363,7 @@ public class MemberControllerTest {
                         fieldWithPath("content[].comment_details[].created_at").description("생성일"),
                         fieldWithPath("content[].comment_details[].modified_at").description("수정일"),
                         fieldWithPath("content[].comment_details[].like_count").description("좋아요 수"),
+                        fieldWithPath("content[].comment_details[].post_id").description("게시글 식별자"),
                         fieldWithPath("content[].tags").description("태그 목록"),
                         fieldWithPath("content[].like_count").description("좋아요 수"),
                         fieldWithPath("content[].created_at").description("생성일"),
@@ -365,7 +375,10 @@ public class MemberControllerTest {
                         fieldWithPath("pageable.unpaged").description("페이징 여부"),
                         fieldWithPath("pageable.page_number").description("페이지 번호"),
                         fieldWithPath("pageable.sort").description("정렬 정보"),
-                        fieldWithPath("total_page").description("총 페이지 수"),
+                        fieldWithPath("pageable.sort.empty").description("비어있는지 여부"),
+                        fieldWithPath("pageable.sort.sorted").description("정렬 여부"),
+                        fieldWithPath("pageable.sort.unsorted").description("정렬 여부"),
+                        fieldWithPath("total_pages").description("총 페이지 수"),
                         fieldWithPath("total_elements").description("총 게시글 수"),
                         fieldWithPath("last").description("마지막 페이지 여부"),
                         fieldWithPath("first").description("첫번째 페이지 여부"),
@@ -373,7 +386,178 @@ public class MemberControllerTest {
                         fieldWithPath("size").description("페이지 사이즈"),
                         fieldWithPath("number_of_elements").description("전체 게시글 수"),
                         fieldWithPath("empty").description("비어있는지 여부"),
-                        fieldWithPath("sort").description("정렬 정보")
+                        fieldWithPath("sort").description("정렬 정보"),
+                        fieldWithPath("sort.empty").description("비어있는지 여부"),
+                        fieldWithPath("sort.sorted").description("정렬 여부"),
+                        fieldWithPath("sort.unsorted").description("정렬 여부")
                 )));
     }
+
+    @Test
+    void getMemberComments_test() throws Exception {
+
+        // given
+        long postId = 1L;
+        long commentId = 1L;
+        String commentContent = "새로운 댓글";
+        String commentAuthor = "널널한 개발자";
+        long commentCreatedAt = System.currentTimeMillis();
+        long commentModifiedAt = System.currentTimeMillis();
+        int commentLikeCount = 10;
+
+        List<CommentDetail> commentDetails = new ArrayList<>();
+        commentDetails.add(new CommentDetail(commentId, commentContent, commentAuthor, commentCreatedAt, commentModifiedAt, postId, commentLikeCount));
+
+        int pageNumber = 0;
+        int pageSize = 5;
+        Sort sort = Sort.by(
+                Sort.Order.desc("createdAt")
+        );
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<CommentDetail> page;
+        page = PageableExecutionUtils.getPage(commentDetails, pageable, commentDetails::size);
+        given(commentService.getListsByMemberId(eq(testMember.id()), any(Pageable.class)))
+                .willReturn(page);
+
+        // when
+        var result = mvc.perform(get("/api/members/{member-id}/comments?page={page}&size={size}&sort={property,direction}", testMember.id(), pageNumber, pageSize, "createdAt,desc")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(commentId))
+                .andExpect(jsonPath("$.content[0].contents").value(commentContent))
+                .andExpect(jsonPath("$.content[0].author").value(commentAuthor))
+                .andExpect(jsonPath("$.content[0].created_at").value(commentCreatedAt))
+                .andExpect(jsonPath("$.content[0].modified_at").value(commentModifiedAt))
+                .andExpect(jsonPath("$.content[0].like_count").value(commentLikeCount))
+                .andExpect(jsonPath("$.content[0].post_id").value(postId))
+                .andExpect(jsonPath("$.pageable.offset").value(page.getPageable().getOffset()))
+                .andExpect(jsonPath("$.pageable.page_size").value(page.getPageable().getPageSize()))
+                .andExpect(jsonPath("$.pageable.paged").value(true))
+                .andExpect(jsonPath("$.pageable.unpaged").value(false))
+                .andExpect(jsonPath("$.pageable.page_number").value(page.getPageable().getPageNumber()))
+                .andExpect(jsonPath("$.pageable.sort").isMap())
+                .andExpect(jsonPath("$.pageable.sort.empty").value(false))
+                .andExpect(jsonPath("$.pageable.sort.sorted").value(true))
+                .andExpect(jsonPath("$.pageable.sort.unsorted").value(false))
+                .andExpect(jsonPath("$.total_pages").value(page.getTotalPages()))
+                .andExpect(jsonPath("$.total_elements").value(page.getTotalElements()))
+                .andExpect(jsonPath("$.last").value(page.isLast()))
+                .andExpect(jsonPath("$.first").value(page.isFirst()))
+                .andExpect(jsonPath("$.number").value(page.getNumber()))
+                .andExpect(jsonPath("$.size").value(page.getSize()))
+                .andExpect(jsonPath("$.number_of_elements").value(page.getNumberOfElements()))
+                .andExpect(jsonPath("$.empty").value(page.isEmpty()))
+                .andExpect(jsonPath("$.first").value(page.isFirst()))
+                .andExpect(jsonPath("$.sort").isMap())
+                .andDo(print());
+
+        then(commentService).should().getListsByMemberId(testMember.id(), pageable);
+
+        // API Docs
+        result.andDo(document("get-member-comments",
+                pathParameters(
+                        parameterWithName("member-id").description("유저 식별자")
+                ),
+                queryParameters(
+                        parameterWithName("page").description("페이지 번호"),
+                        parameterWithName("size").description("페이지 사이즈"),
+                        parameterWithName("sort").description("정렬 방식")
+                ),
+                responseFields(
+                        fieldWithPath("content").description("댓글 목록"),
+                        fieldWithPath("content[].id").description("식별자"),
+                        fieldWithPath("content[].contents").description("내용"),
+                        fieldWithPath("content[].author").description("작성자"),
+                        fieldWithPath("content[].created_at").description("생성일"),
+                        fieldWithPath("content[].modified_at").description("수정일"),
+                        fieldWithPath("content[].like_count").description("좋아요 수"),
+                        fieldWithPath("content[].post_id").description("게시글 식별자"),
+                        fieldWithPath("pageable").description("페이지 정보"),
+                        fieldWithPath("pageable.offset").description("페이지 오프셋"),
+                        fieldWithPath("pageable.page_size").description("페이지 사이즈"),
+                        fieldWithPath("pageable.paged").description("페이징 여부"),
+                        fieldWithPath("pageable.unpaged").description("페이징 여부"),
+                        fieldWithPath("pageable.page_number").description("페이지 번호"),
+                        fieldWithPath("pageable.sort").description("정렬 정보"),
+                        fieldWithPath("pageable.sort.empty").description("비어있는지 여부"),
+                        fieldWithPath("pageable.sort.sorted").description("정렬 여부"),
+                        fieldWithPath("pageable.sort.unsorted").description("정렬 여부"),
+                        fieldWithPath("total_pages").description("총 페이지 수"),
+                        fieldWithPath("total_elements").description("총 게시글 수"),
+                        fieldWithPath("last").description("마지막 페이지 여부"),
+                        fieldWithPath("first").description("첫번째 페이지 여부"),
+                        fieldWithPath("number").description("현재 페이지 번호"),
+                        fieldWithPath("size").description("페이지 사이즈"),
+                        fieldWithPath("number_of_elements").description("전체 게시글 수"),
+                        fieldWithPath("empty").description("비어있는지 여부"),
+                        fieldWithPath("sort").description("정렬 정보"),
+                        fieldWithPath("sort.empty").description("비어있는지 여부"),
+                        fieldWithPath("sort.sorted").description("정렬 여부"),
+                        fieldWithPath("sort.unsorted").description("정렬 여부"))));
+    }
+
+    @Test
+    void emailVerify_test() throws Exception {
+
+        // given
+        EmailVerify request = new EmailVerify("test@gmail.com");
+        doNothing().when(memberService).emailVerify(eq(request), any(HttpSession.class));
+
+        // when
+        var result = mvc.perform(post("/api/members/{member-id}/email/verify", testMember.id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue())
+                .content(om.writeValueAsString(request)));
+
+        // then
+        result.andExpect(status().isNoContent())
+                .andDo(print());
+
+        then(memberService).should().emailVerify(eq(request), any(HttpSession.class));
+
+        // API Docs
+        result.andDo(document("email-verify",
+                pathParameters(
+                        parameterWithName("member-id").description("유저 식별자")
+                ),
+                requestFields(
+                        fieldWithPath("email").description("인증을 위한 이메일")
+                )));
+    }
+
+    @Test
+    void emailConfirm_test() throws Exception {
+
+        // given
+        EmailConfirm request = new EmailConfirm("test@gmail.com", "123456");
+        doNothing().when(memberService).emailConfirm(any(LoginInfo.class), eq(request), any(HttpSession.class));
+
+        // when
+        var result = mvc.perform(post("/api/members/{member-id}/email/confirm", testMember.id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue())
+                .content(om.writeValueAsString(request)));
+
+        // then
+        result.andExpect(status().isNoContent())
+                .andDo(print());
+
+        then(memberService).should().emailConfirm(any(LoginInfo.class), eq(request), any(HttpSession.class));
+
+        // API Docs
+        result.andDo(document("email-confirm",
+                pathParameters(
+                        parameterWithName("member-id").description("유저 식별자")
+                ),
+                requestFields(
+                        fieldWithPath("email").description("인증을 위한 이메일"),
+                        fieldWithPath("code").description("인증 코드")
+                )));
+    }
+
 }
