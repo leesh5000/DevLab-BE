@@ -293,8 +293,7 @@ public class MemberControllerTest {
 
         // when
         var result = mvc.perform(get("/api/members/{member-id}/posts?page={page}&size={size}&sort={property,direction}", testMember.id(), pageNumber, pageSize, "createdAt,desc")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .contentType(MediaType.APPLICATION_JSON));
 
         // then
         result

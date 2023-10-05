@@ -56,7 +56,7 @@ public class CommentService {
 
         if (optional.isPresent()) {
             Comment comment = optional.get();
-            comment.edit(requestDto.contents());
+            comment.edit(requestDto.contents(), loginInfo);
         } else {
             this.create(requestDto, loginInfo, postId);
         }

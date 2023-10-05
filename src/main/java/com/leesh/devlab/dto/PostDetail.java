@@ -1,6 +1,5 @@
 package com.leesh.devlab.dto;
 
-import com.leesh.devlab.dto.CommentDetail;
 import com.leesh.devlab.domain.post.Category;
 import lombok.Builder;
 

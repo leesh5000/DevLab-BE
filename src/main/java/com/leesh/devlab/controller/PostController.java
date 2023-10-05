@@ -83,10 +83,10 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/{post-id}/likes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/{post-id}/likes", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LikeInfo> createLike(@LoginMember LoginInfo loginInfo, @PathVariable("post-id") Long postId) {
 
-        LikeInfo likeInfo = likeService.create(loginInfo, postId);
+        LikeInfo likeInfo = likeService.createPostLike(loginInfo, postId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(likeInfo);
     }
