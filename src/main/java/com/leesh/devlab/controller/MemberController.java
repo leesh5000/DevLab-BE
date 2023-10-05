@@ -6,9 +6,13 @@ import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.resolver.LoginMember;
 import com.leesh.devlab.service.MemberService;
+import com.leesh.devlab.service.PostService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +25,7 @@ import java.util.Objects;
 public class MemberController {
 
     private final MemberService memberService;
+    private final PostService postService;
 
     @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MyProfile> getMyProfile(@LoginMember LoginInfo loginInfo) {
@@ -64,9 +69,11 @@ public class MemberController {
     }
 
     @GetMapping(value = "/{member-id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> getMemberPosts(@PathVariable("member-id") Long memberId) {
+    public ResponseEntity<Page<PostDetail>> getMemberPosts(@PathVariable("member-id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
 
-        return null;
+        Page<PostDetail> memberPosts = postService.getListsByMemberId(memberId, pageable);
+
+        return ResponseEntity.ok(memberPosts);
     }
 
     private void isAccessible(Long memberId, LoginInfo loginInfo) {
