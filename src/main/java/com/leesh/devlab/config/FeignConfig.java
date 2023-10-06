@@ -1,4 +1,4 @@
-package com.leesh.devlab.configuration;
+package com.leesh.devlab.config;
 
 import feign.FeignException;
 import feign.Logger;
@@ -20,7 +20,7 @@ import org.springframework.http.HttpStatus;
 @EnableFeignClients(basePackages = "com.leesh.devlab")
 @Import(FeignClientsConfiguration.class)
 @Configuration
-public class FeignConfiguration {
+public class FeignConfig {
 
     private final ErrorDecoder errorDecoder = new ErrorDecoder.Default();
 

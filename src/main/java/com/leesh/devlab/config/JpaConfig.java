@@ -1,4 +1,4 @@
-package com.leesh.devlab.configuration;
+package com.leesh.devlab.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @EnableJpaAuditing
 @Configuration
-public class JpaConfiguration {
+public class JpaConfig {
 
     @Bean
     public AuditorAware<String> auditorAware() {

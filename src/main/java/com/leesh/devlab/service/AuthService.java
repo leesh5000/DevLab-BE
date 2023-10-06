@@ -2,7 +2,10 @@ package com.leesh.devlab.service;
 
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.dto.*;
+import com.leesh.devlab.dto.FindAccount;
+import com.leesh.devlab.dto.Login;
+import com.leesh.devlab.dto.RegisterInfo;
+import com.leesh.devlab.dto.TokenRefreshInfo;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
@@ -34,7 +37,7 @@ public class AuthService {
     private final MailService mailService;
     private final MemberService memberService;
 
-    public OauthLogin.Response oauthLogin(Request request) {
+    public Login.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
         OauthAttributes oauthAttributes = getOauthMemberInfo(request);
@@ -44,49 +47,7 @@ public class AuthService {
         Member findMember = memberService.getOrSaveByOauthId(oauthId, oauthAttributes);
 
         // 인증 토큰을 생성한다.
-        LoginInfo loginInfo = LoginInfo.from(findMember);
-        Token accessToken = tokenService.createToken(loginInfo, TokenType.ACCESS);
-        Token refreshToken = tokenService.createToken(loginInfo, TokenType.REFRESH);
-
-        // 유저의 refresh token을 업데이트한다.
-        findMember.updateRefreshToken(refreshToken);
-
-        // 응답 DTO를 생성 후 반환한다.
-        return new OauthLogin.Response(GrantType.BEARER, accessToken, refreshToken);
-    }
-
-    public RefreshTokenInfo refreshToken(String refreshToken) {
-
-        // 리프레시 토큰 검증
-        tokenService.validateToken(refreshToken, TokenType.REFRESH);
-
-        // 검증을 통과했으면, 리프레시 토큰을 통해 유저를 찾는다.
-        // 리프레시 토큰이 탈취 되었을 때, 블락 처리를 할 수 있어야 하기 때문에 DB에서 유저를 찾아야한다.
-        Member member = memberService.getByRefreshToken(refreshToken);
-
-        // 리프레시 토큰이 만료됐으면, 예외를 던진다.
-        if (member.getRefreshToken().isExpired()) {
-            throw new AuthException(ErrorCode.INVALID_TOKEN, "not invalid refresh token");
-        }
-
-        // 새로운 액세스 토큰을 발급한다.
-        Token accessToken = tokenService.createToken(LoginInfo.from(member), TokenType.ACCESS);
-
-        return new RefreshTokenInfo(GrantType.BEARER, accessToken);
-
-    }
-
-    private OauthAttributes getOauthMemberInfo(Request request) {
-
-        // oauth 타입에 맞는 oauth api service 구현체를 가져온다.
-        OauthService oauthService = oauthServiceFactory.getService(request.oauthType());
-
-        // 현재 로그인을 시도한 유저 정보를 가져오기 위해 먼저 토큰을 발급받는다.
-        OauthToken oauthToken = oauthService.requestToken(request.authorizationCode());
-
-        // 토큰을 이용하여 유저 정보를 가져온다.
-        return oauthService.requestMemberInfo(oauthToken.getAccessToken());
-
+        return generateResponse(findMember);
     }
 
     public RegisterInfo.Response register(RegisterInfo.Request request) {
@@ -116,6 +77,10 @@ public class AuthService {
         }
 
         // 토큰을 생성한다.
+        return generateResponse(findMember);
+    }
+
+    private Login.Response generateResponse(Member findMember) {
         LoginInfo loginInfo = LoginInfo.from(findMember);
         Token accessToken = tokenService.createToken(loginInfo, TokenType.ACCESS);
         Token refreshToken = tokenService.createToken(loginInfo, TokenType.REFRESH);
@@ -123,7 +88,41 @@ public class AuthService {
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(refreshToken);
 
-        return new Login.Response(GrantType.BEARER, accessToken, refreshToken);
+        return new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
+    }
+
+    public TokenRefreshInfo refreshToken(String refreshToken) {
+
+        // 리프레시 토큰 검증
+        tokenService.validateToken(refreshToken, TokenType.REFRESH);
+
+        // 검증을 통과했으면, 리프레시 토큰을 통해 유저를 찾는다.
+        // 리프레시 토큰이 탈취 되었을 때, 블락 처리를 할 수 있어야 하기 때문에 DB에서 유저를 찾아야한다.
+        Member member = memberService.getByRefreshToken(refreshToken);
+
+        // 리프레시 토큰이 만료됐으면, 예외를 던진다.
+        if (member.getRefreshToken().isExpired()) {
+            throw new AuthException(ErrorCode.INVALID_TOKEN, "not invalid refresh token");
+        }
+
+        // 새로운 액세스 토큰을 발급한다.
+        Token accessToken = tokenService.createToken(LoginInfo.from(member), TokenType.ACCESS);
+
+        return new TokenRefreshInfo(GrantType.BEARER.getType(), accessToken);
+
+    }
+
+    private OauthAttributes getOauthMemberInfo(Request request) {
+
+        // oauth 타입에 맞는 oauth api service 구현체를 가져온다.
+        OauthService oauthService = oauthServiceFactory.getService(request.oauthType());
+
+        // 현재 로그인을 시도한 유저 정보를 가져오기 위해 먼저 토큰을 발급받는다.
+        OauthToken oauthToken = oauthService.requestToken(request.authorizationCode());
+
+        // 토큰을 이용하여 유저 정보를 가져온다.
+        return oauthService.requestMemberInfo(oauthToken.getAccessToken());
+
     }
 
     // TODO : 추후 HTML 템플릿 처리 할 것

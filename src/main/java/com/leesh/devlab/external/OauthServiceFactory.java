@@ -1,6 +1,6 @@
  package com.leesh.devlab.external;
 
- import com.leesh.devlab.configuration.ApplicationContextProvider;
+ import com.leesh.devlab.config.AppContextProvider;
  import com.leesh.devlab.domain.member.OauthType;
  import com.leesh.devlab.external.implementation.google.GoogleOauthService;
  import com.leesh.devlab.external.implementation.kakao.KakaoOauthService;
@@ -22,7 +22,7 @@
 public class OauthServiceFactory {
 
     private final Map<String, OauthService> oauthServices;
-    private final ApplicationContextProvider contextProvider;
+    private final AppContextProvider contextProvider;
 
     public OauthService getService(OauthType type) {
 

@@ -1,8 +1,6 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.dto.CommentDetail;
-import com.leesh.devlab.dto.CreatePost;
-import com.leesh.devlab.dto.PostDetail;
+import com.leesh.devlab.domain.comment.CommentRepository;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.hashtag.HashtagRepository;
 import com.leesh.devlab.domain.like.Like;
@@ -12,6 +10,9 @@ import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.post.repository.PostRepository;
 import com.leesh.devlab.domain.tag.Tag;
+import com.leesh.devlab.dto.CommentDetail;
+import com.leesh.devlab.dto.CreatePost;
+import com.leesh.devlab.dto.PostDetail;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.LoginInfo;
@@ -26,17 +27,20 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Service
 public class PostService {
 
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final TagService tagService;
     private final HashtagRepository hashtagRepository;
     private final LikeRepository likeRepository;
     private final CommentService commentService;
+    private final MemberService memberService;
 
+    @Transactional
     public CreatePost.Response create(CreatePost.Request requestDto, LoginInfo loginInfo) {
 
         Member member = memberRepository.getReferenceById(loginInfo.id());
@@ -55,6 +59,7 @@ public class PostService {
         return CreatePost.Response.from(postId);
     }
 
+    @Transactional
     public void put(Long postId, CreatePost.Request requestDto, LoginInfo loginInfo) {
 
         Optional<Post> optional = postRepository.findById(postId);
@@ -82,6 +87,7 @@ public class PostService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_RESOURCE, "not found"));
     }
 
+    @Transactional
     public void delete(Long postId, LoginInfo loginInfo) {
 
         Post findPost = getByIdWithMember(postId);
@@ -161,4 +167,20 @@ public class PostService {
 
         return page.map(this::generatePostDetail);
     }
+
+    @Transactional(readOnly = true)
+    public Page<PostDetail> getListsByMemberId(Long memberId, Pageable pageable) {
+
+        memberService.existById(memberId);
+
+        Page<Post> page = postRepository.findAllWithMemberByMemberId(memberId, pageable);
+
+        return page.map(this::generatePostDetail);
+    }
+
+    public Post getById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_RESOURCE, "not found"));
+    }
+
 }

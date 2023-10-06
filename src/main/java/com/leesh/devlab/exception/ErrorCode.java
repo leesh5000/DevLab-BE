@@ -24,9 +24,9 @@ public enum ErrorCode {
     NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),
     ALREADY_REGISTERED_ID(CONFLICT, "M-002", "already registered Id"),
     ALREADY_REGISTERED_NICKNAME(CONFLICT, "M-003", "already registered nickname"),
-    WRONG_PASSWORD(UNAUTHORIZED, "M-004", "Wrong Password"),
-    NO_VERIFIED_EMAIL(UNAUTHORIZED, "M-005", "no verified email"),
-    WRONG_CERT_NUMBER(UNAUTHORIZED, "M-006", "wrong certification number"),
+    WRONG_PASSWORD(FORBIDDEN, "M-004", "Wrong Password"),
+    NO_VERIFIED_EMAIL(FORBIDDEN, "M-005", "no verified email"),
+    WRONG_CERT_NUMBER(FORBIDDEN, "M-006", "wrong certification number"),
     NO_PERMISSION(FORBIDDEN, "M-007", "no permission member."),
 
     /* Post */

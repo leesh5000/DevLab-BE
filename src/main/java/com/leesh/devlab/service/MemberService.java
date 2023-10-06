@@ -1,8 +1,9 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.dto.*;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
+import com.leesh.devlab.domain.post.repository.PostRepository;
+import com.leesh.devlab.dto.*;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
@@ -14,16 +15,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final PostService postService;
     private final PasswordEncoder passwordEncoder;
-    private final CommentService commentService;
     private final MailService mailService;
+    private final PostRepository postRepository;
 
     public MyProfile getMyProfile(LoginInfo loginInfo) {
 
@@ -73,6 +73,7 @@ public class MemberService {
                 .build();
     }
 
+    @Transactional
     public void updateProfile(Long memberId, UpdateProfile updateProfile) {
 
         Member member = getById(memberId);
@@ -85,6 +86,7 @@ public class MemberService {
         member.updateProfile(updateProfile.nickname(), updateProfile.email());
     }
 
+    @Transactional
     public void deleteMember(Long memberId) {
 
         memberRepository.deleteById(memberId);
@@ -124,6 +126,7 @@ public class MemberService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
 
+    @Transactional
     public Member getOrSaveByOauthId(String oauthId, OauthAttributes oauthMember) {
         return memberRepository.findByOauthId(oauthId)
                 .orElseGet(() -> {
@@ -135,6 +138,12 @@ public class MemberService {
     public Member getByLoginId(Login.Request request) {
         return memberRepository.findByLoginId(request.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
+    }
+
+    public void existById(Long memberId) throws BusinessException {
+        if (!memberRepository.existsById(memberId)) {
+            throw new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member");
+        }
     }
 
     public void checkExistMember(String loginId, String nickname) throws BusinessException {

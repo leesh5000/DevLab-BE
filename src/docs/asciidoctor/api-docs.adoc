@@ -1,0 +1,499 @@
+ifndef::snippets[]
+:snippets: ./build/generated-snippets
+endif::[]
+
+:doctype: book
+:icons: font
+:source-highlighter: highlight.js
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+= DevLab APIs =
+
+== *공통* ==
+
+=== *에러 코드* ===
+
+API 요청이 거부될 경우, 에러 코드와 메세지를 참고하여 원인을 파악할 수 있습니다.
+
+|===
+| 에러 코드 | 메세지 | 설명
+
+| `A-001`
+| `401 Unauthorized`
+| `만료된 토큰으로 요청`
+
+| `A-002`
+| `401 Unauthorized`
+| `유효하지 않은 토큰으로 요청`
+
+| `A-003`
+| `401 Unauthorized`
+| `Authorization 헤더 타입이 유효하지 않음`
+
+| `A-004`
+| `401 Unauthorized`
+| `Authorization 헤더가 없는 경우`
+
+| `A-005`
+| `401 Unauthorized`
+| `토큰이 없는 경우`
+
+| `M-001`
+| `404 Not Found`
+| `요청한 리소스가 존재하지 않는 경우`
+
+| `M-002`
+| `409 Confilct`
+| `이미 가입된 ID로 회원가입`
+
+| `M-003`
+| `409 Confilct`
+| `이미 가입된 이메일로 회원가입`
+
+| `M-004`
+| `403 FORBIDDEN`
+| `틀린 비밀번호로 로그인`
+
+| `M-005`
+| `403 FORBIDDEN`
+| `아직 인증 완료되지 않은 이메일을 사용`
+
+| `M-006`
+| `403 FORBIDDEN`
+| `이메일 인증 시, 인증번호가 틀린 경우`
+
+| `M-007`
+| `403 FORBIDDEN`
+| `사용자의 소유가 아닌 리소스에 접근`
+
+| `P-001`
+| `500 Internal Server Error`
+| `게시글 저장에 실패`
+
+| `P-002`
+| `400 Bad Request`
+| `해시태그 개수를 초과하여 게시글을 작성`
+
+| `C-001`
+| `400 Bad Request`
+| `입력값이 유효하지 않음`
+
+| `C-002`
+| `500 Internal Server Error`
+| `이메일 전송 실패`
+
+| `C-003`
+| `404 Not Found`
+| `존재하지 않는 리소스를 요청`
+
+| `C-004`
+| `403 Forbidden`
+| `리소스의 소유자가 아닌 경우`
+|===
+
+=== *서버 상태 확인* ===
+
+==== *Request* ====
+include::{snippets}/health-check/http-request.adoc[]
+
+==== *Response* ====
+include::{snippets}/health-check/http-response.adoc[]
+
+== *인증* ==
+
+=== *소셜 계정으로 로그인* ===
+
+소셜 계정을 통해 서비스에 로그인 합니다.
+
+==== *Request* ====
+include::{snippets}/oauth-login/http-request.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/oauth-login/request-fields.adoc[]
+
+==== *Response* ====
+include::{snippets}/oauth-login/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/oauth-login/response-fields.adoc[]
+
+=== *일반 계정 회원가입* ===
+
+일반 계정으로 회원가입을 요청합니다.
+
+==== *Request* ====
+include::{snippets}/register/http-request.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/register/request-fields.adoc[]
+
+==== *Response* ====
+include::{snippets}/register/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/register/response-fields.adoc[]
+
+=== *일반 계정 로그인* ===
+
+일반 계정으로 로그인을 요청합니다.
+
+===== *Request* =====
+include::{snippets}/login/http-request.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/login/request-fields.adoc[]
+
+==== *Response* ====
+include::{snippets}/login/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/login/response-fields.adoc[]
+
+=== *토큰 재발급* ===
+
+리프레시 토큰을 통해 액세스 토큰을 재발급 받습니다.
+
+==== *Request* ====
+include::{snippets}/refresh-token/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/refresh-token/request-headers.adoc[]
+
+==== *Response* ====
+include::{snippets}/refresh-token/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/refresh-token/response-fields.adoc[]
+
+=== *아이디/비밀번호 찾기* ===
+
+입력 받은 이메일로 가입된 회원을 찾아 아이디와 임시 비밀번호를 발급합니다. 회원은 이메일 인증이 되어 있어야 합니다.
+
+==== *Request* ====
+include::{snippets}/find-account/http-request.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/find-account/request-fields.adoc[]
+
+==== *Response* ====
+include::{snippets}/find-account/http-response.adoc[]
+
+== *유저* ==
+
+=== *내 프로필 조회* ===
+
+현재 로그인 한 유저의 프로필을 조회합니다. 이메일 인증을 하지 않은 회원의 경우 빈 값이 들어올 수 있습니다.
+
+==== *Request* ====
+include::{snippets}/get-my-profile/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/get-my-profile/request-headers.adoc[]
+
+==== *Response* ====
+include::{snippets}/get-my-profile/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/get-my-profile/response-fields.adoc[]
+
+=== *유저 프로필 조회* ===
+
+ID를 통해 다른 유저의 프로필을 조회합니다. Login ID, Email 등과 같은 민감정보는 노출하지 않습니다.
+
+==== *Request* ====
+include::{snippets}/get-profile/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/get-profile/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/get-profile/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/get-profile/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/get-profile/response-fields.adoc[]
+
+=== *프로필 수정* ===
+
+사용자의 프로필을 수정합니다.
+
+==== *Request* ====
+include::{snippets}/update-profile/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/update-profile/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/update-profile/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/update-profile/http-response.adoc[]
+
+=== *유저 삭제* ===
+
+유저를 회원 탈퇴 처리합니다.
+
+==== *Request* ====
+include::{snippets}/delete-member/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/delete-member/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/delete-member/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/delete-member/http-response.adoc[]
+
+=== *유저가 작성한 게시글 페이징 조회* ===
+
+입력으로 받은 식별자의 유저가 작성한 게시글을 페이지 정보와 함께 조회합니다.
+
+==== *Request* ====
+include::{snippets}/get-member-posts/http-request.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/get-member-posts/path-parameters.adoc[]
+
+==== *Query Parameters* ====
+include::{snippets}/get-member-posts/query-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/get-member-posts/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/get-member-posts/response-fields.adoc[]
+
+=== *유저가 작성한 댓글 페이징 조회* ===
+
+입력으로 받은 식별자의 유저가 작성한 댓글을 페이지 정보와 함께 조회합니다.
+
+==== *Request* ====
+include::{snippets}/get-member-comments/http-request.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/get-member-comments/path-parameters.adoc[]
+
+==== *Query Parameters* ====
+include::{snippets}/get-member-comments/query-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/get-member-comments/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/get-member-comments/response-fields.adoc[]
+
+=== *이메일 인증 요청* ===
+
+입력으로 받은 사용자의 이메일로 인증번호를 전송합니다.
+
+==== *Request* ====
+include::{snippets}/email-verify/http-request.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/email-verify/path-parameters.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/email-verify/request-fields.adoc[]
+
+=== *이메일 인증 확인* ===
+
+인증번호를 통해 이메일 인증을 완료합니다.
+
+==== *Request* ====
+include::{snippets}/email-confirm/http-request.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/email-confirm/path-parameters.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/email-confirm/request-fields.adoc[]
+
+==== *Response* ====
+include::{snippets}/email-confirm/http-response.adoc[]
+
+== *게시글* ==
+
+=== *게시글 세부조회* ===
+
+입력으로 받은 식별자의 게시글을 조회합니다.
+
+==== *Request* ====
+include::{snippets}/posts/get-detail/http-request.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/posts/get-detail/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/get-detail/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/posts/get-detail/response-fields.adoc[]
+
+=== *게시글 페이징 조회* ===
+
+게시글을 페이지 정보와 함께 조회합니다.
+
+==== *Request* ====
+include::{snippets}/posts/get-lists/http-request.adoc[]
+
+==== *Query Parameters* ====
+include::{snippets}/posts/get-lists/query-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/get-lists/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/posts/get-lists/response-fields.adoc[]
+
+=== *게시글 작성* ===
+
+입력받은 정보로 게시글을 작성합니다.
+
+==== *Request* ====
+include::{snippets}/posts/create/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/posts/create/request-headers.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/posts/create/request-fields.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/create/http-response.adoc[]
+
+==== *Response Body* ====
+include::{snippets}/posts/create/response-fields.adoc[]
+
+=== *게시글 수정* ===
+
+입력받은 정보로 게시글을 수정합니다. 만약, 해당 식별자의 게시글이 없는 경우에는 새로 생성합니다.
+
+==== *Request* ====
+include::{snippets}/posts/put/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/posts/put/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/posts/put/path-parameters.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/posts/put/request-fields.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/put/http-response.adoc[]
+
+=== *게시글 삭제* ===
+
+입력받은 식별자의 게시글을 삭제합니다.
+
+==== *Request* ====
+include::{snippets}/posts/delete/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/posts/delete/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/posts/delete/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/delete/http-response.adoc[]
+
+== *게시글에 댓글 달기* ==
+
+현재 로그인 한 유저로 입력받은 식별자의 게시글에 댓글을 작성합니다.
+
+==== *Request* ====
+include::{snippets}/posts/create-comment/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/posts/create-comment/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/posts/create-comment/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/create-comment/http-response.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/posts/create-comment/request-fields.adoc[]
+
+== *게시글에 댓글 수정* ==
+
+현재 로그인 한 유저로 입력받은 식별자의 게시글에 댓글을 수정합니다.
+
+==== *Request* ====
+include::{snippets}/posts/put-comment/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/posts/put-comment/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/posts/put-comment/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/put-comment/http-response.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/posts/put-comment/request-fields.adoc[]
+
+== *게시글에 좋아요 하기* ==
+
+현재 로그인 한 유저로 입력받은 식별자의 게시글에 좋아요를 합니다.
+
+==== *Request* ====
+include::{snippets}/posts/create-like/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/posts/create-like/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/posts/create-like/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/posts/create-like/http-response.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/posts/create-like/response-fields.adoc[]
+
+== *댓글* ==
+
+=== *댓글 삭제하기* ==
+
+현재 로그인 한 유저가 작성한 댓글을 삭제합니다.
+
+==== *Request* ====
+include::{snippets}/comments/delete/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/comments/delete/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/comments/delete/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/comments/delete/http-response.adoc[]
+
+=== *댓글에 좋아요하기* ===
+
+현재 로그인 한 유저로 입력받은 식별자의 댓글에 좋아요를 합니다.
+
+==== *Request* ====
+include::{snippets}/comments/create-like/http-request.adoc[]
+
+==== *Request Header* ====
+include::{snippets}/comments/create-like/request-headers.adoc[]
+
+==== *Path Parameters* ====
+include::{snippets}/comments/create-like/path-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/comments/create-like/http-response.adoc[]
+
+==== *Request Body* ====
+include::{snippets}/comments/create-like/response-fields.adoc[]
