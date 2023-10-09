@@ -27,7 +27,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 
         registry.addMapping("/api/**")
-                .allowedOrigins("*")
+                // client에서 withCredentials: true로 요청을 보내면 Access-Control-Allow-Origin은 *를 허용하지 않는다. (정책)
+                .allowedOrigins("http://localhost:5173/")
+                .allowCredentials(true)
                 .allowedMethods(
                         HttpMethod.GET.name(),
                         HttpMethod.POST.name(),
@@ -57,6 +59,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/**", RequestMethod.GET) // GET 요청은 인증 필터를 타지 않도록 설정
                 .excludePathPatterns("/api/auth/**", RequestMethod.ANY) // 인증 API는 인증 필터를 타지 않도록 설정
                 .excludePathPatterns("/api/health", RequestMethod.GET) // health check API는 인증 필터를 타지 않도록 설정
+                .excludePathPatterns("/api/members/ids/**", RequestMethod.GET)
                 .addPathPatterns("/api/members/me", RequestMethod.GET)
         ;
 

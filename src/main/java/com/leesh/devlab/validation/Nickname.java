@@ -20,7 +20,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface Nickname {
 
-    String message() default "Nickname must be at least 2 characters and not more than 9 characters.";
+    String message() default "Nickname must be at least 2 characters and not more than 10 characters.";
     Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
@@ -34,7 +34,7 @@ public @interface Nickname {
                 return false;
             }
 
-            Pattern pattern = Pattern.compile("^.{2,9}$");
+            Pattern pattern = Pattern.compile("^.{2,10}$");
             return pattern.matcher(value).matches();
         }
     }

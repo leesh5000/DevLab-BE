@@ -98,7 +98,7 @@ public class Member extends BaseEntity {
 
     /* 도메인 비즈니스 로직 */
     public void updateRefreshToken(Token refreshToken) {
-        this.refreshToken = new RefreshToken(refreshToken.getValue(), refreshToken.getExpiredAt());
+        this.refreshToken = new RefreshToken(refreshToken.getValue(), System.currentTimeMillis() + refreshToken.getExpiresIn());
     }
 
     public void logout() {

@@ -1,19 +1,21 @@
 package com.leesh.devlab.controller;
 
 import com.leesh.devlab.dto.*;
+import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.service.AuthService;
+import com.leesh.devlab.service.MemberService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import static com.leesh.devlab.util.HttpHeaderUtil.extractAuthorization;
+import java.util.Arrays;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
@@ -21,13 +23,17 @@ import static com.leesh.devlab.util.HttpHeaderUtil.extractAuthorization;
 public class AuthController {
 
     private final AuthService authService;
+    private final MemberService memberService;
+    private final String REFRESH_TOKEN = "refresh_token";
 
     @PostMapping(path = "/oauth-login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Login.Response> oauthLogin(@RequestBody OauthLogin.Request request) {
+    public ResponseEntity<Login.Response> oauthLogin(@RequestBody OauthLogin.Request request, HttpServletResponse response) {
 
-        Login.Response response = authService.oauthLogin(request);
+        Login.Response body = authService.oauthLogin(request);
+        Cookie cookie = generateCookie(body);
+        response.addCookie(cookie);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(body);
     }
 
 
@@ -40,21 +46,37 @@ public class AuthController {
     }
 
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Login.Response> login(@RequestBody @Valid Login.Request request) {
+    public ResponseEntity<Login.Response> login(@RequestBody @Valid Login.Request request, HttpServletResponse response) {
 
-        Login.Response response = authService.login(request);
+        Login.Response body = authService.login(request);
 
-        return ResponseEntity.ok(response);
+        Cookie cookie = generateCookie(body);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping(path = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenRefreshInfo> refreshToken(HttpServletRequest request) {
 
-        String refreshToken = extractAuthorization(request);
+        Cookie cookie = extractCookies(request);
 
-        TokenRefreshInfo refreshDtoTokenInfo = authService.refreshToken(refreshToken);
+        TokenRefreshInfo refreshDtoTokenInfo = authService.refreshToken(cookie.getValue());
 
         return ResponseEntity.ok(refreshDtoTokenInfo);
+    }
+
+    private Cookie extractCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            throw new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN, "refresh token is empty.");
+        }
+
+        return Arrays.stream(cookies)
+                .filter(c -> c.getName().equals(REFRESH_TOKEN))
+                .findAny()
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN, "refresh token is empty."));
     }
 
     @PostMapping(path = "/find-account", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -65,4 +87,28 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping(path = "/id-checks")
+    public ResponseEntity<Void> checkId(@RequestParam String id) {
+
+        memberService.validateLoginId(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(path = "/nickname-checks")
+    public ResponseEntity<Void> checkNickname(@RequestParam String nickname) {
+
+        memberService.validateNickname(nickname);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
+    private Cookie generateCookie(Login.Response body) {
+        Cookie cookie = new Cookie(REFRESH_TOKEN, body.refreshToken().getValue());
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(body.refreshToken().getExpiresIn());
+        return cookie;
+    }
 }
