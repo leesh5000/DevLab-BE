@@ -40,6 +40,10 @@ API 요청이 거부될 경우, 에러 코드와 메세지를 참고하여 원�
 | `401 Unauthorized`
 | `토큰이 없는 경우`
 
+| `A-006`
+| `401 Unauthorized`
+| `리프레시 토큰이 없는 경우`
+
 | `M-001`
 | `404 Not Found`
 | `요청한 리소스가 존재하지 않는 경우`
@@ -116,6 +120,9 @@ include::{snippets}/oauth-login/request-fields.adoc[]
 ==== *Response* ====
 include::{snippets}/oauth-login/http-response.adoc[]
 
+==== *Response Header* ====
+include::{snippets}/oauth-login/response-headers.adoc[]
+
 ==== *Response Body* ====
 include::{snippets}/oauth-login/response-fields.adoc[]
 
@@ -148,6 +155,9 @@ include::{snippets}/login/request-fields.adoc[]
 ==== *Response* ====
 include::{snippets}/login/http-response.adoc[]
 
+==== *Response Header* ====
+include::{snippets}/login/response-headers.adoc[]
+
 ==== *Response Body* ====
 include::{snippets}/login/response-fields.adoc[]
 
@@ -179,6 +189,32 @@ include::{snippets}/find-account/request-fields.adoc[]
 
 ==== *Response* ====
 include::{snippets}/find-account/http-response.adoc[]
+
+=== *ID 중복 체크* ===
+
+입력 받은 ID가 이미 가입되어 있는지 확인합니다.
+
+==== *Request* ====
+include::{snippets}/check-id/http-request.adoc[]
+
+==== *Query Parameters* ====
+include::{snippets}/check-id/query-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/check-id/http-response.adoc[]
+
+=== *닉네임 중복 체크* ===
+
+입력 받은 닉네임이 이미 가입되어 있는지 확인합니다.
+
+==== *Request* ====
+include::{snippets}/check-nickname/http-request.adoc[]
+
+==== *Query Parameters* ====
+include::{snippets}/check-nickname/query-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/check-nickname/http-response.adoc[]
 
 == *유저* ==
 

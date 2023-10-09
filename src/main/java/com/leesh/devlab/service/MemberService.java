@@ -169,4 +169,18 @@ public class MemberService {
         member.verifyEmail(requestDto.email());
 
     }
+
+    public void validateLoginId(String loginId) {
+
+        if (memberRepository.existsByLoginId(loginId)) {
+            throw new BusinessException(ErrorCode.ALREADY_REGISTERED_ID, "already registered id, id = " + loginId);
+        }
+    }
+
+    public void validateNickname(String nickname) {
+
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new BusinessException(ErrorCode.ALREADY_REGISTERED_NICKNAME, "already registered nickname, nickname = " + nickname);
+        }
+    }
 }

@@ -61,7 +61,7 @@ public class JwtService implements TokenService {
     @Override
     public Token createToken(LoginInfo loginInfo, TokenType tokenType) {
 
-        long expiredAt = System.currentTimeMillis() + tokenType.getExpiresInMills();
+        long expiredAt = System.currentTimeMillis() + tokenType.getExpiresInMillis();
         String value;
 
         if (tokenType == TokenType.ACCESS) {
@@ -89,7 +89,7 @@ public class JwtService implements TokenService {
                     .compact();
         }
 
-        return new Jwt(tokenType, value, expiredAt);
+        return new Jwt(tokenType, value, tokenType.getExpiresIn());
     }
 
     // 이 메소드의 파라미터인 토큰은 해당 시점에서는 Access Token 또는 Refresh Token 인지 알 수 없다.

@@ -19,6 +19,7 @@ public enum ErrorCode {
     INVALID_AUTHORIZATION_HEADER(UNAUTHORIZED, "A-003", "Invalid Authorization Header"),
     NOT_EXIST_AUTHORIZATION(UNAUTHORIZED, "A-004", "Authorization is empty"),
     NOT_EXIST_TOKEN(UNAUTHORIZED, "A-005", "Token is empty"),
+    NOT_EXIST_REFRESH_TOKEN(UNAUTHORIZED, "A-006", "Refresh Token is empty"),
 
     /* Member */
     NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),
