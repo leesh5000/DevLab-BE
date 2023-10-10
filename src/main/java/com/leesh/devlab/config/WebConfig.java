@@ -4,9 +4,9 @@ import com.leesh.devlab.interceptor.AuthInterceptor;
 import com.leesh.devlab.interceptor.AuthInterceptorProxy;
 import com.leesh.devlab.resolver.LoginMemberArgResolver;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -22,21 +22,18 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
     private final LoginMemberArgResolver loginMemberArgResolver;
+    @Value("${custom.cors.allowed-origin}")
+    private String allowedOrigins;
+
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
 
-        registry.addMapping("/api/**")
-                // client에서 withCredentials: true로 요청을 보내면 Access-Control-Allow-Origin은 *를 허용하지 않는다. (정책)
-                .allowedOrigins("http://localhost:5173/")
+        registry.addMapping("/**")
+                .allowedOrigins(allowedOrigins)
                 .allowCredentials(true)
-                .allowedMethods(
-                        HttpMethod.GET.name(),
-                        HttpMethod.POST.name(),
-                        HttpMethod.PUT.name(),
-                        HttpMethod.PATCH.name(),
-                        HttpMethod.DELETE.name(),
-                        HttpMethod.OPTIONS.name())
+                .allowedMethods("*")
+                .allowedHeaders("*")
                 .maxAge(3600);
 
     }
