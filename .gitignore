@@ -841,4 +841,7 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
+_wildcard.devlab.com.p12
+src/test/java/JasyptTest.java
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,java,python,c++,intellij+all,visualstudio,visualstudiocode

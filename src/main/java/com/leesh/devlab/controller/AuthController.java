@@ -10,9 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -30,8 +28,8 @@ public class AuthController {
     public ResponseEntity<Login.Response> oauthLogin(@RequestBody OauthLogin.Request request, HttpServletResponse response) {
 
         Login.Response body = authService.oauthLogin(request);
-        Cookie cookie = generateCookie(body);
-        response.addCookie(cookie);
+        ResponseCookie cookie = generateCookie(body);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(body);
     }
@@ -49,9 +47,8 @@ public class AuthController {
     public ResponseEntity<Login.Response> login(@RequestBody @Valid Login.Request request, HttpServletResponse response) {
 
         Login.Response body = authService.login(request);
-
-        Cookie cookie = generateCookie(body);
-        response.addCookie(cookie);
+        ResponseCookie cookie = generateCookie(body);
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(body);
     }
@@ -104,11 +101,15 @@ public class AuthController {
     }
 
 
-    private Cookie generateCookie(Login.Response body) {
-        Cookie cookie = new Cookie(REFRESH_TOKEN, body.refreshToken().getValue());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(body.refreshToken().getExpiresIn());
-        return cookie;
+    private ResponseCookie generateCookie(Login.Response body) {
+
+        return ResponseCookie.from(REFRESH_TOKEN, body.refreshToken().getValue())
+                .httpOnly(true)
+                .domain("devlab.com")
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(body.refreshToken().getExpiresIn())
+                .build();
     }
 }
