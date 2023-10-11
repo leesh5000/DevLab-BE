@@ -10,6 +10,7 @@ import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.AuthService;
 import com.leesh.devlab.service.MemberService;
 import config.WebMvcTestConfig;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -24,7 +25,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
+import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -218,12 +222,14 @@ class AuthControllerTest {
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
         TokenRefreshInfo response = new TokenRefreshInfo(GrantType.BEARER.getType(), accessToken);
 
+        Cookie cookie = new Cookie("refresh_token", refreshToken.getValue());
+
         given(authService.refreshToken(refreshToken.getValue()))
                 .willReturn(response);
 
         // when
         var result = mvc.perform(post("/api/auth/refresh-token")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + refreshToken.getValue())
+                .cookie(cookie)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
@@ -242,8 +248,8 @@ class AuthControllerTest {
         // API Docs
         result
                 .andDo(document("refresh-token",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("리프레쉬 토큰")
+                        requestCookies(
+                                cookieWithName("refresh_token").description("리프레시 토큰 (Http Only)")
                         ),
                         responseFields(
                                 fieldWithPath("grant_type").description("토큰 인증 유형"),

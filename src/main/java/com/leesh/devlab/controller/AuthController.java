@@ -63,19 +63,6 @@ public class AuthController {
         return ResponseEntity.ok(refreshDtoTokenInfo);
     }
 
-    private Cookie extractCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies == null) {
-            throw new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN, "refresh token is empty.");
-        }
-
-        return Arrays.stream(cookies)
-                .filter(c -> c.getName().equals(REFRESH_TOKEN))
-                .findAny()
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN, "refresh token is empty."));
-    }
-
     @PostMapping(path = "/find-account", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> findAccount(@RequestBody FindAccount request) {
 
@@ -111,5 +98,18 @@ public class AuthController {
                 .path("/")
                 .maxAge(body.refreshToken().getExpiresIn())
                 .build();
+    }
+
+    private Cookie extractCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            throw new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN, "refresh token is empty.");
+        }
+
+        return Arrays.stream(cookies)
+                .filter(c -> c.getName().equals(REFRESH_TOKEN))
+                .findAny()
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN, "refresh token is empty."));
     }
 }
