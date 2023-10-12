@@ -34,7 +34,8 @@ public @interface Nickname {
                 return false;
             }
 
-            Pattern pattern = Pattern.compile("^.{2,10}$");
+            // 한글, 영어, 숫자로 된 2~10자리
+            Pattern pattern = Pattern.compile("^[a-z0-9가-힣]{2,10}$");
             return pattern.matcher(value).matches();
         }
     }

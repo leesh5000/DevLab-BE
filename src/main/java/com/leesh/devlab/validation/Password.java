@@ -34,7 +34,8 @@ public @interface Password {
                 return false;
             }
 
-            Pattern pattern = Pattern.compile("^.{4,30}$");
+            // 4~30자리
+            Pattern pattern = Pattern.compile("^.{6,30}$");
             return pattern.matcher(value).matches();
         }
     }

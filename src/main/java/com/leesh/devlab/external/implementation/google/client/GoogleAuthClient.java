@@ -16,10 +16,10 @@ import java.util.Map;
 public interface GoogleAuthClient {
 
     @PostMapping(value = "/token", consumes = "application/json")
-    GoogleToken requestToken(@RequestHeader("Content-Type") String contentType, Map<String, Object> request);
+    GoogleToken fetchToken(@RequestHeader("Content-Type") String contentType, Map<String, Object> request);
 
     @PostMapping(value = "/tokeninfo?id_token={idToken}", consumes = "application/json")
-    GoogleAttributes requestMemberInfo(@RequestHeader("Content-type") String contentType,
-                                       @PathVariable("idToken") String idToken);
+    GoogleAttributes fetchAttributes(@RequestHeader("Content-type") String contentType,
+                                     @PathVariable("idToken") String idToken);
 
 }

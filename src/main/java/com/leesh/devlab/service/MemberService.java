@@ -113,7 +113,7 @@ public class MemberService {
 
     public Member getByRefreshToken(String refreshToken) {
         return memberRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new AuthException(ErrorCode.INVALID_TOKEN, "not invalid refresh token"));
+                .orElseThrow(() -> new AuthException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by refresh token = " + refreshToken));
     }
 
     public Member getById(Long memberId) {

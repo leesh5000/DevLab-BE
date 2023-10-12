@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface NaverApiClient {
 
     @GetMapping(value = "/v1/nid/me", consumes = "application/json")
-    NaverAttributes requestMemberInfo(@RequestHeader("Content-type") String contentType,
-                                      @RequestHeader("Authorization") String accessToken);
+    NaverAttributes fetchAttributes(@RequestHeader("Content-type") String contentType,
+                                    @RequestHeader("Authorization") String accessToken);
 }

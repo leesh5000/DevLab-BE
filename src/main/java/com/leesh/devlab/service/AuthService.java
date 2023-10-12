@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.leesh.devlab.dto.OauthLogin.Request;
 
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Service
 public class AuthService {
 
@@ -37,19 +37,21 @@ public class AuthService {
     private final MailService mailService;
     private final MemberService memberService;
 
+    @Transactional
     public Login.Response oauthLogin(Request request) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
-        OauthAttributes oauthAttributes = getOauthMemberInfo(request);
+        OauthAttributes oauthAttributes = getOauthAttributes(request);
 
         // Oauth Provider 에서 가져온 사용자 식별값을 이용하여 DB에서 가입된 회원을 찾는다. 만약 회원가입한 유저가 아니라면, 신규 가입을 하고 가져온다.
         String oauthId = oauthAttributes.getOauthId();
         Member findMember = memberService.getOrSaveByOauthId(oauthId, oauthAttributes);
 
         // 인증 토큰을 생성한다.
-        return generateResponse(findMember);
+        return generateResponseToken(findMember);
     }
 
+    @Transactional
     public RegisterInfo.Response register(RegisterInfo.Request request) {
 
         // 이미 가입된 유저인지 확인한다.
@@ -67,6 +69,7 @@ public class AuthService {
         return new RegisterInfo.Response(id);
     }
 
+    @Transactional
     public Login.Response login(Login.Request request) {
 
         Member findMember = memberService.getByLoginId(request);
@@ -77,10 +80,10 @@ public class AuthService {
         }
 
         // 토큰을 생성한다.
-        return generateResponse(findMember);
+        return generateResponseToken(findMember);
     }
 
-    private Login.Response generateResponse(Member findMember) {
+    private Login.Response generateResponseToken(Member findMember) {
         LoginInfo loginInfo = LoginInfo.from(findMember);
         Token accessToken = tokenService.createToken(loginInfo, TokenType.ACCESS);
         Token refreshToken = tokenService.createToken(loginInfo, TokenType.REFRESH);
@@ -112,16 +115,16 @@ public class AuthService {
 
     }
 
-    private OauthAttributes getOauthMemberInfo(Request request) {
+    private OauthAttributes getOauthAttributes(Request request) {
 
         // oauth 타입에 맞는 oauth api service 구현체를 가져온다.
         OauthService oauthService = oauthServiceFactory.getService(request.oauthType());
 
         // 현재 로그인을 시도한 유저 정보를 가져오기 위해 먼저 토큰을 발급받는다.
-        OauthToken oauthToken = oauthService.requestToken(request.authorizationCode());
+        OauthToken oauthToken = oauthService.fetchToken(request.authorizationCode());
 
         // 토큰을 이용하여 유저 정보를 가져온다.
-        return oauthService.requestMemberInfo(oauthToken.getAccessToken());
+        return oauthService.fetchAttributes(oauthToken.getAccessToken());
 
     }
 
@@ -149,4 +152,11 @@ public class AuthService {
         return String.valueOf((int) (Math.random() * 899999) + 100000);
     }
 
+    public void logout(String refreshToken) {
+
+        memberRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by refresh token = " + refreshToken))
+                .logout();
+
+    }
 }

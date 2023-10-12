@@ -35,7 +35,7 @@ public class NaverOauthService implements OauthService {
     }
 
     @Override
-    public OauthToken requestToken(String authorizationCode) {
+    public OauthToken fetchToken(String authorizationCode) {
 
         Map<String, Object> request = new HashMap<>();
         request.put("grant_type", "authorization_code");
@@ -44,11 +44,11 @@ public class NaverOauthService implements OauthService {
         request.put("code", authorizationCode);
         request.put("state", "RANDOM_STATE");
 
-        return authClient.requestToken(MediaType.APPLICATION_FORM_URLENCODED_VALUE, request);
+        return authClient.fetchToken(MediaType.APPLICATION_FORM_URLENCODED_VALUE, request);
     }
 
     @Override
-    public OauthAttributes requestMemberInfo(String accessToken) {
-        return apiClient.requestMemberInfo(MediaType.APPLICATION_JSON_VALUE, "Bearer " + accessToken);
+    public OauthAttributes fetchAttributes(String accessToken) {
+        return apiClient.fetchAttributes(MediaType.APPLICATION_JSON_VALUE, "Bearer " + accessToken);
     }
 }

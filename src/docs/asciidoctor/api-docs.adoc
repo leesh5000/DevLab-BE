@@ -161,15 +161,22 @@ include::{snippets}/login/response-headers.adoc[]
 ==== *Response Body* ====
 include::{snippets}/login/response-fields.adoc[]
 
+=== *로그아웃* ===
+
+로그아웃을 요청합니다. (현재 로그인한 유저의 토큰을 만료)
+
+==== *Request* ====
+include::{snippets}/logout/http-request.adoc[]
+
+==== *Response* ====
+include::{snippets}/logout/http-response.adoc[]
+
 === *토큰 재발급* ===
 
-리프레시 토큰을 통해 액세스 토큰을 재발급 받습니다.
+리프레시 토큰이 담긴 쿠키(HttpOnly)를 통해 액세스 토큰을 재발급 받습니다.
 
 ==== *Request* ====
 include::{snippets}/refresh-token/http-request.adoc[]
-
-==== *Request Header* ====
-include::{snippets}/refresh-token/request-headers.adoc[]
 
 ==== *Response* ====
 include::{snippets}/refresh-token/http-response.adoc[]
