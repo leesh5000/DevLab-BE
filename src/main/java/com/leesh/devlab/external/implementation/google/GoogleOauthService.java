@@ -14,10 +14,10 @@ import java.util.Map;
 @Component
 public class GoogleOauthService implements OauthService {
 
-    private GoogleAuthClient googleAuthClient;
-    private String clientId;
-    private String clientSecret;
-    private String redirectUri;
+    private final GoogleAuthClient googleAuthClient;
+    private final String clientId;
+    private final String clientSecret;
+    private final String redirectUri;
 
     public GoogleOauthService(GoogleAuthClient googleAuthClient,
                               @Value("${oauth.google.id}") String clientId,

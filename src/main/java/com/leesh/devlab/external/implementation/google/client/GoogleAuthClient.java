@@ -9,9 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Map;
 
-/**
- * 참고 : https://developers.google.com/identity/openid-connect/openid-connect?hl=ko#scope-param
- */
 @FeignClient(url = "https://oauth2.googleapis.com", name = "googleAuthClient")
 public interface GoogleAuthClient {
 

@@ -2,7 +2,6 @@ package com.leesh.devlab.service;
 
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.domain.post.repository.PostRepository;
 import com.leesh.devlab.dto.*;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
@@ -23,7 +22,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
-    private final PostRepository postRepository;
 
     public MyProfile getMyProfile(LoginInfo loginInfo) {
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.post.Category;
 import com.leesh.devlab.domain.post.Post;
+import com.leesh.devlab.validation.Contents;
 import com.leesh.devlab.validation.Tags;
 
 import java.util.Set;
@@ -13,7 +14,7 @@ public class CreatePost {
     private CreatePost() {
     }
 
-    public record Request(String title, String contents, Category category, @Tags @JsonProperty("tags") Set<String> tagNames) {
+    public record Request(String title, @Contents String contents, Category category, @Tags @JsonProperty("tags") Set<String> tagNames) {
 
         public Post toEntity(Member member) {
 

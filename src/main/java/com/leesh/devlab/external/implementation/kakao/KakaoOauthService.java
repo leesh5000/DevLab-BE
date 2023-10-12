@@ -14,11 +14,11 @@ import java.util.Map;
 @Component
 public class KakaoOauthService implements OauthService {
 
-    private KakaoAuthClient kakaoAuthClient;
-    private KakaoApiClient kakaoApiClient;
-    private String clientId;
-    private String clientSecret;
-    private String redirectUri;
+    private final KakaoAuthClient kakaoAuthClient;
+    private final KakaoApiClient kakaoApiClient;
+    private final String clientId;
+    private final String clientSecret;
+    private final String redirectUri;
 
     public KakaoOauthService(
             KakaoAuthClient kakaoAuthClient,

@@ -15,10 +15,10 @@ import java.util.Map;
 @Component
 public class NaverOauthService implements OauthService {
 
-    private NaverAuthClient authClient;
-    private NaverApiClient apiClient;
-    private String clientId;
-    private String clientSecret;
+    private final NaverAuthClient authClient;
+    private final NaverApiClient apiClient;
+    private final String clientId;
+    private final String clientSecret;
 
 
     public NaverOauthService(
