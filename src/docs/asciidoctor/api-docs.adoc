@@ -447,7 +447,7 @@ include::{snippets}/posts/delete/path-parameters.adoc[]
 ==== *Response* ====
 include::{snippets}/posts/delete/http-response.adoc[]
 
-== *게시글에 댓글 달기* ==
+=== *게시글에 댓글 달기* ===
 
 현재 로그인 한 유저로 입력받은 식별자의 게시글에 댓글을 작성합니다.
 
@@ -466,7 +466,7 @@ include::{snippets}/posts/create-comment/http-response.adoc[]
 ==== *Request Body* ====
 include::{snippets}/posts/create-comment/request-fields.adoc[]
 
-== *게시글에 댓글 수정* ==
+=== *게시글에 댓글 수정* ===
 
 현재 로그인 한 유저로 입력받은 식별자의 게시글에 댓글을 수정합니다.
 
@@ -485,7 +485,7 @@ include::{snippets}/posts/put-comment/http-response.adoc[]
 ==== *Request Body* ====
 include::{snippets}/posts/put-comment/request-fields.adoc[]
 
-== *게시글에 좋아요 하기* ==
+=== *게시글에 좋아요 하기* ===
 
 현재 로그인 한 유저로 입력받은 식별자의 게시글에 좋아요를 합니다.
 
@@ -506,7 +506,7 @@ include::{snippets}/posts/create-like/response-fields.adoc[]
 
 == *댓글* ==
 
-=== *댓글 삭제하기* ==
+=== *댓글 삭제하기* ===
 
 현재 로그인 한 유저가 작성한 댓글을 삭제합니다.
 
