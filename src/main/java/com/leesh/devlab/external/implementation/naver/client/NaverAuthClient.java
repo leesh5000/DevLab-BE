@@ -12,8 +12,8 @@ import java.util.Map;
 public interface NaverAuthClient {
 
     @PostMapping(value = "/oauth2.0/token", consumes = "application/json")
-    NaverToken requestToken(@RequestHeader("Content-Type") String contentType,
-                            @SpringQueryMap Map<String, Object> request
+    NaverToken fetchToken(@RequestHeader("Content-Type") String contentType,
+                          @SpringQueryMap Map<String, Object> request
     );
 
 }

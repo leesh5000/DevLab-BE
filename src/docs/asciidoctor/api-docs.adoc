@@ -161,15 +161,22 @@ include::{snippets}/login/response-headers.adoc[]
 ==== *Response Body* ====
 include::{snippets}/login/response-fields.adoc[]
 
+=== *로그아웃* ===
+
+로그아웃을 요청합니다. (현재 로그인한 유저의 토큰을 만료)
+
+==== *Request* ====
+include::{snippets}/logout/http-request.adoc[]
+
+==== *Response* ====
+include::{snippets}/logout/http-response.adoc[]
+
 === *토큰 재발급* ===
 
-리프레시 토큰을 통해 액세스 토큰을 재발급 받습니다.
+리프레시 토큰이 담긴 쿠키(HttpOnly)를 통해 액세스 토큰을 재발급 받습니다.
 
 ==== *Request* ====
 include::{snippets}/refresh-token/http-request.adoc[]
-
-==== *Request Header* ====
-include::{snippets}/refresh-token/request-headers.adoc[]
 
 ==== *Response* ====
 include::{snippets}/refresh-token/http-response.adoc[]
@@ -440,7 +447,7 @@ include::{snippets}/posts/delete/path-parameters.adoc[]
 ==== *Response* ====
 include::{snippets}/posts/delete/http-response.adoc[]
 
-== *게시글에 댓글 달기* ==
+=== *게시글에 댓글 달기* ===
 
 현재 로그인 한 유저로 입력받은 식별자의 게시글에 댓글을 작성합니다.
 
@@ -459,7 +466,7 @@ include::{snippets}/posts/create-comment/http-response.adoc[]
 ==== *Request Body* ====
 include::{snippets}/posts/create-comment/request-fields.adoc[]
 
-== *게시글에 댓글 수정* ==
+=== *게시글에 댓글 수정* ===
 
 현재 로그인 한 유저로 입력받은 식별자의 게시글에 댓글을 수정합니다.
 
@@ -478,7 +485,7 @@ include::{snippets}/posts/put-comment/http-response.adoc[]
 ==== *Request Body* ====
 include::{snippets}/posts/put-comment/request-fields.adoc[]
 
-== *게시글에 좋아요 하기* ==
+=== *게시글에 좋아요 하기* ===
 
 현재 로그인 한 유저로 입력받은 식별자의 게시글에 좋아요를 합니다.
 
@@ -499,7 +506,7 @@ include::{snippets}/posts/create-like/response-fields.adoc[]
 
 == *댓글* ==
 
-=== *댓글 삭제하기* ==
+=== *댓글 삭제하기* ===
 
 현재 로그인 한 유저가 작성한 댓글을 삭제합니다.
 

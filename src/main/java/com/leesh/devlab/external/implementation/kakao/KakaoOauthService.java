@@ -14,11 +14,11 @@ import java.util.Map;
 @Component
 public class KakaoOauthService implements OauthService {
 
-    private KakaoAuthClient kakaoAuthClient;
-    private KakaoApiClient kakaoApiClient;
-    private String clientId;
-    private String clientSecret;
-    private String redirectUri;
+    private final KakaoAuthClient kakaoAuthClient;
+    private final KakaoApiClient kakaoApiClient;
+    private final String clientId;
+    private final String clientSecret;
+    private final String redirectUri;
 
     public KakaoOauthService(
             KakaoAuthClient kakaoAuthClient,
@@ -36,7 +36,7 @@ public class KakaoOauthService implements OauthService {
     }
 
     @Override
-    public OauthToken requestToken(String authorizationCode) {
+    public OauthToken fetchToken(String authorizationCode) {
 
         String contentType = "application/x-www-form-urlencoded;charset=utf-8";
 
@@ -47,15 +47,15 @@ public class KakaoOauthService implements OauthService {
         request.put("code", authorizationCode);
         request.put("redirect_uri", redirectUri);
 
-        return kakaoAuthClient.requestToken(contentType, request);
+        return kakaoAuthClient.fetchToken(contentType, request);
     }
 
     @Override
-    public OauthAttributes requestMemberInfo(String accessToken) {
+    public OauthAttributes fetchAttributes(String accessToken) {
 
         String contentType = "application/x-www-form-urlencoded;charset=utf-8";
 
-        return kakaoApiClient.requestMemberInfo(contentType, "Bearer " + accessToken);
+        return kakaoApiClient.fetchAttributes(contentType, "Bearer " + accessToken);
     }
 
 }

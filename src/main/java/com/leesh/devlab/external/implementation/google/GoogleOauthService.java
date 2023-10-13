@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.google;
 
-import com.leesh.devlab.external.OauthService;
 import com.leesh.devlab.external.OauthAttributes;
+import com.leesh.devlab.external.OauthService;
 import com.leesh.devlab.external.OauthToken;
 import com.leesh.devlab.external.implementation.google.client.GoogleAuthClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,10 +14,10 @@ import java.util.Map;
 @Component
 public class GoogleOauthService implements OauthService {
 
-    private GoogleAuthClient googleAuthClient;
-    private String clientId;
-    private String clientSecret;
-    private String redirectUri;
+    private final GoogleAuthClient googleAuthClient;
+    private final String clientId;
+    private final String clientSecret;
+    private final String redirectUri;
 
     public GoogleOauthService(GoogleAuthClient googleAuthClient,
                               @Value("${oauth.google.id}") String clientId,
@@ -31,7 +31,7 @@ public class GoogleOauthService implements OauthService {
     }
 
     @Override
-    public OauthToken requestToken(String authorizationCode) {
+    public OauthToken fetchToken(String authorizationCode) {
 
         Map<String, Object> request = new HashMap<>();
         request.put("grant_type", "authorization_code");
@@ -40,11 +40,11 @@ public class GoogleOauthService implements OauthService {
         request.put("code", authorizationCode);
         request.put("redirect_uri", redirectUri);
 
-        return googleAuthClient.requestToken(MediaType.APPLICATION_FORM_URLENCODED_VALUE, request);
+        return googleAuthClient.fetchToken(MediaType.APPLICATION_FORM_URLENCODED_VALUE, request);
     }
 
     @Override
-    public OauthAttributes requestMemberInfo(String accessToken) {
-        return googleAuthClient.requestMemberInfo(MediaType.APPLICATION_JSON_VALUE, accessToken);
+    public OauthAttributes fetchAttributes(String accessToken) {
+        return googleAuthClient.fetchAttributes(MediaType.APPLICATION_JSON_VALUE, accessToken);
     }
 }

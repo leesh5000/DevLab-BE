@@ -8,8 +8,8 @@ package com.leesh.devlab.external;
  */
 public interface OauthService {
 
-    OauthToken requestToken(String authorizationCode);
+    OauthToken fetchToken(String authorizationCode);
 
-    OauthAttributes requestMemberInfo(String accessToken);
+    OauthAttributes fetchAttributes(String accessToken);
 
 }

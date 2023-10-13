@@ -9,17 +9,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Map;
 
-/**
- * 참고 : https://developers.google.com/identity/openid-connect/openid-connect?hl=ko#scope-param
- */
 @FeignClient(url = "https://oauth2.googleapis.com", name = "googleAuthClient")
 public interface GoogleAuthClient {
 
     @PostMapping(value = "/token", consumes = "application/json")
-    GoogleToken requestToken(@RequestHeader("Content-Type") String contentType, Map<String, Object> request);
+    GoogleToken fetchToken(@RequestHeader("Content-Type") String contentType, Map<String, Object> request);
 
     @PostMapping(value = "/tokeninfo?id_token={idToken}", consumes = "application/json")
-    GoogleAttributes requestMemberInfo(@RequestHeader("Content-type") String contentType,
-                                       @PathVariable("idToken") String idToken);
+    GoogleAttributes fetchAttributes(@RequestHeader("Content-type") String contentType,
+                                     @PathVariable("idToken") String idToken);
 
 }

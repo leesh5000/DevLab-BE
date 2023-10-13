@@ -56,7 +56,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/**", RequestMethod.GET) // GET 요청은 인증 필터를 타지 않도록 설정
                 .excludePathPatterns("/api/auth/**", RequestMethod.ANY) // 인증 API는 인증 필터를 타지 않도록 설정
                 .excludePathPatterns("/api/health", RequestMethod.GET) // health check API는 인증 필터를 타지 않도록 설정
-                .excludePathPatterns("/api/members/ids/**", RequestMethod.GET)
                 .addPathPatterns("/api/members/me", RequestMethod.GET)
         ;
 

@@ -34,7 +34,8 @@ public @interface LoginId {
                 return false;
             }
 
-            Pattern pattern = Pattern.compile("^.{2,20}$");
+            // 영어, 숫자로 된 4~20자리
+            Pattern pattern = Pattern.compile("^[a-z0-9]{4,20}$");
             return pattern.matcher(value).matches();
         }
     }

@@ -12,6 +12,6 @@ import java.util.Map;
 public interface KakaoAuthClient {
 
     @PostMapping(value = "/oauth/token", consumes = "application/json")
-    KakaoToken requestToken(@RequestHeader("Content-Type") String contentType, @SpringQueryMap Map<String, Object> request);
+    KakaoToken fetchToken(@RequestHeader("Content-Type") String contentType, @SpringQueryMap Map<String, Object> request);
 
 }

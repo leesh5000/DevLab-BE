@@ -8,8 +8,11 @@ import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.AuthService;
+import com.leesh.devlab.service.CookieService;
 import com.leesh.devlab.service.MemberService;
 import config.WebMvcTestConfig;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -18,14 +21,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static com.leesh.devlab.service.CookieService.COOKIE_DOMAIN;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.cookies.CookieDocumentation.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -51,6 +61,9 @@ class AuthControllerTest {
     @MockBean
     private MemberService memberService;
 
+    @MockBean
+    private CookieService cookieService;
+
     @Test
     void oauthLogin_test() throws Exception {
 
@@ -59,23 +72,37 @@ class AuthControllerTest {
         Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresIn());
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
 
-        OauthLogin.Request request = new OauthLogin.Request(OauthType.NAVER, authorizationCode);
-        Login.Response response = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
+        OauthLogin.Request requestBody = new OauthLogin.Request(OauthType.NAVER, authorizationCode);
+        Login.Response responseBody = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
 
-        given(authService.oauthLogin(request))
-                .willReturn(response);
+        ResponseCookie cookie = ResponseCookie.from(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue())
+                .httpOnly(true)
+                .domain(COOKIE_DOMAIN)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(responseBody.refreshToken().getExpiresIn())
+                .build();
+
+        given(authService.oauthLogin(requestBody))
+                .willReturn(responseBody);
+
+        given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
+                .willReturn(cookie);
 
         // when
         ResultActions result = mvc.perform(post("/api/auth/oauth-login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(request)));
+                .content(om.writeValueAsString(requestBody)));
 
         // then
         result
                 .andExpect(status().isOk())
-                .andExpect(cookie().value("refresh_token", refreshToken.getValue()))
-                .andExpect(cookie().maxAge("refresh_token", refreshToken.getExpiresIn()))
+                .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
+                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresIn()))
+                .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
+                .andExpect(cookie().httpOnly(responseBody.refreshToken().getTokenType().name(), true))
                 .andExpect(jsonPath("$.grant_type").value(GrantType.BEARER.getType()))
                 .andExpect(jsonPath("$.access_token").exists())
                 .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
@@ -87,7 +114,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.refresh_token.expires_in").value(refreshToken.getExpiresIn()))
                 .andDo(print());
 
-        then(authService).should().oauthLogin(request);
+        then(authService).should().oauthLogin(requestBody);
 
         // API Docs
         result
@@ -153,26 +180,39 @@ class AuthControllerTest {
     void login_test() throws Exception {
 
         // given
-        Login.Request request = new Login.Request("test", "test");
-
         Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresIn());
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
-        Login.Response response = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
+        Login.Request requestBody = new Login.Request("test", "test");
+        Login.Response responseBody = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
 
-        given(authService.login(request))
-                .willReturn(response);
+        ResponseCookie cookie = ResponseCookie.from(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue())
+                .httpOnly(true)
+                .domain(COOKIE_DOMAIN)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(responseBody.refreshToken().getExpiresIn())
+                .build();
+
+        given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
+                .willReturn(cookie);
+
+        given(authService.login(requestBody))
+                .willReturn(responseBody);
 
         // when
         var result = mvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(request)));
+                .content(om.writeValueAsString(requestBody)));
 
         // then
         result
                 .andExpect(status().isOk())
-                .andExpect(cookie().value("refresh_token", refreshToken.getValue()))
-                .andExpect(cookie().maxAge("refresh_token", refreshToken.getExpiresIn()))
+                .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
+                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresIn()))
+                .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
+                .andExpect(cookie().httpOnly(responseBody.refreshToken().getTokenType().name(), true))
                 .andExpect(jsonPath("$.grant_type").value(GrantType.BEARER.getType()))
                 .andExpect(jsonPath("$.access_token").exists())
                 .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
@@ -184,7 +224,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.refresh_token.expires_in").value(refreshToken.getExpiresIn()))
                 .andDo(print());
 
-        then(authService).should().login(request);
+        then(authService).should().login(requestBody);
 
         // API Docs
         result
@@ -211,6 +251,63 @@ class AuthControllerTest {
     }
 
     @Test
+    void logout_test() throws Exception {
+
+        // given
+        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
+        Cookie cookie = new Cookie(refreshToken.getTokenType().name(), refreshToken.getValue());
+
+        ResponseCookie responseCookie = ResponseCookie.from(TokenType.REFRESH.name(), "")
+                .httpOnly(true)
+                .domain(COOKIE_DOMAIN)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge((0))
+                .build();
+
+        doNothing().when(authService).logout(refreshToken.getValue());
+        given(cookieService.extractCookies(any(HttpServletRequest.class), eq(TokenType.REFRESH.name())))
+                .willReturn(cookie);
+
+        given(cookieService.generateCookie(eq(TokenType.REFRESH.name()), any(String.class), eq(0)))
+                .willReturn(responseCookie);
+
+        // when
+        var result = mvc.perform(delete("/api/auth/logout")
+                .header(HttpHeaders.COOKIE, cookie.getValue())
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        // then
+        result
+                .andExpect(status().isNoContent())
+                .andExpect(cookie().value(TokenType.REFRESH.name(), ""))
+                .andExpect(cookie().maxAge(TokenType.REFRESH.name(), 0))
+                .andExpect(cookie().domain(TokenType.REFRESH.name(), COOKIE_DOMAIN))
+                .andExpect(cookie().httpOnly(TokenType.REFRESH.name(), true))
+                .andDo(print());
+
+        then(authService).should().logout(refreshToken.getValue());
+
+
+        // API Docs
+        result
+                .andDo(document("logout",
+                        requestCookies(
+                                cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.SET_COOKIE).description("클라이언트의 쿠키를 삭제 (maxAge = 0)")
+                        ),
+                        responseCookies(
+                                cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)"
+                        ))
+                ));
+    }
+
+    @Test
     void refreshToken_test() throws Exception {
 
         // given
@@ -218,12 +315,27 @@ class AuthControllerTest {
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
         TokenRefreshInfo response = new TokenRefreshInfo(GrantType.BEARER.getType(), accessToken);
 
+        String requestCookie = ResponseCookie.from(refreshToken.getTokenType().name(), refreshToken.getValue())
+                .httpOnly(true)
+                .domain(COOKIE_DOMAIN)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(refreshToken.getExpiresIn())
+                .build().getValue();
+
+        Cookie cookie = new Cookie(TokenType.REFRESH.name(), requestCookie);
+
+        given(cookieService.extractCookies(any(HttpServletRequest.class), eq(TokenType.REFRESH.name())))
+                .willReturn(cookie);
+
         given(authService.refreshToken(refreshToken.getValue()))
                 .willReturn(response);
 
         // when
         var result = mvc.perform(post("/api/auth/refresh-token")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + refreshToken.getValue())
+                .header(HttpHeaders.COOKIE, cookie.getValue())
+                .cookie(cookie)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
@@ -242,8 +354,8 @@ class AuthControllerTest {
         // API Docs
         result
                 .andDo(document("refresh-token",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("리프레쉬 토큰")
+                        requestCookies(
+                                cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
                         ),
                         responseFields(
                                 fieldWithPath("grant_type").description("토큰 인증 유형"),
@@ -285,7 +397,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void checkId_test() throws Exception {
+    void validateId_test() throws Exception {
 
         // given
         String loginId = "test";
@@ -293,7 +405,7 @@ class AuthControllerTest {
         doNothing().when(memberService).validateLoginId(loginId);
 
         // when
-        var result = mvc.perform(get("/api/auth/id-checks")
+        var result = mvc.perform(get("/api/auth/validation/id")
                 .param("id", loginId));
 
         // then
@@ -305,14 +417,14 @@ class AuthControllerTest {
 
         // API Docs
         result
-                .andDo(document("check-id",
+                .andDo(document("validate-id",
                         queryParameters(
                                 parameterWithName("id").description("검증할 ID")
                         )));
     }
 
     @Test
-    void checkNickname_test() throws Exception {
+    void validateNickname_test() throws Exception {
 
         // given
         String nickname = "test";
@@ -320,7 +432,7 @@ class AuthControllerTest {
         doNothing().when(memberService).validateNickname(nickname);
 
         // when
-        var result = mvc.perform(get("/api/auth/nickname-checks")
+        var result = mvc.perform(get("/api/auth/validation/nickname")
                 .param("nickname", nickname));
 
         // then
@@ -332,7 +444,7 @@ class AuthControllerTest {
 
         // API Docs
         result
-                .andDo(document("check-nickname",
+                .andDo(document("validate-nickname",
                         queryParameters(
                                 parameterWithName("nickname").description("검증할 닉네임")
                         )));
