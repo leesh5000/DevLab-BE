@@ -44,6 +44,10 @@ API 요청이 거부될 경우, 에러 코드와 메세지를 참고하여 원�
 | `401 Unauthorized`
 | `리프레시 토큰이 없는 경우`
 
+| `A-007`
+| `400 Bad Request`
+| `이메일 인증 실패`
+
 | `M-001`
 | `404 Not Found`
 | `요청한 리소스가 존재하지 않는 경우`
@@ -123,6 +127,9 @@ include::{snippets}/oauth-login/http-response.adoc[]
 ==== *Response Header* ====
 include::{snippets}/oauth-login/response-headers.adoc[]
 
+==== *Response Cookies* ====
+include::{snippets}/oauth-login/response-cookies.adoc[]
+
 ==== *Response Body* ====
 include::{snippets}/oauth-login/response-fields.adoc[]
 
@@ -158,6 +165,9 @@ include::{snippets}/login/http-response.adoc[]
 ==== *Response Header* ====
 include::{snippets}/login/response-headers.adoc[]
 
+==== *Response Cookies* ====
+include::{snippets}/login/response-cookies.adoc[]
+
 ==== *Response Body* ====
 include::{snippets}/login/response-fields.adoc[]
 
@@ -168,8 +178,17 @@ include::{snippets}/login/response-fields.adoc[]
 ==== *Request* ====
 include::{snippets}/logout/http-request.adoc[]
 
+==== *Request Cookies* ====
+include::{snippets}/logout/request-cookies.adoc[]
+
 ==== *Response* ====
 include::{snippets}/logout/http-response.adoc[]
+
+==== *Response Headers* ====
+include::{snippets}/logout/response-headers.adoc[]
+
+==== *Response Cookies* ====
+include::{snippets}/logout/response-cookies.adoc[]
 
 === *토큰 재발급* ===
 
@@ -177,6 +196,9 @@ include::{snippets}/logout/http-response.adoc[]
 
 ==== *Request* ====
 include::{snippets}/refresh-token/http-request.adoc[]
+
+==== *Request Cookies* ====
+include::{snippets}/refresh-token/request-cookies.adoc[]
 
 ==== *Response* ====
 include::{snippets}/refresh-token/http-response.adoc[]
@@ -202,26 +224,58 @@ include::{snippets}/find-account/http-response.adoc[]
 입력 받은 ID가 이미 가입되어 있는지 확인합니다.
 
 ==== *Request* ====
-include::{snippets}/check-id/http-request.adoc[]
+include::{snippets}/id-checks/http-request.adoc[]
 
 ==== *Query Parameters* ====
-include::{snippets}/check-id/query-parameters.adoc[]
+include::{snippets}/id-checks/query-parameters.adoc[]
 
 ==== *Response* ====
-include::{snippets}/check-id/http-response.adoc[]
+include::{snippets}/id-checks/http-response.adoc[]
 
 === *닉네임 중복 체크* ===
 
 입력 받은 닉네임이 이미 가입되어 있는지 확인합니다.
 
 ==== *Request* ====
-include::{snippets}/check-nickname/http-request.adoc[]
+include::{snippets}/nickname-checks/http-request.adoc[]
 
 ==== *Query Parameters* ====
-include::{snippets}/check-nickname/query-parameters.adoc[]
+include::{snippets}/nickname-checks/query-parameters.adoc[]
 
 ==== *Response* ====
-include::{snippets}/check-nickname/http-response.adoc[]
+include::{snippets}/nickname-checks/http-response.adoc[]
+
+=== *이메일 인증 요청* ===
+
+입력 받은 이메일로 인증코드를 전송합니다.
+
+==== *Request* ====
+include::{snippets}/email-verifications/http-request.adoc[]
+
+==== *Query Parameters* ====
+include::{snippets}/email-verifications/query-parameters.adoc[]
+
+==== *Response* ====
+include::{snippets}/email-verifications/http-response.adoc[]
+
+==== *Response Headers* ====
+include::{snippets}/email-verifications/response-headers.adoc[]
+
+=== *이메일 인증 확인* ===
+
+입력 받은 이메일과 인증코드를 통해 이메일 인증을 완료합니다.
+
+==== *Request* ====
+include::{snippets}/email-confirms/http-request.adoc[]
+
+==== *Query Parameters* ====
+include::{snippets}/email-confirms/query-parameters.adoc[]
+
+==== *Request Cookies* ====
+include::{snippets}/email-confirms/request-cookies.adoc[]
+
+==== *Response* ====
+include::{snippets}/email-confirms/http-response.adoc[]
 
 == *유저* ==
 

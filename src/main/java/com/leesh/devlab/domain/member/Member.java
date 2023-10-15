@@ -35,8 +35,8 @@ public class Member extends BaseEntity {
     @Column(name = "nickname", length = 10, nullable = false, unique = true)
     private String nickname;
 
-    @Column(name = "email", length = 255, unique = true, nullable = true)
-    private String email;
+    @Column(name = "security_code", length = 255, unique = true, nullable = true)
+    private String securityCode;
 
     @Column(name = "password", length = 255, nullable = true)
     private String password;
@@ -109,13 +109,8 @@ public class Member extends BaseEntity {
         this.password = password;
     }
 
-    public void updateProfile(String nickname, String email) {
+    public void updateProfile(String nickname) {
         this.nickname = nickname;
-        this.email = email;
-    }
-
-    public void verifyEmail(String email) {
-        this.email = email;
     }
 
     public Comment comment(Post post, String contents) {

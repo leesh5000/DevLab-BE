@@ -83,6 +83,10 @@ asciidoctor {
 	dependsOn test
 }
 
+asciidoctor.doFirst {
+	delete file('build/generated-snippets')
+}
+
 // bootJar task 실행 시, asciidoctor task 수행 및 결과물을 jar 파일에 포함
 bootJar {
 	dependsOn asciidoctor

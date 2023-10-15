@@ -131,21 +131,6 @@ public class AuthService {
     // TODO : 추후 HTML 템플릿 처리 할 것
     public void findAccount(FindAccount requestDto) {
 
-        Member findMember = memberService.getByEmail(requestDto.email());
-
-        String title = "[DevLab] 아이디/비밀번호 정보 안내";
-        String tempPassword = generateRandom6Digits();
-
-        String content =
-                "[아이디] " + findMember.getLoginId() + "\n" +
-                        "[닉네임] " + findMember.getNickname() + "\n" +
-                        "[임시 비밀번호] " + tempPassword + "\n\n" +
-                        "로그인 후 비밀번호를 변경해주세요.";
-
-        mailService.sendMail(findMember.getEmail(), title, content);
-
-        findMember.changePassword(passwordEncoder.encode(tempPassword));
-
     }
 
     private String generateRandom6Digits() {
@@ -158,5 +143,9 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by refresh token = " + refreshToken))
                 .logout();
 
+    }
+
+    public String generateVerificationCode() {
+        return generateRandom6Digits();
     }
 }

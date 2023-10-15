@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class CookieService {
 
     public ResponseCookie generateCookie(String key, String value, int maxAgeSeconds) {
 
-        return ResponseCookie.from(key, value)
+        return ResponseCookie.from(encode(key), value)
                 .httpOnly(true)
                 .domain(COOKIE_DOMAIN)
                 .sameSite("None")
@@ -38,9 +40,13 @@ public class CookieService {
         }
 
         return Arrays.stream(cookies)
-                .filter(c -> c.getName().equals(key))
+                .filter(c -> c.getName().equals(encode(key)))
                 .findAny()
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN_NAME, "token name is not valid."));
+    }
+
+    public static String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
 }

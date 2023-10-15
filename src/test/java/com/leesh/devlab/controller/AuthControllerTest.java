@@ -9,6 +9,7 @@ import com.leesh.devlab.jwt.TokenType;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.AuthService;
 import com.leesh.devlab.service.CookieService;
+import com.leesh.devlab.service.MailService;
 import com.leesh.devlab.service.MemberService;
 import config.WebMvcTestConfig;
 import jakarta.servlet.http.Cookie;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static com.leesh.devlab.service.CookieService.COOKIE_DOMAIN;
+import static com.leesh.devlab.service.CookieService.encode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -64,6 +66,9 @@ class AuthControllerTest {
     @MockBean
     private CookieService cookieService;
 
+    @MockBean
+    private MailService mailService;
+
     @Test
     void oauthLogin_test() throws Exception {
 
@@ -75,7 +80,7 @@ class AuthControllerTest {
         OauthLogin.Request requestBody = new OauthLogin.Request(OauthType.NAVER, authorizationCode);
         Login.Response responseBody = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
 
-        ResponseCookie cookie = ResponseCookie.from(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue())
+        ResponseCookie responseCookie = ResponseCookie.from(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue())
                 .httpOnly(true)
                 .domain(COOKIE_DOMAIN)
                 .sameSite("None")
@@ -88,7 +93,7 @@ class AuthControllerTest {
                 .willReturn(responseBody);
 
         given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
-                .willReturn(cookie);
+                .willReturn(responseCookie);
 
         // when
         ResultActions result = mvc.perform(post("/api/auth/oauth-login")
@@ -99,6 +104,7 @@ class AuthControllerTest {
         // then
         result
                 .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, responseCookie.toString()))
                 .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
                 .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresIn()))
                 .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
@@ -124,7 +130,10 @@ class AuthControllerTest {
                                 fieldWithPath("authorization_code").description("인가 코드")
                         ),
                         responseHeaders(
-                                headerWithName(HttpHeaders.SET_COOKIE).description("클라이언트 쿠키에 설정할 리프레시 토큰 (Http Only)")
+                                headerWithName(HttpHeaders.SET_COOKIE).description("클라이언트에 쿠키 생성")
+                        ),
+                        responseCookies(
+                                cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
                         ),
                         responseFields(
                                 fieldWithPath("grant_type").description("토큰 인증 유형"),
@@ -209,6 +218,7 @@ class AuthControllerTest {
         // then
         result
                 .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, cookie.toString()))
                 .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
                 .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresIn()))
                 .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
@@ -234,7 +244,10 @@ class AuthControllerTest {
                                 fieldWithPath("password").description("비밀번호")
                         ),
                         responseHeaders(
-                                headerWithName(HttpHeaders.SET_COOKIE).description("클라이언트 쿠키에 설정할 리프레시 토큰 (Http Only)")
+                                headerWithName(HttpHeaders.SET_COOKIE).description("클라이언트에 쿠키 생성")
+                        ),
+                        responseCookies(
+                                cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
                         ),
                         responseFields(
                                 fieldWithPath("grant_type").description("토큰 인증 유형"),
@@ -275,7 +288,7 @@ class AuthControllerTest {
 
         // when
         var result = mvc.perform(delete("/api/auth/logout")
-                .header(HttpHeaders.COOKIE, cookie.getValue())
+                .header(HttpHeaders.COOKIE, cookie.toString())
                 .cookie(cookie)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
@@ -283,6 +296,7 @@ class AuthControllerTest {
         // then
         result
                 .andExpect(status().isNoContent())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, "REFRESH=; Path=/; Domain=devlab.com; Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=None"))
                 .andExpect(cookie().value(TokenType.REFRESH.name(), ""))
                 .andExpect(cookie().maxAge(TokenType.REFRESH.name(), 0))
                 .andExpect(cookie().domain(TokenType.REFRESH.name(), COOKIE_DOMAIN))
@@ -299,10 +313,10 @@ class AuthControllerTest {
                                 cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
                         ),
                         responseHeaders(
-                                headerWithName(HttpHeaders.SET_COOKIE).description("클라이언트의 쿠키를 삭제 (maxAge = 0)")
+                                headerWithName(HttpHeaders.SET_COOKIE).description("클라이언트에 쿠키를 설정")
                         ),
                         responseCookies(
-                                cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)"
+                                cookieWithName(TokenType.REFRESH.name()).description("클라이언트의 쿠키를 삭제 (maxAge = 0)"
                         ))
                 ));
     }
@@ -402,10 +416,10 @@ class AuthControllerTest {
         // given
         String loginId = "test";
 
-        doNothing().when(memberService).validateLoginId(loginId);
+        doNothing().when(memberService).checkLoginId(loginId);
 
         // when
-        var result = mvc.perform(get("/api/auth/validation/id")
+        var result = mvc.perform(get("/api/auth/id-checks")
                 .param("id", loginId));
 
         // then
@@ -413,11 +427,11 @@ class AuthControllerTest {
                 .andExpect(status().isNoContent())
                 .andDo(print());
 
-        then(memberService).should().validateLoginId(loginId);
+        then(memberService).should().checkLoginId(loginId);
 
         // API Docs
         result
-                .andDo(document("validate-id",
+                .andDo(document("id-checks",
                         queryParameters(
                                 parameterWithName("id").description("검증할 ID")
                         )));
@@ -429,10 +443,10 @@ class AuthControllerTest {
         // given
         String nickname = "test";
 
-        doNothing().when(memberService).validateNickname(nickname);
+        doNothing().when(memberService).checkNickname(nickname);
 
         // when
-        var result = mvc.perform(get("/api/auth/validation/nickname")
+        var result = mvc.perform(get("/api/auth/nickname-checks")
                 .param("nickname", nickname));
 
         // then
@@ -440,15 +454,98 @@ class AuthControllerTest {
                 .andExpect(status().isNoContent())
                 .andDo(print());
 
-        then(memberService).should().validateNickname(nickname);
+        then(memberService).should().checkNickname(nickname);
 
         // API Docs
         result
-                .andDo(document("validate-nickname",
+                .andDo(document("nickname-checks",
                         queryParameters(
                                 parameterWithName("nickname").description("검증할 닉네임")
                         )));
     }
 
+    @Test
+    void verifyEmail_test() throws Exception {
 
+        // given
+        String email = "test@gmail.com";
+        String verificationCode = "123456";
+        int maxAgeSeconds = 5 * 60;
+        String encodedKey = encode(email);
+
+        given(authService.generateVerificationCode()).willReturn(verificationCode);
+        doNothing().when(mailService).sendMail(any(String.class), any(String.class), any(String.class));
+        given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
+                .willReturn(ResponseCookie.from(encodedKey, verificationCode)
+                        .httpOnly(true)
+                        .domain(COOKIE_DOMAIN)
+                        .sameSite("None")
+                        .secure(true)
+                        .path("/")
+                        .maxAge(maxAgeSeconds)
+                        .build());
+
+        // when
+        var result = mvc.perform(get("/api/auth/email-verifications")
+                .param("email", email));
+
+        // then
+        result
+                .andExpect(status().isNoContent())
+                .andExpect(cookie().value(encodedKey, verificationCode))
+                .andExpect(cookie().maxAge(encodedKey, maxAgeSeconds))
+                .andExpect(cookie().domain(encodedKey, COOKIE_DOMAIN))
+                .andExpect(cookie().httpOnly(encodedKey, true))
+                .andDo(print());
+
+        then(authService).should().generateVerificationCode();
+        then(mailService).should().sendMail(any(String.class), any(String.class), any(String.class));
+        then(cookieService).should().generateCookie(any(String.class), any(String.class), any(Integer.class));
+
+        // API Docs
+        result
+                .andDo(document("email-verifications",
+                        queryParameters(
+                                parameterWithName("email").description("인증 코드를 전송할 이메일")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.SET_COOKIE).description("인증코드 확인용 쿠키 (HttpOnly)")
+                        )));
+    }
+
+    @Test
+    void confirmEmail_test() throws Exception {
+
+        // given
+        String email = "test@gmail.com";
+        String verificationCode = "123456";
+
+        given(cookieService.extractCookies(any(HttpServletRequest.class), eq(email)))
+                .willReturn(new Cookie(encode(email), verificationCode));
+
+        // when
+        var result = mvc.perform(get("/api/auth/email-confirms")
+                .param("email", email)
+                .param("code", verificationCode)
+                .cookie(new Cookie(encode(email), verificationCode)
+                ));
+
+        // then
+        result
+                .andExpect(status().isNoContent())
+                .andDo(print());
+
+        then(cookieService).should().extractCookies(any(HttpServletRequest.class), eq(email));
+
+        // API Docs
+        result
+                .andDo(document("email-confirms",
+                        queryParameters(
+                                parameterWithName("email").description("인증 코드를 전송한 이메일"),
+                                parameterWithName("code").description("인증 코드")
+                        ),
+                        requestCookies(
+                                cookieWithName(encode(email)).description("인증 코드 확인용 쿠키 (HttpOnly)")
+                        )));
+    }
 }
