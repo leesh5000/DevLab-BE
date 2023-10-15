@@ -10,12 +10,8 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<Member> findByEmail(String email);
-
     @Query("select m from Member m where m.refreshToken.value = :refreshToken")
     Optional<Member> findByRefreshToken(@Param("refreshToken") String refreshToken);
-
-    boolean existsByLoginIdOrNickname(String email, String nickname);
 
     Optional<Member> findByOauthId(String id);
 

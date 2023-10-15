@@ -1,4 +1,4 @@
-package com.leesh.devlab.resolver;
+package com.leesh.devlab.config;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;

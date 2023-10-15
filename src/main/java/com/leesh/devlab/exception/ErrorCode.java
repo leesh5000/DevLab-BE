@@ -22,6 +22,7 @@ public enum ErrorCode {
     NOT_EXIST_REFRESH_TOKEN(UNAUTHORIZED, "A-006", "Refresh Token is empty"),
     INVALID_TOKEN_NAME(UNAUTHORIZED, "A-007", "Invalid token name"),
     WRONG_VERIFICATION_CODE(BAD_REQUEST, "A-008", "Wrong Verification Code"),
+    NOT_EXIST_COOKIE(UNAUTHORIZED, "A-009", "Not Exist Cookie"),
 
     /* Member */
     NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),

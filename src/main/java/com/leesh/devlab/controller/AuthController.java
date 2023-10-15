@@ -25,7 +25,6 @@ public class AuthController {
     private final CookieService cookieService;
     private final MailService mailService;
 
-
     @PostMapping(path = "/oauth-login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Login.Response> oauthLogin(@RequestBody OauthLogin.Request request) {
 
@@ -123,10 +122,10 @@ public class AuthController {
                 "[이메일 인증번호] " + verificationCode + "\n" +
                 "인증번호 유효시간은 " + expiresInSeconds / 60 + "분 입니다.");
 
-        ResponseCookie cookie = cookieService.generateCookie(email, verificationCode, expiresInSeconds);
+        ResponseCookie responseCookie = cookieService.generateCookie(email, verificationCode, expiresInSeconds);
 
         return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .build();
     }
 

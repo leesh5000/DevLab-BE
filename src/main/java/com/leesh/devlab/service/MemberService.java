@@ -118,11 +118,6 @@ public class MemberService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
 
-    public Member getByEmail(String email) throws BusinessException {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
-    }
-
     @Transactional
     public Member getOrSaveByOauthId(String oauthId, OauthAttributes oauthMember) {
         return memberRepository.findByOauthId(oauthId)

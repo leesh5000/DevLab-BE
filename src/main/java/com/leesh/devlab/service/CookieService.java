@@ -36,7 +36,7 @@ public class CookieService {
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
-            throw new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN, "refresh token is empty.");
+            throw new BusinessException(ErrorCode.NOT_EXIST_COOKIE, "cookie is empty.");
         }
 
         return Arrays.stream(cookies)

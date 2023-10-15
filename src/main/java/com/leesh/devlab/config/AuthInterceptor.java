@@ -1,4 +1,4 @@
-package com.leesh.devlab.interceptor;
+package com.leesh.devlab.config;
 
 import com.leesh.devlab.jwt.TokenService;
 import com.leesh.devlab.jwt.TokenType;

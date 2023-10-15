@@ -1,4 +1,4 @@
-package com.leesh.devlab.resolver;
+package com.leesh.devlab.config;
 
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import jakarta.servlet.http.HttpServletRequest;
