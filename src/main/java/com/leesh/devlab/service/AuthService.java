@@ -62,6 +62,7 @@ public class AuthService {
                 .loginId(request.loginId())
                 .nickname(request.nickname())
                 .password(passwordEncoder.encode(request.password()))
+                .verified(request.verified())
                 .build();
 
         Long id = memberRepository.save(newMember).getId();

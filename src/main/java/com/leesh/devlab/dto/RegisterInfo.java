@@ -9,7 +9,7 @@ public class RegisterInfo {
     protected RegisterInfo() {
     }
 
-    public record Request(@LoginId String loginId, @Size(min = 4, max = 255) String password, @Nickname String nickname) {
+    public record Request(@LoginId String loginId, @Size(min = 4, max = 255) String password, @Nickname String nickname, boolean verified) {
 
     }
 

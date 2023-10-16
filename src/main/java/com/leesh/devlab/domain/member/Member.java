@@ -90,10 +90,13 @@ public class Member extends BaseEntity {
     }
 
     @Builder
-    private Member(String nickname, String loginId, String password) {
+    private Member(String nickname, String loginId, String password, boolean verified) {
         this.nickname = nickname;
         this.loginId = loginId;
         this.password = password;
+        if (verified) {
+            this.securityCode = UUID.randomUUID().toString();
+        }
     }
 
     /* 도메인 비즈니스 로직 */
