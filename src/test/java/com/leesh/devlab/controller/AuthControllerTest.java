@@ -153,7 +153,7 @@ class AuthControllerTest {
     void register_test() throws Exception {
 
         // given
-        RegisterInfo.Request request = new RegisterInfo.Request("test", "test", "test");
+        RegisterInfo.Request request = new RegisterInfo.Request("test", "test", "test", true);
 
         given(authService.register(request))
                 .willReturn(new RegisterInfo.Response(1L));
@@ -178,7 +178,8 @@ class AuthControllerTest {
                         requestFields(
                                 fieldWithPath("login_id").description("로그인 아이디"),
                                 fieldWithPath("password").description("비밀번호"),
-                                fieldWithPath("nickname").description("닉네임")
+                                fieldWithPath("nickname").description("닉네임"),
+                                fieldWithPath("verified").description("이메일 인증 여부")
                         ),
                         responseFields(
                                 fieldWithPath("member_id").description("생성된 회원 아이디(PK)")
@@ -327,7 +328,9 @@ class AuthControllerTest {
         // given
         Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresIn());
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
-        TokenRefreshInfo response = new TokenRefreshInfo(GrantType.BEARER.getType(), accessToken);
+        String loginId = "test1";
+        String nickname = "test1";
+        TokenRefreshInfo response = TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, loginId, nickname);
 
         String requestCookie = ResponseCookie.from(refreshToken.getTokenType().name(), refreshToken.getValue())
                 .httpOnly(true)
@@ -361,6 +364,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
                 .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
                 .andExpect(jsonPath("$.access_token.expires_in").value(accessToken.getExpiresIn()))
+                .andExpect(jsonPath("$.user_info.login_id").value(loginId))
+                .andExpect(jsonPath("$.user_info.nickname").value(nickname))
                 .andDo(print());
 
         then(authService).should().refreshToken(refreshToken.getValue());
@@ -376,9 +381,11 @@ class AuthControllerTest {
                                 fieldWithPath("access_token").description("액세스 토큰"),
                                 fieldWithPath("access_token.token_type").description("토큰 유형"),
                                 fieldWithPath("access_token.value").description("토큰 값"),
-                                fieldWithPath("access_token.expires_in").description("토큰 만료일")
+                                fieldWithPath("access_token.expires_in").description("토큰 만료일"),
+                                fieldWithPath("user_info").description("현재 로그인 한 유저 정보"),
+                                fieldWithPath("user_info.login_id").description("아이디"),
+                                fieldWithPath("user_info.nickname").description("닉네임")
                         )));
-
     }
 
     @Test

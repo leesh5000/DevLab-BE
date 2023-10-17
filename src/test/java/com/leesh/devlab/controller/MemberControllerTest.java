@@ -100,7 +100,7 @@ public class MemberControllerTest {
         int commentLikeCount = 32;
 
         Activities activities = new Activities(postCount, postLikeCount, commentCount, commentLikeCount);
-        MyProfile response = new MyProfile(testMember.id(), loginId, testMember.nickname(), email, createdAt, activities);
+        MyProfile response = new MyProfile(testMember.id(), loginId, testMember.nickname(), createdAt, activities);
 
         given(memberService.getMyProfile(testMember))
                 .willReturn(response);
@@ -115,7 +115,6 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.id").value(testMember.id()))
                 .andExpect(jsonPath("$.login_id").value(loginId))
                 .andExpect(jsonPath("$.nickname").value(testMember.nickname()))
-                .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.created_at").value(createdAt))
                 .andExpect(jsonPath("$.activities.post_count").value(postCount))
                 .andExpect(jsonPath("$.activities.post_like_count").value(postLikeCount))
@@ -134,7 +133,6 @@ public class MemberControllerTest {
                         fieldWithPath("id").description("식별자"),
                         fieldWithPath("login_id").description("로그인 아이디"),
                         fieldWithPath("nickname").description("닉네임"),
-                        fieldWithPath("email").description("이메일"),
                         fieldWithPath("created_at").description("생성일"),
                         fieldWithPath("activities.post_count").description("유저가 작성한 게시글 수"),
                         fieldWithPath("activities.post_like_count").description("유저가 작성한 게시글의 좋아요 수"),

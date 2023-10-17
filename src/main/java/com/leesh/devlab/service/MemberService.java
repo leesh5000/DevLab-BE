@@ -119,10 +119,10 @@ public class MemberService {
     }
 
     @Transactional
-    public Member getOrSaveByOauthId(String oauthId, OauthAttributes oauthMember) {
-        return memberRepository.findByOauthId(oauthId)
+    public Member getOrSaveByOauthId(OauthAttributes oauthAttributes) {
+        return memberRepository.findByOauthId(oauthAttributes.getId())
                 .orElseGet(() -> {
-                    Member entity = oauthMember.toEntity();
+                    Member entity = oauthAttributes.toEntity();
                     return memberRepository.save(entity);
                 });
     }

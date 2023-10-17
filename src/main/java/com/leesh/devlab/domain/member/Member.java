@@ -78,13 +78,12 @@ public class Member extends BaseEntity {
     }
 
     /* 생성 메서드 */
-    public static Member of(OauthType oauthType, String oauthId) {
+    public static Member of(OauthType oauthType, String id, String nickname) {
 
         Member member = new Member();
 
-        // 유저 닉네임에 임의의 값을 부여한다. TODO 추후 소셜 로그인 동의항목을 추가하여 닉네임 값을 받아올지 고민해볼 것
-        member.nickname = UUID.randomUUID().toString().split("-")[0];
-        member.oauth = new Oauth(oauthType, oauthId);
+        member.nickname = nickname;
+        member.oauth = new Oauth(oauthType, id);
 
         return member;
     }

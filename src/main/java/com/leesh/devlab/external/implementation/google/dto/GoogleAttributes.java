@@ -6,7 +6,7 @@ import com.leesh.devlab.external.OauthAttributes;
 public record GoogleAttributes(String sub, String email, String picture) implements OauthAttributes {
 
     @Override
-    public String getOauthId() {
+    public String getId() {
         return getOauthType() + "@" + sub;
     }
 

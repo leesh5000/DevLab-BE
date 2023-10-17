@@ -5,12 +5,6 @@ import com.leesh.devlab.domain.member.OauthType;
 import com.leesh.devlab.external.OauthAttributes;
 import lombok.Getter;
 
-/**
- * <p>
- *      네이버 로그인 API를 통해 받아온 사용자 정보를 담는 DTO
- * </p>
- * <a href={https://developers.naver.com/docs/login/profile/profile.md}>공식문서 링크</a>
- */
 @Getter
 public class NaverAttributes implements OauthAttributes {
 
@@ -32,7 +26,7 @@ public class NaverAttributes implements OauthAttributes {
     }
 
     @Override
-    public String getOauthId() {
+    public String getId() {
         return getOauthType() + "@" + response.id;
     }
 

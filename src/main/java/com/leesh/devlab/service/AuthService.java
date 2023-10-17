@@ -44,8 +44,7 @@ public class AuthService {
         OauthAttributes oauthAttributes = getOauthAttributes(request);
 
         // Oauth Provider 에서 가져온 사용자 식별값을 이용하여 DB에서 가입된 회원을 찾는다. 만약 회원가입한 유저가 아니라면, 신규 가입을 하고 가져온다.
-        String oauthId = oauthAttributes.getOauthId();
-        Member findMember = memberService.getOrSaveByOauthId(oauthId, oauthAttributes);
+        Member findMember = memberService.getOrSaveByOauthId(oauthAttributes);
 
         // 인증 토큰을 생성한다.
         return generateResponseToken(findMember);
@@ -112,7 +111,7 @@ public class AuthService {
         // 새로운 액세스 토큰을 발급한다.
         Token accessToken = tokenService.createToken(LoginInfo.from(member), TokenType.ACCESS);
 
-        return new TokenRefreshInfo(GrantType.BEARER.getType(), accessToken);
+        return TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, member.getLoginId(), member.getNickname());
 
     }
 

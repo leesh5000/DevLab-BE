@@ -1,23 +1,15 @@
 package com.leesh.devlab.dto;
 
 import com.leesh.devlab.jwt.Token;
-import com.leesh.devlab.jwt.GrantType;
-import com.leesh.devlab.jwt.TokenType;
-import org.springframework.util.StringUtils;
 
-import java.util.Objects;
+public record TokenRefreshInfo(String grantType, Token accessToken, UserInfo userInfo) {
 
-public record TokenRefreshInfo(String grantType, Token accessToken) {
+    public record UserInfo(String loginId, String nickname) {
 
-    public TokenRefreshInfo {
+    }
 
-        Objects.requireNonNull(grantType, "grantType must be provided");
-        Objects.requireNonNull(accessToken, "accessToken must be provided");
-
-        if (!StringUtils.hasText(accessToken.getValue()) || !TokenType.isAccessToken(accessToken)) {
-            throw new IllegalArgumentException("accessToken must be provided");
-        }
-
+    public static TokenRefreshInfo of(String grantType, Token accessToken, String loginId, String nickname) {
+        return new TokenRefreshInfo(grantType, accessToken, new UserInfo(loginId, nickname));
     }
 
 }
