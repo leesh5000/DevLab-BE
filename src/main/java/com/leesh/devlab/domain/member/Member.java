@@ -100,7 +100,7 @@ public class Member extends BaseEntity {
 
     /* 도메인 비즈니스 로직 */
     public void updateRefreshToken(Token refreshToken) {
-        this.refreshToken = new RefreshToken(refreshToken.getValue(), System.currentTimeMillis() + refreshToken.getExpiresIn());
+        this.refreshToken = new RefreshToken(refreshToken.getValue(), System.currentTimeMillis() + refreshToken.getExpiresInSeconds() * 1000L);
     }
 
     public void logout() {

@@ -9,11 +9,15 @@ import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.post.repository.PostRepository;
 import com.leesh.devlab.dto.LikeInfo;
+import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.LoginInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class LikeService {
 
@@ -22,9 +26,18 @@ public class LikeService {
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
 
+    @Transactional
     public LikeInfo createPostLike(LoginInfo loginInfo, Long postId) {
 
         Post post = postRepository.getReferenceById(postId);
+
+        post.getLikes().stream()
+                .filter(like -> like.getMember().getId().equals(loginInfo.id()))
+                .findAny()
+                .ifPresent((like) -> {
+                    throw new BusinessException(ErrorCode.ALREADY_LIKED_POST, "already liked post, member(id) = " + loginInfo.id());
+                });
+
         Member member = memberRepository.getReferenceById(loginInfo.id());
 
         Like newLike = Like.builder()
@@ -37,9 +50,18 @@ public class LikeService {
         return LikeInfo.from(newLike);
     }
 
+    @Transactional
     public LikeInfo createCommentLike(LoginInfo loginInfo, Long commentId) {
 
         Comment comment = commentRepository.getReferenceById(commentId);
+
+        comment.getLikes().stream()
+                .filter(like -> like.getMember().getId().equals(loginInfo.id()))
+                .findAny()
+                .ifPresent((like) -> {
+                    throw new BusinessException(ErrorCode.ALREADY_LIKED_COMMENT, "already liked comment, member(id) = " + loginInfo.id());
+                });
+
         Member member = memberRepository.getReferenceById(loginInfo.id());
 
         Like newLike = Like.builder()

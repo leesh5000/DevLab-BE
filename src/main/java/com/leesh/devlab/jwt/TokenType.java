@@ -5,19 +5,17 @@ import lombok.Getter;
 @Getter
 public enum TokenType {
 
-    ACCESS(20 * 60), // 20분
-    REFRESH(7 * 24 * 60 * 60) // 7일
+    ACCESS(5 * 60), // 20분
+    REFRESH(30 * 60) // 7일
     ;
 
     // 토큰의 유효 기간 (초)
-    private final int expiresIn;
+    private final int expiresInSeconds;
+    private final long expiresInMillis;
 
-    public long getExpiresInMillis() {
-        return this.expiresIn * 1000L;
-    }
-
-    TokenType(Integer expiresIn) {
-        this.expiresIn = expiresIn;
+    TokenType(Integer expiresInSeconds) {
+        this.expiresInSeconds = expiresInSeconds;
+        this.expiresInMillis = expiresInSeconds * 1000L;
     }
 
     public static boolean isAccessToken(Token token) {

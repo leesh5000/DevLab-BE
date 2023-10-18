@@ -5,7 +5,7 @@ import com.leesh.devlab.jwt.TokenType;
 
 import java.util.Objects;
 
-public record Jwt(TokenType tokenType, String value, int expiresIn) implements Token {
+public record Jwt(TokenType tokenType, String value, int expiresInSeconds) implements Token {
 
     public Jwt {
         Objects.requireNonNull(tokenType, "tokenType must be not null");
@@ -23,8 +23,8 @@ public record Jwt(TokenType tokenType, String value, int expiresIn) implements T
     }
 
     @Override
-    public int getExpiresIn() {
-        return this.expiresIn;
+    public int getExpiresInSeconds() {
+        return this.expiresInSeconds;
     }
 
 }

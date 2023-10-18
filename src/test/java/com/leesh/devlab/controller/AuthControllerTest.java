@@ -74,8 +74,8 @@ class AuthControllerTest {
 
         // given
         String authorizationCode = "y7iyuzOxjD3AnPOtNDkxlKhVEtdjIBduM7uJboWnDskFxrD9GvitLQpqpnA7fAc4pMvowAo9dJcAAAGGCllssw";
-        Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresIn());
-        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
+        Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
+        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
 
         OauthLogin.Request requestBody = new OauthLogin.Request(OauthType.NAVER, authorizationCode);
         Login.Response responseBody = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
@@ -86,7 +86,7 @@ class AuthControllerTest {
                 .sameSite("None")
                 .secure(true)
                 .path("/")
-                .maxAge(responseBody.refreshToken().getExpiresIn())
+                .maxAge(responseBody.refreshToken().getExpiresInSeconds())
                 .build();
 
         given(authService.oauthLogin(requestBody))
@@ -106,18 +106,18 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, responseCookie.toString()))
                 .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
-                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresIn()))
+                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresInSeconds()))
                 .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
                 .andExpect(cookie().httpOnly(responseBody.refreshToken().getTokenType().name(), true))
                 .andExpect(jsonPath("$.grant_type").value(GrantType.BEARER.getType()))
                 .andExpect(jsonPath("$.access_token").exists())
                 .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
                 .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
-                .andExpect(jsonPath("$.access_token.expires_in").value(accessToken.getExpiresIn()))
+                .andExpect(jsonPath("$.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
                 .andExpect(jsonPath("$.refresh_token").exists())
                 .andExpect(jsonPath("$.refresh_token.token_type").value(TokenType.REFRESH.name()))
                 .andExpect(jsonPath("$.refresh_token.value").value(refreshToken.getValue()))
-                .andExpect(jsonPath("$.refresh_token.expires_in").value(refreshToken.getExpiresIn()))
+                .andExpect(jsonPath("$.refresh_token.expires_in_seconds").value(refreshToken.getExpiresInSeconds()))
                 .andDo(print());
 
         then(authService).should().oauthLogin(requestBody);
@@ -140,11 +140,11 @@ class AuthControllerTest {
                                 fieldWithPath("access_token").description("액세스 토큰"),
                                 fieldWithPath("access_token.token_type").description("토큰 유형"),
                                 fieldWithPath("access_token.value").description("토큰 값"),
-                                fieldWithPath("access_token.expires_in").description("토큰 만료일"),
+                                fieldWithPath("access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
                                 fieldWithPath("refresh_token").description("리프레쉬 토큰"),
                                 fieldWithPath("refresh_token.token_type").description("토큰 유형"),
                                 fieldWithPath("refresh_token.value").description("토큰 값"),
-                                fieldWithPath("refresh_token.expires_in").description("토큰 만료일")
+                                fieldWithPath("refresh_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)")
                         )));
 
     }
@@ -190,8 +190,8 @@ class AuthControllerTest {
     void login_test() throws Exception {
 
         // given
-        Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresIn());
-        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
+        Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
+        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
         Login.Request requestBody = new Login.Request("test", "test");
         Login.Response responseBody = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
 
@@ -201,7 +201,7 @@ class AuthControllerTest {
                 .sameSite("None")
                 .secure(true)
                 .path("/")
-                .maxAge(responseBody.refreshToken().getExpiresIn())
+                .maxAge(responseBody.refreshToken().getExpiresInSeconds())
                 .build();
 
         given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
@@ -221,18 +221,18 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, cookie.toString()))
                 .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
-                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresIn()))
+                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresInSeconds()))
                 .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
                 .andExpect(cookie().httpOnly(responseBody.refreshToken().getTokenType().name(), true))
                 .andExpect(jsonPath("$.grant_type").value(GrantType.BEARER.getType()))
                 .andExpect(jsonPath("$.access_token").exists())
                 .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
                 .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
-                .andExpect(jsonPath("$.access_token.expires_in").value(accessToken.getExpiresIn()))
+                .andExpect(jsonPath("$.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
                 .andExpect(jsonPath("$.refresh_token").exists())
                 .andExpect(jsonPath("$.refresh_token.token_type").value(TokenType.REFRESH.name()))
                 .andExpect(jsonPath("$.refresh_token.value").value(refreshToken.getValue()))
-                .andExpect(jsonPath("$.refresh_token.expires_in").value(refreshToken.getExpiresIn()))
+                .andExpect(jsonPath("$.refresh_token.expires_in_seconds").value(refreshToken.getExpiresInSeconds()))
                 .andDo(print());
 
         then(authService).should().login(requestBody);
@@ -255,11 +255,11 @@ class AuthControllerTest {
                                 fieldWithPath("access_token").description("액세스 토큰"),
                                 fieldWithPath("access_token.token_type").description("토큰 유형"),
                                 fieldWithPath("access_token.value").description("토큰 값"),
-                                fieldWithPath("access_token.expires_in").description("토큰 만료일"),
+                                fieldWithPath("access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
                                 fieldWithPath("refresh_token").description("리프레쉬 토큰"),
                                 fieldWithPath("refresh_token.token_type").description("토큰 유형"),
                                 fieldWithPath("refresh_token.value").description("토큰 값"),
-                                fieldWithPath("refresh_token.expires_in").description("토큰 만료일")
+                                fieldWithPath("refresh_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)")
                         )));
 
     }
@@ -268,7 +268,7 @@ class AuthControllerTest {
     void logout_test() throws Exception {
 
         // given
-        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
+        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
         Cookie cookie = new Cookie(refreshToken.getTokenType().name(), refreshToken.getValue());
 
         ResponseCookie responseCookie = ResponseCookie.from(TokenType.REFRESH.name(), "")
@@ -326,8 +326,8 @@ class AuthControllerTest {
     void refreshToken_test() throws Exception {
 
         // given
-        Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresIn());
-        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresIn());
+        Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
+        Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
         String loginId = "test1";
         String nickname = "test1";
         TokenRefreshInfo response = TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, loginId, nickname);
@@ -338,7 +338,7 @@ class AuthControllerTest {
                 .sameSite("None")
                 .secure(true)
                 .path("/")
-                .maxAge(refreshToken.getExpiresIn())
+                .maxAge(refreshToken.getExpiresInSeconds())
                 .build().getValue();
 
         Cookie cookie = new Cookie(TokenType.REFRESH.name(), requestCookie);
@@ -363,7 +363,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.access_token").exists())
                 .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
                 .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
-                .andExpect(jsonPath("$.access_token.expires_in").value(accessToken.getExpiresIn()))
+                .andExpect(jsonPath("$.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
                 .andExpect(jsonPath("$.user_info.login_id").value(loginId))
                 .andExpect(jsonPath("$.user_info.nickname").value(nickname))
                 .andDo(print());
@@ -381,7 +381,7 @@ class AuthControllerTest {
                                 fieldWithPath("access_token").description("액세스 토큰"),
                                 fieldWithPath("access_token.token_type").description("토큰 유형"),
                                 fieldWithPath("access_token.value").description("토큰 값"),
-                                fieldWithPath("access_token.expires_in").description("토큰 만료일"),
+                                fieldWithPath("access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
                                 fieldWithPath("user_info").description("현재 로그인 한 유저 정보"),
                                 fieldWithPath("user_info.login_id").description("아이디"),
                                 fieldWithPath("user_info.nickname").description("닉네임")

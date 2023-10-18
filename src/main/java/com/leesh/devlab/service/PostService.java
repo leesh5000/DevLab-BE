@@ -3,7 +3,6 @@ package com.leesh.devlab.service;
 import com.leesh.devlab.domain.comment.CommentRepository;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.hashtag.HashtagRepository;
-import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.like.LikeRepository;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
@@ -94,27 +93,7 @@ public class PostService {
 
         validateAuthor(loginInfo, findPost);
 
-        // 자식 데이터들을 먼저 삭제한다.
-        deleteAllChildren(findPost);
-
         postRepository.delete(findPost);
-
-    }
-
-    private void deleteAllChildren(Post findPost) {
-
-        List<Long> hashtagIds = findPost.getHashtags()
-                .stream()
-                .map(Hashtag::getId)
-                .toList();
-
-        List<Long> likeIds = findPost.getLikes()
-                .stream()
-                .map(Like::getId)
-                .toList();
-
-        hashtagRepository.deleteAllByIdInBatch(hashtagIds);
-        likeRepository.deleteAllByIdInBatch(likeIds);
     }
 
     public static void validateAuthor(LoginInfo loginInfo, Post post) {

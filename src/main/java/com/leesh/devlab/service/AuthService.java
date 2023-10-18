@@ -105,7 +105,7 @@ public class AuthService {
 
         // 리프레시 토큰이 만료됐으면, 예외를 던진다.
         if (member.getRefreshToken().isExpired()) {
-            throw new AuthException(ErrorCode.EXPIRED_TOKEN, "expired refresh token");
+            throw new AuthException(ErrorCode.EXPIRED_REFRESH_TOKEN, "expired refresh token");
         }
 
         // 새로운 액세스 토큰을 발급한다.

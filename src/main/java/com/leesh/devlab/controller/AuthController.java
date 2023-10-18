@@ -33,7 +33,7 @@ public class AuthController {
         ResponseCookie cookie = cookieService.generateCookie(
                 responseBody.refreshToken().getTokenType().name(),
                 responseBody.refreshToken().getValue(),
-                responseBody.refreshToken().getExpiresIn());
+                responseBody.refreshToken().getExpiresInSeconds());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -57,7 +57,7 @@ public class AuthController {
         ResponseCookie cookie = cookieService.generateCookie(
                 responseBody.refreshToken().getTokenType().name(),
                 responseBody.refreshToken().getValue(),
-                responseBody.refreshToken().getExpiresIn());
+                responseBody.refreshToken().getExpiresInSeconds());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
