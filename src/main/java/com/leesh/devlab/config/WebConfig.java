@@ -1,8 +1,5 @@
 package com.leesh.devlab.config;
 
-import com.leesh.devlab.interceptor.AuthInterceptor;
-import com.leesh.devlab.interceptor.AuthInterceptorProxy;
-import com.leesh.devlab.resolver.LoginMemberArgResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-import static com.leesh.devlab.interceptor.AuthInterceptorProxy.RequestMethod;
+import static com.leesh.devlab.config.AuthInterceptorProxy.RequestMethod;
 
 @RequiredArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Configuration

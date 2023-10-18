@@ -1,4 +1,4 @@
-package com.leesh.devlab.interceptor;
+package com.leesh.devlab.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

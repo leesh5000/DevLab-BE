@@ -44,8 +44,7 @@ public class AuthService {
         OauthAttributes oauthAttributes = getOauthAttributes(request);
 
         // Oauth Provider 에서 가져온 사용자 식별값을 이용하여 DB에서 가입된 회원을 찾는다. 만약 회원가입한 유저가 아니라면, 신규 가입을 하고 가져온다.
-        String oauthId = oauthAttributes.getOauthId();
-        Member findMember = memberService.getOrSaveByOauthId(oauthId, oauthAttributes);
+        Member findMember = memberService.getOrSaveByOauthId(oauthAttributes);
 
         // 인증 토큰을 생성한다.
         return generateResponseToken(findMember);
@@ -62,6 +61,7 @@ public class AuthService {
                 .loginId(request.loginId())
                 .nickname(request.nickname())
                 .password(passwordEncoder.encode(request.password()))
+                .verified(request.verified())
                 .build();
 
         Long id = memberRepository.save(newMember).getId();
@@ -105,13 +105,13 @@ public class AuthService {
 
         // 리프레시 토큰이 만료됐으면, 예외를 던진다.
         if (member.getRefreshToken().isExpired()) {
-            throw new AuthException(ErrorCode.EXPIRED_TOKEN, "expired refresh token");
+            throw new AuthException(ErrorCode.EXPIRED_REFRESH_TOKEN, "expired refresh token");
         }
 
         // 새로운 액세스 토큰을 발급한다.
         Token accessToken = tokenService.createToken(LoginInfo.from(member), TokenType.ACCESS);
 
-        return new TokenRefreshInfo(GrantType.BEARER.getType(), accessToken);
+        return TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, member.getLoginId(), member.getNickname());
 
     }
 
@@ -131,21 +131,6 @@ public class AuthService {
     // TODO : 추후 HTML 템플릿 처리 할 것
     public void findAccount(FindAccount requestDto) {
 
-        Member findMember = memberService.getByEmail(requestDto.email());
-
-        String title = "[DevLab] 아이디/비밀번호 정보 안내";
-        String tempPassword = generateRandom6Digits();
-
-        String content =
-                "[아이디] " + findMember.getLoginId() + "\n" +
-                        "[닉네임] " + findMember.getNickname() + "\n" +
-                        "[임시 비밀번호] " + tempPassword + "\n\n" +
-                        "로그인 후 비밀번호를 변경해주세요.";
-
-        mailService.sendMail(findMember.getEmail(), title, content);
-
-        findMember.changePassword(passwordEncoder.encode(tempPassword));
-
     }
 
     private String generateRandom6Digits() {
@@ -158,5 +143,9 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by refresh token = " + refreshToken))
                 .logout();
 
+    }
+
+    public String generateVerificationCode() {
+        return generateRandom6Digits();
     }
 }

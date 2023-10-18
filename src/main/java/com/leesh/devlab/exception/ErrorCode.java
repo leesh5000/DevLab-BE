@@ -21,6 +21,9 @@ public enum ErrorCode {
     NOT_EXIST_TOKEN(UNAUTHORIZED, "A-005", "Token is empty"),
     NOT_EXIST_REFRESH_TOKEN(UNAUTHORIZED, "A-006", "Refresh Token is empty"),
     INVALID_TOKEN_NAME(UNAUTHORIZED, "A-007", "Invalid token name"),
+    WRONG_VERIFICATION_CODE(BAD_REQUEST, "A-008", "Wrong Verification Code"),
+    NOT_EXIST_COOKIE(UNAUTHORIZED, "A-009", "Not Exist Cookie"),
+    EXPIRED_REFRESH_TOKEN(UNAUTHORIZED, "A-010", "Expired Refresh Token"),
 
     /* Member */
     NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),
@@ -34,12 +37,14 @@ public enum ErrorCode {
     /* Post */
     POST_SAVE_FAILED(INTERNAL_SERVER_ERROR, "P-001", "post save failed. please try again later."),
     EXCEED_HASHTAG_COUNT(BAD_REQUEST, "P-002", "post's hashtag count can't exceed 10."),
+    ALREADY_LIKED_POST(CONFLICT, "P-003", "already liked post."),
 
     /* Common */
     INVALID_INPUT(BAD_REQUEST, "C-001", "Bad Request"),
     EMAIL_SEND_FAILED(INTERNAL_SERVER_ERROR, "C-002", "Email Send Failed"),
     NOT_EXIST_RESOURCE(NOT_FOUND, "C-002", "not exist resource."),
     NOT_RESOURCE_OWNER(FORBIDDEN, "C-003", "not resource owner."),
+    ALREADY_LIKED_COMMENT(CONFLICT, "C-004", "already liked comment."),
     ;
 
     private final HttpStatus status;

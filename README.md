@@ -22,7 +22,7 @@ DevLab은 개발과 관련된 정보들을 서로 공유하고 질문할 수 있
 
 - login_id : 사용자의 로그인 아이디이며 유일한 값
 - name : 사용자의 닉네임이며 유일한 값
-- email : 사용자의 이메일 (이메일 인증을 하지 않으면 NULL)
+- security_code : 보안코드 (아이디/비밀번호 찾기 시 사용)
 - password : 비밀번호
 - oauth_type : 소설 로그인 종류
 - oauth_id : 소셜 로그인을 통해 회원가입을 했을 경우, 소셜 계정의 고유 아이디
@@ -65,7 +65,7 @@ create table members
     id                       bigint auto_increment,
     login_id                 varchar(20) unique,
     nickname                 varchar(10) not null unique,
-    email                    varchar(255) unique,
+    security_code            varchar(255) unique,
     password                 varchar(255),
     oauth_type               varchar(20),
     oauth_id                 varchar(255) unique,

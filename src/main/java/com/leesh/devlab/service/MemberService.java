@@ -32,7 +32,6 @@ public class MemberService {
                 .id(member.getId())
                 .loginId(member.getLoginId())
                 .nickname(member.getNickname())
-                .email(member.getEmail())
                 .createdAt(member.getCreatedAt())
                 .activities(activities)
                 .build();
@@ -81,7 +80,7 @@ public class MemberService {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD, "wrong password");
         }
 
-        member.updateProfile(updateProfile.nickname(), updateProfile.email());
+        member.updateProfile(updateProfile.nickname());
     }
 
     @Transactional
@@ -119,16 +118,11 @@ public class MemberService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
 
-    public Member getByEmail(String email) throws BusinessException {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
-    }
-
     @Transactional
-    public Member getOrSaveByOauthId(String oauthId, OauthAttributes oauthMember) {
-        return memberRepository.findByOauthId(oauthId)
+    public Member getOrSaveByOauthId(OauthAttributes oauthAttributes) {
+        return memberRepository.findByOauthId(oauthAttributes.getId())
                 .orElseGet(() -> {
-                    Member entity = oauthMember.toEntity();
+                    Member entity = oauthAttributes.toEntity();
                     return memberRepository.save(entity);
                 });
     }
@@ -164,21 +158,26 @@ public class MemberService {
 
         // 인증번호가 일치하면, 토큰 정보를 통해서 유저를 조회한 후 이메일 정보를 업데이트한다.
         Member member = getById(loginInfo.id());
-        member.verifyEmail(requestDto.email());
 
     }
 
-    public void validateLoginId(String loginId) {
+    public void checkLoginId(String loginId) {
 
         if (memberRepository.existsByLoginId(loginId)) {
             throw new BusinessException(ErrorCode.ALREADY_REGISTERED_ID, "already registered id, id = " + loginId);
         }
     }
 
-    public void validateNickname(String nickname) {
+    public void checkNickname(String nickname) {
 
         if (memberRepository.existsByNickname(nickname)) {
             throw new BusinessException(ErrorCode.ALREADY_REGISTERED_NICKNAME, "already registered nickname, nickname = " + nickname);
         }
+    }
+
+    public void verifyEmail(String email) {
+
+
+
     }
 }

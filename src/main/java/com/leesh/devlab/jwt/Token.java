@@ -6,6 +6,6 @@ public interface Token {
 
     String getValue();
 
-    int getExpiresIn();
+    int getExpiresInSeconds();
 
 }

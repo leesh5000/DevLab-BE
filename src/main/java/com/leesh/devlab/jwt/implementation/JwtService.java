@@ -89,7 +89,7 @@ public class JwtService implements TokenService {
                     .compact();
         }
 
-        return new Jwt(tokenType, value, tokenType.getExpiresIn());
+        return new Jwt(tokenType, value, tokenType.getExpiresInSeconds());
     }
 
     // 이 메소드의 파라미터인 토큰은 해당 시점에서는 Access Token 또는 Refresh Token 인지 알 수 없다.

@@ -1,10 +1,10 @@
 package com.leesh.devlab.controller;
 
+import com.leesh.devlab.config.LoginMember;
 import com.leesh.devlab.dto.*;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.LoginInfo;
-import com.leesh.devlab.resolver.LoginMember;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
 import com.leesh.devlab.service.PostService;
