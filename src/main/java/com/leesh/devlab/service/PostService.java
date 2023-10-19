@@ -6,6 +6,7 @@ import com.leesh.devlab.domain.hashtag.HashtagRepository;
 import com.leesh.devlab.domain.like.LikeRepository;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
+import com.leesh.devlab.domain.post.Category;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.post.repository.PostRepository;
 import com.leesh.devlab.domain.tag.Tag;
@@ -139,10 +140,16 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostDetail> getLists(Pageable pageable) {
+    public Page<PostDetail> getLists(Category category, Pageable pageable) {
 
         // 컬렉션은 페이징을 할 수 없으므로, 게시글만 먼저 가져온 뒤, Batch Size Fetch를 통해 1:1:1 쿼리로 해결한다.
-        Page<Post> page = postRepository.findAllWithMember(pageable);
+        Page<Post> page;
+
+        if (category == null) {
+            page = postRepository.findAll(pageable);
+        } else {
+            page = postRepository.findAllByCategory(category, pageable);
+        }
 
         return page.map(this::generatePostDetail);
     }
@@ -156,10 +163,4 @@ public class PostService {
 
         return page.map(this::generatePostDetail);
     }
-
-    public Post getById(Long postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_RESOURCE, "not found"));
-    }
-
 }

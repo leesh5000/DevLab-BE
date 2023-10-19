@@ -1,5 +1,6 @@
 package com.leesh.devlab.domain.post.repository;
 
+import com.leesh.devlab.domain.post.Category;
 import com.leesh.devlab.domain.post.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +21,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     @Query(value = "select p from Post p " +
-            "inner join fetch p.member m ",
-            countQuery = "select count(p) from Post p")
-    Page<Post> findAllWithMember(Pageable pageable);
+            "inner join fetch p.member m " +
+            "where p.category = :category",
+            countQuery = "select count(p) from Post p where p.category = :category")
+    Page<Post> findAllByCategory(@Param("category") Category category, Pageable pageable);
 
     @Query(value = "select p from Post p " +
             "inner join fetch p.member m " +

@@ -2,7 +2,6 @@ package com.leesh.devlab.service;
 
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.comment.CommentRepository;
-import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.like.LikeRepository;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
@@ -19,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -87,19 +85,7 @@ public class CommentService {
 
         validateAuthor(loginInfo, comment);
 
-        deleteAllChildren(comment);
-
         commentRepository.delete(comment);
-    }
-
-    private void deleteAllChildren(Comment comment) {
-
-        List<Long> likeIds = comment.getLikes()
-                .stream()
-                .map(Like::getId)
-                .toList();
-
-        likeRepository.deleteAllByIdInBatch(likeIds);
     }
 
     private void validateAuthor(LoginInfo loginInfo, Comment comment) {

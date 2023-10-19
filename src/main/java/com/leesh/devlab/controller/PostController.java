@@ -1,6 +1,7 @@
 package com.leesh.devlab.controller;
 
 import com.leesh.devlab.config.LoginMember;
+import com.leesh.devlab.domain.post.Category;
 import com.leesh.devlab.dto.CreateComment;
 import com.leesh.devlab.dto.CreatePost;
 import com.leesh.devlab.dto.LikeInfo;
@@ -36,9 +37,9 @@ public class PostController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostDetail>> getLists(@PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<PostDetail>> getLists(@RequestParam(value = "category", required = false) Category category, @PageableDefault(size = 20) Pageable pageable) {
 
-        Page<PostDetail> responseDto = postService.getLists(pageable);
+        Page<PostDetail> responseDto = postService.getLists(category, pageable);
 
         return ResponseEntity.ok(responseDto);
     }
