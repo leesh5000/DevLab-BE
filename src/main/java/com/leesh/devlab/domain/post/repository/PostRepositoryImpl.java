@@ -56,6 +56,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         Long totalElements = queryFactory
                 .select(Wildcard.count)
                 .from(post)
+                .where(categoryEq(category))
                 .fetchOne();
 
         return PageableExecutionUtils.getPage(

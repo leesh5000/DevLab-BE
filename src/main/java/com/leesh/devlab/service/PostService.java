@@ -142,10 +142,6 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostInfo> getLists(Category category, Pageable pageable) {
-
-        // 컬렉션은 페이징을 할 수 없으므로, 게시글만 먼저 가져온 뒤, Batch Size Fetch를 통해 1:1:1 쿼리로 해결한다.
-        Page<Post> page;
-
         return postRepository.getPostInfoByPaging(category, pageable);
     }
 
