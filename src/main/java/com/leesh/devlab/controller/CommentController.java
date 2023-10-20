@@ -1,9 +1,9 @@
 package com.leesh.devlab.controller;
 
+import com.leesh.devlab.config.LoginMember;
 import com.leesh.devlab.dto.CommentDetail;
 import com.leesh.devlab.dto.LikeInfo;
 import com.leesh.devlab.jwt.dto.LoginInfo;
-import com.leesh.devlab.config.LoginMember;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.LikeService;
 import lombok.RequiredArgsConstructor;

@@ -68,7 +68,7 @@ public class Comment extends BaseEntity {
     }
 
     public void edit(String contents, LoginInfo loginInfo) {
-        if (this.member.getId().equals(loginInfo.id())) {
+        if (!this.member.getId().equals(loginInfo.id())) {
             throw new BusinessException(ErrorCode.NOT_RESOURCE_OWNER, "not resource owner. member id = " + member.getId() + ", login id = " + loginInfo.id());
         }
         this.contents = contents;
