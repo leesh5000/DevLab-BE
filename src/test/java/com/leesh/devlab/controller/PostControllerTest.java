@@ -177,8 +177,6 @@ class PostControllerTest {
         String content = "Spring Bean 주입 방식에는 3가지 방식이 있습니다..";
         Category category = Category.INFORMATION;
         String author = "test";
-        List<String> tags = List.of("java", "spring");
-        int postLikeCount = 11;
         long createdAt = System.currentTimeMillis();
 
         long commentId = 1L;
@@ -187,12 +185,14 @@ class PostControllerTest {
         long commentCreatedAt = System.currentTimeMillis();
         long commentModifiedAt = System.currentTimeMillis();
         int commentLikeCount = 10;
+        long commentCount = 10;
+        long likeCount = 10;
+        List<String> tags = List.of("spring", "java");
 
-        List<CommentDetail> commentDetails = new ArrayList<>();
-        commentDetails.add(new CommentDetail(commentId, commentContent, commentAuthor, commentCreatedAt, commentModifiedAt, postId, commentLikeCount));
-
-        List<PostDetail> postDetails = new ArrayList<>();
-        postDetails.add(new PostDetail(postId, title, content, category, author, commentDetails, tags, postLikeCount, createdAt, createdAt));
+        PostInfo postInfo = new PostInfo(postId, title, content, category, createdAt, createdAt, author, commentCount, likeCount);
+        List<PostInfo> postInfos = new ArrayList<>();
+        postInfos.add(postInfo);
+        tags.forEach(postInfo::addTags);
 
         int pageNumber = 0;
         int pageSize = 5;
@@ -201,8 +201,8 @@ class PostControllerTest {
         );
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<PostDetail> page;
-        page = PageableExecutionUtils.getPage(postDetails, pageable, postDetails::size);
+        Page<PostInfo> page;
+        page = PageableExecutionUtils.getPage(postInfos, pageable, postInfos::size);
         given(postService.getLists(any(Category.class), any(Pageable.class)))
                 .willReturn(page);
 
@@ -218,16 +218,10 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.content[0].contents").value(content))
                 .andExpect(jsonPath("$.content[0].category").value(category.name()))
                 .andExpect(jsonPath("$.content[0].author").value(author))
-                .andExpect(jsonPath("$.content[0].comment_details[0].id").value(commentId))
-                .andExpect(jsonPath("$.content[0].comment_details[0].contents").value(commentContent))
-                .andExpect(jsonPath("$.content[0].comment_details[0].author").value(commentAuthor))
-                .andExpect(jsonPath("$.content[0].comment_details[0].created_at").value(commentCreatedAt))
-                .andExpect(jsonPath("$.content[0].comment_details[0].modified_at").value(commentModifiedAt))
-                .andExpect(jsonPath("$.content[0].comment_details[0].like_count").value(commentLikeCount))
-                .andExpect(jsonPath("$.content[0].comment_details[0].post_id").value(postId))
                 .andExpect(jsonPath("$.content[0].tags[0]").value(tags.get(0)))
                 .andExpect(jsonPath("$.content[0].tags[1]").value(tags.get(1)))
-                .andExpect(jsonPath("$.content[0].like_count").value(postLikeCount))
+                .andExpect(jsonPath("$.content[0].like_count").value(likeCount))
+                .andExpect(jsonPath("$.content[0].comment_count").value(commentCount))
                 .andExpect(jsonPath("$.content[0].created_at").value(createdAt))
                 .andExpect(jsonPath("$.content[0].modified_at").value(createdAt))
                 .andExpect(jsonPath("$.pageable.offset").value(page.getPageable().getOffset()))
@@ -268,16 +262,9 @@ class PostControllerTest {
                         fieldWithPath("content[].contents").description("내용"),
                         fieldWithPath("content[].category").description("카테고리"),
                         fieldWithPath("content[].author").description("작성자"),
-                        fieldWithPath("content[].comment_details").description("댓글 목록"),
-                        fieldWithPath("content[].comment_details[].id").description("식별자"),
-                        fieldWithPath("content[].comment_details[].contents").description("내용"),
-                        fieldWithPath("content[].comment_details[].author").description("작성자"),
-                        fieldWithPath("content[].comment_details[].created_at").description("생성일"),
-                        fieldWithPath("content[].comment_details[].modified_at").description("수정일"),
-                        fieldWithPath("content[].comment_details[].like_count").description("좋아요 수"),
-                        fieldWithPath("content[].comment_details[].post_id").description("게시글 식별자"),
                         fieldWithPath("content[].tags").description("태그 목록"),
                         fieldWithPath("content[].like_count").description("좋아요 수"),
+                        fieldWithPath("content[].comment_count").description("댓글 수"),
                         fieldWithPath("content[].created_at").description("생성일"),
                         fieldWithPath("content[].modified_at").description("수정일"),
                         fieldWithPath("pageable").description("페이지 정보"),

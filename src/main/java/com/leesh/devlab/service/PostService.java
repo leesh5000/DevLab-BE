@@ -13,6 +13,7 @@ import com.leesh.devlab.domain.tag.Tag;
 import com.leesh.devlab.dto.CommentDetail;
 import com.leesh.devlab.dto.CreatePost;
 import com.leesh.devlab.dto.PostDetail;
+import com.leesh.devlab.dto.PostInfo;
 import com.leesh.devlab.exception.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.jwt.dto.LoginInfo;
@@ -140,18 +141,12 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostDetail> getLists(Category category, Pageable pageable) {
+    public Page<PostInfo> getLists(Category category, Pageable pageable) {
 
         // 컬렉션은 페이징을 할 수 없으므로, 게시글만 먼저 가져온 뒤, Batch Size Fetch를 통해 1:1:1 쿼리로 해결한다.
         Page<Post> page;
 
-        if (category == null) {
-            page = postRepository.findAll(pageable);
-        } else {
-            page = postRepository.findAllByCategory(category, pageable);
-        }
-
-        return page.map(this::generatePostDetail);
+        return postRepository.getPostInfoByPaging(category, pageable);
     }
 
     @Transactional(readOnly = true)

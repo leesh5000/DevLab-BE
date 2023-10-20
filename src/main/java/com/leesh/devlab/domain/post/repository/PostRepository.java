@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
 
     @Query("select p from Post p " +
             "inner join fetch p.member m " +
@@ -31,4 +31,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "where m.id = :memberId",
             countQuery = "select count(p) from Post p where p.member.id = :memberId")
     Page<Post> findAllWithMemberByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query(nativeQuery = true,
+            value = "select p.* from post p " +
+                    "inner join member m on p.member_id = m.id " +
+                    "where m.id = :memberId",
+            countQuery = "select count(p) from Post p where p.member.id = :memberId")
+    Page<Post> findAllByPage(Pageable pageable);
+
 }
