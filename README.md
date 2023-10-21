@@ -97,8 +97,7 @@ create table posts
     foreign key (member_id) references members (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
-create fulltext index posts_title_idx on posts (title);
-create fulltext index posts_contents_idx on posts (contents);
+create fulltext index posts_title_contents_idx on posts (title, contents) with parser ngram;
 create index posts_type_idx on posts (category);
 create index posts_member_id_idx on posts (member_id);
 create index posts_created_at_idx on posts (created_at);
@@ -153,7 +152,7 @@ create table tags
     primary key (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
-create index tags_name_idx on tags (name);
+create fulltext index tags_name_idx on tags (name);
 
 create table hashtags
 (
