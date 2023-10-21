@@ -11,6 +11,7 @@ public record PostInfo(Long id, String title, String contents, Category category
 
     @QueryProjection
     public PostInfo(Long id, String title, String contents, Category category, Long createdAt, Long modifiedAt, String author, long commentCount, long likeCount, String tags) {
-        this(id, title, contents, category, createdAt, modifiedAt, author, commentCount, likeCount, Arrays.stream(tags.split(",")).toList());
+        this(id, title, contents, category, createdAt, modifiedAt, author, commentCount, likeCount,
+                tags != null ? Arrays.stream(tags.split(",")).toList() : List.of());
     }
 }
