@@ -1,6 +1,5 @@
 package com.leesh.devlab.domain.post.repository;
 
-import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.post.Category;
 import com.leesh.devlab.dto.PostInfo;
 import com.leesh.devlab.dto.QPostInfo;
@@ -8,21 +7,19 @@ import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static com.leesh.devlab.domain.comment.QComment.comment;
 import static com.leesh.devlab.domain.hashtag.QHashtag.hashtag;
@@ -31,8 +28,10 @@ import static com.leesh.devlab.domain.member.QMember.member;
 import static com.leesh.devlab.domain.post.QPost.post;
 import static com.leesh.devlab.domain.tag.QTag.tag;
 import static com.querydsl.core.group.GroupBy.groupBy;
+import static com.querydsl.core.group.GroupBy.list;
 import static com.querydsl.core.types.ExpressionUtils.count;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
+import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 import static io.micrometer.common.util.StringUtils.isBlank;
 
 @RequiredArgsConstructor
@@ -44,52 +43,19 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     @Override
     public Page<PostInfo> getPostInfoByPaging(Category category, Pageable pageable, String keyword) {
 
-        Map<Long, PostInfo> postInfos = getLongPostInfoMap(category, pageable, keyword);
-
-        List<Hashtag> hashtags = getHashtagsByPostIds(postInfos);
-
-        for (Hashtag hashtag : hashtags) {
-            Long postId = hashtag.getPost().getId();
-            String tagName = hashtag.getTag().getName();
-
-            if (postInfos.containsKey(postId)) {
-                postInfos.get(postId).addTags(tagName);
-            }
-        }
-
-        Long totalElements = queryFactory
-                .select(Wildcard.count)
-                .from(post)
-                .where(categoryEq(category))
-                .fetchOne();
-
-        return PageableExecutionUtils.getPage(
-                List.copyOf(postInfos.values()),
-                pageable,
-                () -> (totalElements == null) ? 0 : totalElements);
-    }
-
-    private List<Hashtag> getHashtagsByPostIds(Map<Long, PostInfo> postInfos) {
-        return queryFactory
-                .selectFrom(hashtag)
-                .innerJoin(hashtag.post, post).fetchJoin()
-                .innerJoin(hashtag.tag, tag).fetchJoin()
-                .where(hashtag.post.id.in(postInfos.keySet()))
-                .fetch();
-    }
-
-    private Map<Long, PostInfo> getLongPostInfoMap(Category category, Pageable pageable, String keyword) {
-
-        return queryFactory
+        List<PostInfo> postInfos = queryFactory
+                .select(post, stringTemplate("group_concat({0})", tag.name))
                 .from(post)
                 .innerJoin(post.member, member)
+                .leftJoin(post.hashtags, hashtag)
+                .leftJoin(hashtag.tag, tag)
                 .where(categoryEq(category))
                 .where(keywordEq(keyword))
                 .groupBy(post.id)
                 .orderBy(getOrderBy(pageable.getSort()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .transform(groupBy(post.id).as(
+                .transform(groupBy(post.id).list(
                         new QPostInfo(
                                 post.id,
                                 post.title,
@@ -109,8 +75,23 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                                 .select(count(like.id))
                                                 .from(like)
                                                 .where(like.post.eq(post)),
-                                        "likeCount")
-                        )));
+                                        "likeCount"),
+                                list(stringTemplate("group_concat({0})", tag.name).as("tags"))
+                        )
+                ));
+
+        int totalSize = queryFactory
+                .select(post.count())
+                .from(post)
+                .leftJoin(post.hashtags, hashtag)
+                .leftJoin(hashtag.tag, tag)
+                .where(categoryEq(category))
+                .where(keywordEq(keyword))
+                .groupBy(post.id)
+                .fetch()
+                .size();
+
+        return new PageImpl<>(postInfos, pageable, totalSize);
     }
 
     private BooleanExpression keywordEq(String keyword) {
@@ -120,8 +101,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         }
 
         String decodedKeyword = URLDecoder.decode(keyword, StandardCharsets.UTF_8);
-        return numberTemplate(Double.class, "function('matches', {0}, {1}, {2})", post.title, post.contents, "\"" + decodedKeyword + "\"").
-                gt(0);
+        return numberTemplate(Double.class, "function('matches', {0}, {1}, {2})", post.title, post.contents, "\"" + decodedKeyword + "\"").gt(0)
+                .or(numberTemplate(Double.class, "function('match', {0}, {1})", tag.name, "\"" + decodedKeyword + "\"").gt(0));
     }
 
     private static BooleanExpression categoryEq(Category category) {

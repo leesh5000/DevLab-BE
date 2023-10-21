@@ -5,6 +5,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -18,10 +19,11 @@ public class PostInfo {
         private final String author;
         private final long commentCount;
         private final long likeCount;
-        private final Set<String> tags = new HashSet<>();
+        private final List<String> tags;
 
-    @QueryProjection
-    public PostInfo(Long id, String title, String contents, Category category, Long createdAt, Long modifiedAt, String author, long commentCount, long likeCount) {
+        @QueryProjection
+
+    public PostInfo(Long id, String title, String contents, Category category, Long createdAt, Long modifiedAt, String author, long commentCount, long likeCount, List<String> tags) {
         this.id = id;
         this.title = title;
         this.contents = contents;
@@ -31,13 +33,6 @@ public class PostInfo {
         this.author = author;
         this.commentCount = commentCount;
         this.likeCount = likeCount;
-    }
-
-    public void addTags(String tag) {
-        this.tags.add(tag);
-    }
-
-    public void addTags(Set<String> tags) {
-        this.tags.addAll(tags);
+        this.tags = tags;
     }
 }
