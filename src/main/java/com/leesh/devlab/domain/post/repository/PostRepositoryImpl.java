@@ -28,7 +28,6 @@ import static com.leesh.devlab.domain.member.QMember.member;
 import static com.leesh.devlab.domain.post.QPost.post;
 import static com.leesh.devlab.domain.tag.QTag.tag;
 import static com.querydsl.core.group.GroupBy.groupBy;
-import static com.querydsl.core.group.GroupBy.list;
 import static com.querydsl.core.types.ExpressionUtils.count;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
@@ -44,7 +43,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public Page<PostInfo> getPostInfoByPaging(Category category, Pageable pageable, String keyword) {
 
         List<PostInfo> postInfos = queryFactory
-                .select(post, stringTemplate("group_concat({0})", tag.name))
                 .from(post)
                 .innerJoin(post.member, member)
                 .leftJoin(post.hashtags, hashtag)
@@ -76,7 +74,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                                 .from(like)
                                                 .where(like.post.eq(post)),
                                         "likeCount"),
-                                list(stringTemplate("group_concat({0})", tag.name).as("tags"))
+                                stringTemplate("group_concat({0})", tag.name).as("tags")
                         )
                 ));
 
@@ -90,6 +88,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .groupBy(post.id)
                 .fetch()
                 .size();
+
+        /**
+         * 1. 태크 , 로 붙어서오는 문제
+         * 2. 태그 누르면 제목 , 내용 말고 오직 태그만 검색어에 되도록
+         */
 
         return new PageImpl<>(postInfos, pageable, totalSize);
     }

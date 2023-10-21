@@ -152,7 +152,7 @@ create table tags
     primary key (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
-create fulltext index tags_name_idx on tags (name) with parser ngram;
+create fulltext index tags_name_idx on tags (name);
 
 create table hashtags
 (

@@ -16,6 +16,6 @@ public class CustomFunctionContributor implements FunctionContributor {
 
         functionContributions.getFunctionRegistry().registerPattern("match","MATCH(?1) AGAINST (?2 IN BOOLEAN MODE)", doubleType);
         functionContributions.getFunctionRegistry().registerPattern("matches", "MATCH(?1, ?2) AGAINST (?3 IN BOOLEAN MODE)", doubleType);
-        functionContributions.getFunctionRegistry().registerPattern("group_concat", "GROUP_CONCAT(?1)", stringType);
+        functionContributions.getFunctionRegistry().registerPattern("group_concat", "GROUP_CONCAT(?1 SEPARATOR ',')", stringType);
     }
 }

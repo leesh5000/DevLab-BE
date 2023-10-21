@@ -189,10 +189,8 @@ class PostControllerTest {
         long likeCount = 10;
         List<String> tags = List.of("spring", "java");
 
-        PostInfo postInfo = new PostInfo(postId, title, content, category, createdAt, createdAt, author, commentCount, likeCount);
+        PostInfo postInfo = new PostInfo(postId, title, content, category, createdAt, createdAt, author, commentCount, likeCount, tags);
         List<PostInfo> postInfos = new ArrayList<>();
-        postInfos.add(postInfo);
-        tags.forEach(postInfo::addTags);
 
         int pageNumber = 0;
         int pageSize = 5;
