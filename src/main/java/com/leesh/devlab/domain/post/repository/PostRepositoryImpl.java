@@ -89,11 +89,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetch()
                 .size();
 
-        /**
-         * 1. 태크 , 로 붙어서오는 문제
-         * 2. 태그 누르면 제목 , 내용 말고 오직 태그만 검색어에 되도록
-         */
-
         return new PageImpl<>(postInfos, pageable, totalSize);
     }
 
