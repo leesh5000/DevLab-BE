@@ -199,15 +199,16 @@ class PostControllerTest {
         Sort sort = Sort.by(
                 Sort.Order.desc("createdAt")
         );
+        String searchValue = "객체지향의 4가지 원칙";
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<PostInfo> page;
         page = PageableExecutionUtils.getPage(postInfos, pageable, postInfos::size);
-        given(postService.getLists(any(Category.class), any(Pageable.class)))
+        given(postService.getLists(any(Category.class), any(Pageable.class), any(String.class)))
                 .willReturn(page);
 
         // when
-        var result = mvc.perform(get("/api/posts?category={category}&page={page}&size={size}&sort={property,direction}", category, pageNumber, pageSize, "createdAt,desc")
+        var result = mvc.perform(get("/api/posts?category={category}&page={page}&size={size}&sort={property,direction}&search={searchValue}", category, pageNumber, pageSize, "createdAt,desc", searchValue)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -245,7 +246,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.sort").isMap())
                 .andDo(print());
 
-        then(postService).should().getLists(any(Category.class), any(Pageable.class));
+        then(postService).should().getLists(any(Category.class), any(Pageable.class), any(String.class));
 
         // API Docs
         result.andDo(document("posts/get-lists",
@@ -253,7 +254,8 @@ class PostControllerTest {
                         parameterWithName("category").description("카테고리"),
                         parameterWithName("page").description("페이지 번호"),
                         parameterWithName("size").description("페이지 사이즈"),
-                        parameterWithName("sort").description("정렬 방식")
+                        parameterWithName("sort").description("정렬 방식"),
+                        parameterWithName("search").description("검색어")
                 ),
                 responseFields(
                         fieldWithPath("content").description("게시글 목록"),

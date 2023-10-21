@@ -141,8 +141,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostInfo> getLists(Category category, Pageable pageable) {
-        return postRepository.getPostInfoByPaging(category, pageable);
+    public Page<PostInfo> getLists(Category category, Pageable pageable, String keyword) {
+        return postRepository.getPostInfoByPaging(category, pageable, keyword);
     }
 
     @Transactional(readOnly = true)

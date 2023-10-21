@@ -34,9 +34,10 @@ public class PostController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostInfo>> getLists(@RequestParam(value = "category", required = false) Category category, @PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<PostInfo>> getLists(@RequestParam(value = "category", required = false) Category category, @PageableDefault(size = 20) Pageable pageable,
+                                                   @RequestParam(value = "keyword", required = false) String keyword) {
 
-        var responseDto = postService.getLists(category, pageable);
+        var responseDto = postService.getLists(category, pageable, keyword);
 
         return ResponseEntity.ok(responseDto);
     }

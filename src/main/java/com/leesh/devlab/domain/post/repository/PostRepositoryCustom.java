@@ -7,6 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface PostRepositoryCustom {
 
-    Page<PostInfo> getPostInfoByPaging(Category category, Pageable pageable);
+    Page<PostInfo> getPostInfoByPaging(Category category, Pageable pageable, String keyword);
 
 }
