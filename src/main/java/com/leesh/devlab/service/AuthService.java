@@ -53,16 +53,9 @@ public class AuthService {
     @Transactional
     public RegisterInfo.Response register(RegisterInfo.Request request) {
 
-        // 이미 가입된 유저인지 확인한다.
         memberService.checkExistMember(request.loginId(), request.nickname());
 
-        // 회원가입을 진행한다.
-        Member newMember = Member.builder()
-                .loginId(request.loginId())
-                .nickname(request.nickname())
-                .password(passwordEncoder.encode(request.password()))
-                .verified(request.verified())
-                .build();
+        Member newMember = Member.createMember(request.loginId(), request.nickname(), passwordEncoder.encode(request.password()), request.verified());
 
         Long id = memberRepository.save(newMember).getId();
 
@@ -74,12 +67,10 @@ public class AuthService {
 
         Member findMember = memberService.getByLoginId(request);
 
-        // 비밀번호가 일치하는지 확인한다.
         if (!passwordEncoder.matches(request.password(), findMember.getPassword())) {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD, "wrong password");
         }
 
-        // 토큰을 생성한다.
         return generateResponseToken(findMember);
     }
 

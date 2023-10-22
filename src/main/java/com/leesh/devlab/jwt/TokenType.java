@@ -5,8 +5,8 @@ import lombok.Getter;
 @Getter
 public enum TokenType {
 
-    ACCESS(5 * 60), // 20분
-    REFRESH(30 * 60) // 7일
+    ACCESS(1 * 60), // 20분
+    REFRESH(2 * 60) // 7일
     ;
 
     // 토큰의 유효 기간 (초)

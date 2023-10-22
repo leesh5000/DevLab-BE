@@ -4,10 +4,10 @@ import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.post.Post;
+import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.jwt.Token;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -78,24 +78,31 @@ public class Member extends BaseEntity {
     }
 
     /* 생성 메서드 */
-    public static Member of(OauthType oauthType, String id, String nickname) {
+    public static Member createMember(OauthAttributes oauthAttributes) {
 
-        Member member = new Member();
+        String nickname = oauthAttributes.getOauthType().toString().charAt(0) + UUID.randomUUID().toString().split("-")[0];
+        Oauth oauth = new Oauth(oauthAttributes.getOauthType(), oauthAttributes.getId());
+        String securityCode = UUID.randomUUID().toString();
 
-        member.nickname = nickname;
-        member.oauth = new Oauth(oauthType, id);
-
-        return member;
+        return new Member(null, nickname, securityCode, null, oauth);
     }
 
-    @Builder
-    private Member(String nickname, String loginId, String password, boolean verified) {
-        this.nickname = nickname;
-        this.loginId = loginId;
-        this.password = password;
+    public static Member createMember(String loginId, String nickname, String password, boolean verified) {
+
+        String securityCode = null;
         if (verified) {
-            this.securityCode = UUID.randomUUID().toString();
+            securityCode = UUID.randomUUID().toString();
         }
+
+        return new Member(loginId, nickname, securityCode, password, null);
+    }
+
+    private Member(String loginId, String nickname, String securityCode, String password, Oauth oauth) {
+        this.loginId = loginId;
+        this.nickname = nickname;
+        this.securityCode = securityCode;
+        this.password = password;
+        this.oauth = oauth;
     }
 
     /* 도메인 비즈니스 로직 */
