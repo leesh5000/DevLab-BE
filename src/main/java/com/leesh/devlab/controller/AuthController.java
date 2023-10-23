@@ -90,8 +90,6 @@ public class AuthController {
     @PostMapping(path = "/find-account", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> findAccount(@RequestBody FindAccount request) {
 
-        authService.findAccount(request);
-
         return ResponseEntity.noContent().build();
     }
 

@@ -8,7 +8,6 @@ import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
 import com.leesh.devlab.service.PostService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,16 +36,16 @@ public class MemberController {
         return ResponseEntity.ok(myProfile);
     }
 
-    @GetMapping(value = "/{member-id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MemberProfile> getProfile(@PathVariable("member-id") Long memberId) {
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MemberProfile> getProfile(@PathVariable("id") Long memberId) {
 
         MemberProfile memberProfile = memberService.getMemberProfile(memberId);
-
+        
         return ResponseEntity.ok(memberProfile);
     }
 
-    @PatchMapping(value = "/{member-id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> updateProfile(@PathVariable("member-id") Long memberId,
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> updateProfile(@PathVariable("id") Long memberId,
                                               @LoginMember LoginInfo loginInfo,
                                               @RequestBody @Valid UpdateProfile updateProfile) {
 
@@ -58,8 +57,8 @@ public class MemberController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping(value = "/{member-id}")
-    public ResponseEntity<Void> deleteMember(@PathVariable("member-id") Long memberId,
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> deleteMember(@PathVariable("id") Long memberId,
                                              @LoginMember LoginInfo loginInfo) {
 
         // 현재 로그인 한 사용자가 자원을 수정하려는 사용자와 같은지 확인
@@ -70,16 +69,16 @@ public class MemberController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/{member-id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostDetail>> getMemberPosts(@PathVariable("member-id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
+    @GetMapping(value = "/{id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<PostDetail>> getMemberPosts(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
 
         Page<PostDetail> memberPosts = postService.getListsByMemberId(memberId, pageable);
 
         return ResponseEntity.ok(memberPosts);
     }
 
-    @GetMapping(value = "/{member-id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<CommentDetail>> getMemberComments(@PathVariable("member-id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
+    @GetMapping(value = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<CommentDetail>> getMemberComments(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
 
         Page<CommentDetail> memberComments = commentService.getListsByMemberId(memberId, pageable);
 
@@ -90,26 +89,6 @@ public class MemberController {
         if (!Objects.equals(memberId, loginInfo.id())) {
             throw new BusinessException(ErrorCode.NO_PERMISSION, "no permission");
         }
-    }
-
-    @PostMapping(path = "/{member-id}/email/verify", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> emailVerify(@PathVariable("member-id") Long memberId, @LoginMember LoginInfo loginInfo, @RequestBody EmailVerify requestDto, HttpSession session) {
-
-        isAccessible(memberId, loginInfo);
-
-        memberService.emailVerify(requestDto, session);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping(path = "/{member-id}/email/confirm")
-    public ResponseEntity<Void> emailConfirm(@PathVariable("member-id") Long memberId, @LoginMember LoginInfo loginInfo, @RequestBody EmailConfirm requestDto, HttpSession session) {
-
-        isAccessible(memberId, loginInfo);
-
-        memberService.emailConfirm(loginInfo, requestDto, session);
-
-        return ResponseEntity.noContent().build();
     }
 
 }

@@ -8,7 +8,6 @@ import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.jwt.dto.LoginInfo;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,9 +29,10 @@ public class MemberService {
 
         return MyProfile.builder()
                 .id(member.getId())
-                .loginId(member.getLoginId())
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
+                .securityCode(member.getSecurityCode())
+                .introduce(member.getIntroduce())
                 .activities(activities)
                 .build();
     }
@@ -63,9 +63,9 @@ public class MemberService {
         Activities activities = getActivities(member);
 
         return MemberProfile.builder()
-                .id(member.getId())
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
+                .introduce(member.getIntroduce())
                 .activities(activities)
                 .build();
     }
@@ -91,21 +91,6 @@ public class MemberService {
 
     private String generateRandom6Digits() {
         return String.valueOf((int) (Math.random() * 899999) + 100000);
-    }
-
-    public void emailVerify(EmailVerify requestDto, HttpSession session) {
-
-        String randomNumber = generateRandom6Digits();
-
-        // TODO : 추후 스케일 아웃이 고려될 때 Redis와 같은 외부 저장소를 사용하여 인증 번호를 관리할 것
-        session.setAttribute(requestDto.email(), randomNumber);
-
-        // 이메일 인증을 진행한다.
-        String title = "[DevLab] 이메일 인증번호 안내";
-        String contents = "[이메일 인증번호] " + randomNumber + "\n" +
-                "인증번호 유효시간은 3분 입니다.";
-
-        mailService.sendMail(requestDto.email(), title, contents);
     }
 
     public Member getByRefreshToken(String refreshToken) {
@@ -146,19 +131,6 @@ public class MemberService {
         if (memberRepository.existsByNickname(nickname)) {
             throw new BusinessException(ErrorCode.ALREADY_REGISTERED_NICKNAME, "already registered nickname");
         }
-    }
-
-    public void emailConfirm(LoginInfo loginInfo, EmailConfirm requestDto, HttpSession session) {
-
-        // 세션에 저장된 인증번호를 가져온다.
-        String cert = (String) session.getAttribute(requestDto.email());
-        if (!requestDto.code().equals(cert)) {
-            throw new BusinessException(ErrorCode.WRONG_CERT_NUMBER, "wrong certification number");
-        }
-
-        // 인증번호가 일치하면, 토큰 정보를 통해서 유저를 조회한 후 이메일 정보를 업데이트한다.
-        Member member = getById(loginInfo.id());
-
     }
 
     public void checkLoginId(String loginId) {

@@ -14,7 +14,6 @@ import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
 import com.leesh.devlab.service.PostService;
 import config.WebMvcTestConfig;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,7 +43,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -92,7 +93,8 @@ public class MemberControllerTest {
 
         // given
         String loginId = "test";
-        String email = "test@gmail.com";
+        String securityCode = UUID.randomUUID().toString();
+        String introduce = "안녕하세요 ^^ 즐겁게 개발을 하고있는 개발자입니다.";
         long createdAt = System.currentTimeMillis();
         int postCount = 11;
         int postLikeCount = 112;
@@ -100,7 +102,7 @@ public class MemberControllerTest {
         int commentLikeCount = 32;
 
         Activities activities = new Activities(postCount, postLikeCount, commentCount, commentLikeCount);
-        MyProfile response = new MyProfile(testMember.id(), loginId, testMember.nickname(), createdAt, activities);
+        MyProfile response = new MyProfile(testMember.id(), loginId, testMember.nickname(), createdAt, securityCode, introduce, activities);
 
         given(memberService.getMyProfile(testMember))
                 .willReturn(response);
@@ -116,6 +118,8 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.login_id").value(loginId))
                 .andExpect(jsonPath("$.nickname").value(testMember.nickname()))
                 .andExpect(jsonPath("$.created_at").value(createdAt))
+                .andExpect(jsonPath("$.security_code").value(securityCode))
+                .andExpect(jsonPath("$.introduce").value(introduce))
                 .andExpect(jsonPath("$.activities.post_count").value(postCount))
                 .andExpect(jsonPath("$.activities.post_like_count").value(postLikeCount))
                 .andExpect(jsonPath("$.activities.comment_count").value(commentCount))
@@ -134,6 +138,8 @@ public class MemberControllerTest {
                         fieldWithPath("login_id").description("로그인 아이디"),
                         fieldWithPath("nickname").description("닉네임"),
                         fieldWithPath("created_at").description("생성일"),
+                        fieldWithPath("security_code").description("보안 코드"),
+                        fieldWithPath("introduce").description("내 소개"),
                         fieldWithPath("activities.post_count").description("유저가 작성한 게시글 수"),
                         fieldWithPath("activities.post_like_count").description("유저가 작성한 게시글의 좋아요 수"),
                         fieldWithPath("activities.comment_count").description("유저가 작성한 댓글 수"),
@@ -147,7 +153,8 @@ public class MemberControllerTest {
 
         // given
         Activities activities = new Activities(10, 1, 32, 13);
-        MemberProfile response = new MemberProfile(testMember.id(), testMember.nickname(), System.currentTimeMillis(), activities);
+        String introduce = "안녕하세요 ^^ 개발을 즐기는 ...";
+        MemberProfile response = new MemberProfile(testMember.nickname(), System.currentTimeMillis(), introduce, activities);
 
         given(memberService.getMemberProfile(testMember.id()))
                 .willReturn(response);
@@ -159,9 +166,9 @@ public class MemberControllerTest {
 
         // then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testMember.id()))
                 .andExpect(jsonPath("$.nickname").value(testMember.nickname()))
                 .andExpect(jsonPath("$.created_at").value(response.createdAt()))
+                .andExpect(jsonPath("$.introduce").value(introduce))
                 .andExpect(jsonPath("$.activities.post_count").value(response.activities().postCount()))
                 .andExpect(jsonPath("$.activities.post_like_count").value(response.activities().postLikeCount()))
                 .andExpect(jsonPath("$.activities.comment_count").value(response.activities().commentCount()))
@@ -179,9 +186,9 @@ public class MemberControllerTest {
                         headerWithName(HttpHeaders.AUTHORIZATION).description("액세스 토큰")
                 ),
                 responseFields(
-                        fieldWithPath("id").description("식별자"),
                         fieldWithPath("nickname").description("닉네임"),
                         fieldWithPath("created_at").description("생성일"),
+                        fieldWithPath("introduce").description("내 소개"),
                         fieldWithPath("activities.post_count").description("유저가 작성한 게시글 수"),
                         fieldWithPath("activities.post_like_count").description("유저가 작성한 게시글의 좋아요 수"),
                         fieldWithPath("activities.comment_count").description("유저가 작성한 댓글 수"),
@@ -496,65 +503,6 @@ public class MemberControllerTest {
                         fieldWithPath("sort.empty").description("비어있는지 여부"),
                         fieldWithPath("sort.sorted").description("정렬 여부"),
                         fieldWithPath("sort.unsorted").description("정렬 여부"))));
-    }
-
-    @Test
-    void emailVerify_test() throws Exception {
-
-        // given
-        EmailVerify request = new EmailVerify("test@gmail.com");
-        doNothing().when(memberService).emailVerify(eq(request), any(HttpSession.class));
-
-        // when
-        var result = mvc.perform(post("/api/members/{member-id}/email/verify", testMember.id())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue())
-                .content(om.writeValueAsString(request)));
-
-        // then
-        result.andExpect(status().isNoContent())
-                .andDo(print());
-
-        then(memberService).should().emailVerify(eq(request), any(HttpSession.class));
-
-        // API Docs
-        result.andDo(document("email-verify",
-                pathParameters(
-                        parameterWithName("member-id").description("유저 식별자")
-                ),
-                requestFields(
-                        fieldWithPath("email").description("인증을 위한 이메일")
-                )));
-    }
-
-    @Test
-    void emailConfirm_test() throws Exception {
-
-        // given
-        EmailConfirm request = new EmailConfirm("test@gmail.com", "123456");
-        doNothing().when(memberService).emailConfirm(any(LoginInfo.class), eq(request), any(HttpSession.class));
-
-        // when
-        var result = mvc.perform(post("/api/members/{member-id}/email/confirm", testMember.id())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue())
-                .content(om.writeValueAsString(request)));
-
-        // then
-        result.andExpect(status().isNoContent())
-                .andDo(print());
-
-        then(memberService).should().emailConfirm(any(LoginInfo.class), eq(request), any(HttpSession.class));
-
-        // API Docs
-        result.andDo(document("email-confirm",
-                pathParameters(
-                        parameterWithName("member-id").description("유저 식별자")
-                ),
-                requestFields(
-                        fieldWithPath("email").description("인증을 위한 이메일"),
-                        fieldWithPath("code").description("인증 코드")
-                )));
     }
 
 }

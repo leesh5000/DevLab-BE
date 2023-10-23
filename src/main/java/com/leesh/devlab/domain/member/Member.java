@@ -41,6 +41,9 @@ public class Member extends BaseEntity {
     @Column(name = "password", length = 255, nullable = true)
     private String password;
 
+    @Column(name = "introduce")
+    private String introduce;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 10)
     private Role role = Role.MEMBER;

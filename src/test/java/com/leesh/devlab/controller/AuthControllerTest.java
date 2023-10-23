@@ -328,9 +328,10 @@ class AuthControllerTest {
         // given
         Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
+        Long id = 1L;
         String loginId = "test1";
         String nickname = "test1";
-        TokenRefreshInfo response = TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, loginId, nickname);
+        TokenRefreshInfo response = TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, id, loginId, nickname);
 
         String requestCookie = ResponseCookie.from(refreshToken.getTokenType().name(), refreshToken.getValue())
                 .httpOnly(true)
@@ -364,6 +365,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
                 .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
                 .andExpect(jsonPath("$.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
+                .andExpect(jsonPath("$.user_info.id").value(id))
                 .andExpect(jsonPath("$.user_info.login_id").value(loginId))
                 .andExpect(jsonPath("$.user_info.nickname").value(nickname))
                 .andDo(print());
@@ -383,6 +385,7 @@ class AuthControllerTest {
                                 fieldWithPath("access_token.value").description("토큰 값"),
                                 fieldWithPath("access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
                                 fieldWithPath("user_info").description("현재 로그인 한 유저 정보"),
+                                fieldWithPath("user_info.id").description("유저의 식별자 ID"),
                                 fieldWithPath("user_info.login_id").description("아이디"),
                                 fieldWithPath("user_info.nickname").description("닉네임")
                         )));
@@ -395,8 +398,6 @@ class AuthControllerTest {
         String email = "test@gmail.com";
         FindAccount request = new FindAccount(email);
 
-        doNothing().when(authService).findAccount(request);
-
         // when
         var result = mvc.perform(post("/api/auth/find-account")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -406,8 +407,6 @@ class AuthControllerTest {
         result
                 .andExpect(status().isNoContent())
                 .andDo(print());
-
-        then(authService).should().findAccount(request);
 
         // API Docs
         result

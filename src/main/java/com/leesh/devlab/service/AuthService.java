@@ -2,7 +2,6 @@ package com.leesh.devlab.service;
 
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.dto.FindAccount;
 import com.leesh.devlab.dto.Login;
 import com.leesh.devlab.dto.RegisterInfo;
 import com.leesh.devlab.dto.TokenRefreshInfo;
@@ -34,8 +33,8 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
     private final MemberService memberService;
+    private final MailService mailService;
 
     @Transactional
     public Login.Response oauthLogin(Request request) {
@@ -102,7 +101,7 @@ public class AuthService {
         // 새로운 액세스 토큰을 발급한다.
         Token accessToken = tokenService.createToken(LoginInfo.from(member), TokenType.ACCESS);
 
-        return TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, member.getLoginId(), member.getNickname());
+        return TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, member.getId(), member.getLoginId(), member.getNickname());
 
     }
 
@@ -116,11 +115,6 @@ public class AuthService {
 
         // 토큰을 이용하여 유저 정보를 가져온다.
         return oauthService.fetchAttributes(oauthToken.getAccessToken());
-
-    }
-
-    // TODO : 추후 HTML 템플릿 처리 할 것
-    public void findAccount(FindAccount requestDto) {
 
     }
 

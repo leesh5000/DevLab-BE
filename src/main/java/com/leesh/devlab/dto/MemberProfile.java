@@ -3,6 +3,6 @@ package com.leesh.devlab.dto;
 import lombok.Builder;
 
 @Builder
-public record MemberProfile(Long id, String nickname, Long createdAt, Activities activities) {
+public record MemberProfile(String nickname, Long createdAt, String introduce, Activities activities) {
 
 }
