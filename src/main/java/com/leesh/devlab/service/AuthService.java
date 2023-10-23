@@ -54,10 +54,15 @@ public class AuthService {
 
         memberService.checkExistMember(request.loginId(), request.nickname());
 
-        Member newMember = Member.createMember(request.loginId(), request.nickname(), passwordEncoder.encode(request.password()), request.verified());
+        Member newMember = Member.createMember(request.loginId(), request.nickname(), passwordEncoder.encode(request.password()));
+
+        // 이메일 인증된 회원이면, 해당 이메일로 보안코드를 전송한다.
+        if (request.email().verified()) {
+            String securityCode = newMember.verify();
+            mailService.sendMail(request.email().address(), "[DevLab] 계정 보안코드 안내", "계정 보안코드 : " + securityCode);
+        }
 
         Long id = memberRepository.save(newMember).getId();
-
         return new RegisterInfo.Response(id);
     }
 

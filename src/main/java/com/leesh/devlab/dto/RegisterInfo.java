@@ -9,8 +9,11 @@ public class RegisterInfo {
     protected RegisterInfo() {
     }
 
-    public record Request(@LoginId String loginId, @Size(min = 4, max = 255) String password, @Nickname String nickname, boolean verified) {
-        
+    public record Request(@LoginId String loginId, @Size(min = 4, max = 255) String password, @Nickname String nickname, Email email) {
+
+        public record Email(String address, boolean verified) {
+
+        }
     }
 
     public record Response(Long memberId) {
