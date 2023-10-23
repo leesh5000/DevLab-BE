@@ -178,26 +178,20 @@ class PostControllerTest {
         Category category = Category.INFORMATION;
         String author = "test";
         long createdAt = System.currentTimeMillis();
-
-        long commentId = 1L;
-        String commentContent = "새로운 댓글";
-        String commentAuthor = "널널한 개발자";
-        long commentCreatedAt = System.currentTimeMillis();
-        long commentModifiedAt = System.currentTimeMillis();
-        int commentLikeCount = 10;
         long commentCount = 10;
         long likeCount = 10;
         List<String> tags = List.of("spring", "java");
 
         PostInfo postInfo = new PostInfo(postId, title, content, category, createdAt, createdAt, author, commentCount, likeCount, tags);
         List<PostInfo> postInfos = new ArrayList<>();
+        postInfos.add(postInfo);
 
         int pageNumber = 0;
         int pageSize = 5;
         Sort sort = Sort.by(
                 Sort.Order.desc("createdAt")
         );
-        String searchValue = "객체지향의 4가지 원칙";
+        String keyword = "객체지향의 4가지 원칙";
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<PostInfo> page;
@@ -206,7 +200,7 @@ class PostControllerTest {
                 .willReturn(page);
 
         // when
-        var result = mvc.perform(get("/api/posts?category={category}&page={page}&size={size}&sort={property,direction}&search={searchValue}", category, pageNumber, pageSize, "createdAt,desc", searchValue)
+        var result = mvc.perform(get("/api/posts?category={category}&page={page}&size={size}&sort={property,direction}&keyword={keyword}", category, pageNumber, pageSize, "createdAt,desc", keyword)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -253,7 +247,7 @@ class PostControllerTest {
                         parameterWithName("page").description("페이지 번호"),
                         parameterWithName("size").description("페이지 사이즈"),
                         parameterWithName("sort").description("정렬 방식"),
-                        parameterWithName("search").description("검색어")
+                        parameterWithName("keyword").description("검색어")
                 ),
                 responseFields(
                         fieldWithPath("content").description("게시글 목록"),
