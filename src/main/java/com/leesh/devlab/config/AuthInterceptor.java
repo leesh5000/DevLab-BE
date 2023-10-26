@@ -1,8 +1,8 @@
 package com.leesh.devlab.config;
 
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.jwt.TokenType;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import com.leesh.devlab.util.HttpHeaderUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,10 +26,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         tokenService.validateToken(accessToken, TokenType.ACCESS);
 
         // 3. 토큰으로부터 유저 정보 추출
-        LoginInfo loginInfo = tokenService.extractLoginInfo(accessToken);
+        LoginMemberDto loginMemberDto = tokenService.extractLoginInfo(accessToken);
 
         // 4. 유저 정보를 Request에 저장 (LoginMemberArgResolver 에서 사용)
-        request.setAttribute(LoginInfo.class.getName(), loginInfo);
+        request.setAttribute(LoginMemberDto.class.getName(), loginMemberDto);
 
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }

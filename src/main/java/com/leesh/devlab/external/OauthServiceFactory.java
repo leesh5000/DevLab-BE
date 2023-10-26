@@ -1,7 +1,7 @@
  package com.leesh.devlab.external;
 
  import com.leesh.devlab.config.AppContextProvider;
- import com.leesh.devlab.domain.member.OauthType;
+ import com.leesh.devlab.constant.OauthType;
  import com.leesh.devlab.external.implementation.google.GoogleOauthService;
  import com.leesh.devlab.external.implementation.kakao.KakaoOauthService;
  import com.leesh.devlab.external.implementation.naver.NaverOauthService;

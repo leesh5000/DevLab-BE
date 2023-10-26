@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
 
     @Query("select c from Comment c " +
             "inner join fetch c.member " +
@@ -22,8 +22,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query(value = "select c from Comment c " +
             "inner join fetch c.member " +
             "left join fetch c.post ",
-            countQuery = "select count(c) from Comment c")
-    Page<Comment> findAllWithMemberAndPost(Pageable pageable);
+            countQuery = "select count(c) from Comment c where c.member.id = :memberId")
+    Page<Comment>
+    findAllByMemberId(Pageable pageable, Long memberId);
 
     @Query(value = "select c from Comment c " +
             "inner join fetch c.member m " +

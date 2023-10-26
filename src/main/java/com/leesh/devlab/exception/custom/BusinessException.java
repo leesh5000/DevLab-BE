@@ -1,6 +1,6 @@
 package com.leesh.devlab.exception.custom;
 
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.ErrorCode;
 import lombok.Getter;
 
 /**

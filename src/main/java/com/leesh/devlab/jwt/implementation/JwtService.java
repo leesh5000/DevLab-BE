@@ -1,12 +1,12 @@
 package com.leesh.devlab.jwt.implementation;
 
-import com.leesh.devlab.domain.member.Role;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.jwt.TokenType;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -31,7 +31,7 @@ public class JwtService implements TokenService {
     }
 
     @Override
-    public LoginInfo extractLoginInfo(String value) throws AuthException {
+    public LoginMemberDto extractLoginInfo(String value) throws AuthException {
 
         Claims claims = extractAllClaims(value);
 
@@ -40,7 +40,7 @@ public class JwtService implements TokenService {
             throw new AuthException(ErrorCode.INVALID_TOKEN, "not access token");
         }
 
-        return new LoginInfo(
+        return new LoginMemberDto(
                 claims.get("id", Long.class),
                 claims.get("nickname", String.class),
                 Role.valueOf(claims.get("role", String.class))
@@ -59,7 +59,7 @@ public class JwtService implements TokenService {
     }
 
     @Override
-    public Token createToken(LoginInfo loginInfo, TokenType tokenType) {
+    public Token createToken(LoginMemberDto loginMemberDto, TokenType tokenType) {
 
         long expiredAt = System.currentTimeMillis() + tokenType.getExpiresInMillis();
         String value;
@@ -70,9 +70,9 @@ public class JwtService implements TokenService {
                     .setSubject(tokenType.name())              // 토큰 제목
                     .setIssuedAt(new Date())                   // 토큰 발급 시간
                     .setExpiration(new Date(expiredAt))        // 토큰 만료되는 시간
-                    .claim("id", loginInfo.id())        // 회원 아이디 (PK값)
-                    .claim("nickname", loginInfo.nickname())    // 회원 닉네임
-                    .claim("role", loginInfo.role())    // 유저 role
+                    .claim("id", loginMemberDto.id())        // 회원 아이디 (PK값)
+                    .claim("nickname", loginMemberDto.nickname())    // 회원 닉네임
+                    .claim("role", loginMemberDto.role())    // 유저 role
                     .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                     .setHeaderParam("typ", "JWT")
                     .compact();
@@ -83,7 +83,7 @@ public class JwtService implements TokenService {
                     .setSubject(tokenType.name())              // 토큰 제목
                     .setIssuedAt(new Date())                   // 토큰 발급 시간
                     .setExpiration(new Date(expiredAt))        // 토큰 만료되는 시간
-                    .claim("id", loginInfo.id())        // 회원 아이디 (PK값)
+                    .claim("id", loginMemberDto.id())        // 회원 아이디 (PK값)
                     .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                     .setHeaderParam("typ", "JWT")
                     .compact();

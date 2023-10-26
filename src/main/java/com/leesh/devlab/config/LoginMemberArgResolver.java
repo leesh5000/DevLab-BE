@@ -1,6 +1,6 @@
 package com.leesh.devlab.config;
 
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -18,8 +18,8 @@ public class LoginMemberArgResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
 
-        boolean hasLoginMemberAnnotation = parameter.hasParameterAnnotation(LoginMember.class);
-        boolean hasMemberInfoClass = LoginInfo.class.isAssignableFrom(parameter.getParameterType());
+        boolean hasLoginMemberAnnotation = parameter.hasParameterAnnotation(LoginMemberAnno.class);
+        boolean hasMemberInfoClass = LoginMemberDto.class.isAssignableFrom(parameter.getParameterType());
         return hasLoginMemberAnnotation && hasMemberInfoClass;
     }
 
@@ -28,7 +28,7 @@ public class LoginMemberArgResolver implements HandlerMethodArgumentResolver {
 
         // 1. Request에서 유저 정보 추출
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        Object memberInfo = request.getAttribute(LoginInfo.class.getName());
+        Object memberInfo = request.getAttribute(LoginMemberDto.class.getName());
 
         // 2. 유저 정보가 없으면 예외 발생
         if (memberInfo == null) {

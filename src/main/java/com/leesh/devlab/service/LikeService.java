@@ -7,11 +7,11 @@ import com.leesh.devlab.domain.like.LikeRepository;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.domain.post.Post;
-import com.leesh.devlab.domain.post.repository.PostRepository;
-import com.leesh.devlab.dto.LikeInfo;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.domain.post.PostRepository;
+import com.leesh.devlab.constant.dto.LikeResponseDto;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,18 +27,18 @@ public class LikeService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public LikeInfo createPostLike(LoginInfo loginInfo, Long postId) {
+    public LikeResponseDto createPostLike(LoginMemberDto loginMemberDto, Long postId) {
 
         Post post = postRepository.getReferenceById(postId);
 
         post.getLikes().stream()
-                .filter(like -> like.getMember().getId().equals(loginInfo.id()))
+                .filter(like -> like.getMember().getId().equals(loginMemberDto.id()))
                 .findAny()
                 .ifPresent((like) -> {
-                    throw new BusinessException(ErrorCode.ALREADY_LIKED_POST, "already liked post, member(id) = " + loginInfo.id());
+                    throw new BusinessException(ErrorCode.ALREADY_LIKED_POST, "already liked post, member(id) = " + loginMemberDto.id());
                 });
 
-        Member member = memberRepository.getReferenceById(loginInfo.id());
+        Member member = memberRepository.getReferenceById(loginMemberDto.id());
 
         Like newLike = Like.builder()
                 .post(post)
@@ -47,22 +47,22 @@ public class LikeService {
 
         likeRepository.saveAndFlush(newLike);
 
-        return LikeInfo.from(newLike);
+        return LikeResponseDto.from(newLike);
     }
 
     @Transactional
-    public LikeInfo createCommentLike(LoginInfo loginInfo, Long commentId) {
+    public LikeResponseDto createCommentLike(LoginMemberDto loginMemberDto, Long commentId) {
 
         Comment comment = commentRepository.getReferenceById(commentId);
 
         comment.getLikes().stream()
-                .filter(like -> like.getMember().getId().equals(loginInfo.id()))
+                .filter(like -> like.getMember().getId().equals(loginMemberDto.id()))
                 .findAny()
                 .ifPresent((like) -> {
-                    throw new BusinessException(ErrorCode.ALREADY_LIKED_COMMENT, "already liked comment, member(id) = " + loginInfo.id());
+                    throw new BusinessException(ErrorCode.ALREADY_LIKED_COMMENT, "already liked comment, member(id) = " + loginMemberDto.id());
                 });
 
-        Member member = memberRepository.getReferenceById(loginInfo.id());
+        Member member = memberRepository.getReferenceById(loginMemberDto.id());
 
         Like newLike = Like.builder()
                 .comment(comment)
@@ -71,6 +71,6 @@ public class LikeService {
 
         likeRepository.saveAndFlush(newLike);
 
-        return LikeInfo.from(newLike);
+        return LikeResponseDto.from(newLike);
     }
 }

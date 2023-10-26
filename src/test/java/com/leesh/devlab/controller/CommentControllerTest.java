@@ -1,12 +1,12 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leesh.devlab.domain.member.Role;
-import com.leesh.devlab.dto.LikeInfo;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.constant.dto.LikeResponseDto;
 import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.jwt.TokenType;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.LikeService;
@@ -63,13 +63,13 @@ class CommentControllerTest {
 
     private Token accessToken;
 
-    private LoginInfo testMember;
+    private LoginMemberDto testMember;
 
     @BeforeEach
     void setUp() {
 
         accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
-        testMember = new LoginInfo(1L, "test", Role.MEMBER);
+        testMember = new LoginMemberDto(1L, "test", Role.MEMBER);
 
         doNothing().when(tokenService).validateToken(accessToken.getValue(), accessToken.getTokenType());
         given(tokenService.extractLoginInfo(accessToken.getValue()))
@@ -114,7 +114,7 @@ class CommentControllerTest {
         long commentId = 1L;
         long likeId = 1L;
         long now = System.currentTimeMillis();
-        LikeInfo response = new LikeInfo(likeId, now, now);
+        LikeResponseDto response = new LikeResponseDto(likeId, now, now);
         given(likeService.createCommentLike(testMember, commentId))
                 .willReturn(response);
 

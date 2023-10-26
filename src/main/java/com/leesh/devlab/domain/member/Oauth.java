@@ -1,12 +1,15 @@
 package com.leesh.devlab.domain.member;
 
+import com.leesh.devlab.constant.OauthType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 
+@Getter
 @Embeddable
 @NoArgsConstructor
 public class Oauth {

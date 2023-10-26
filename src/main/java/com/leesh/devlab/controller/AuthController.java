@@ -1,9 +1,9 @@
 package com.leesh.devlab.controller;
 
-import com.leesh.devlab.dto.*;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.dto.*;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
-import com.leesh.devlab.jwt.TokenType;
+import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.service.AuthService;
 import com.leesh.devlab.service.CookieService;
 import com.leesh.devlab.service.MailService;
@@ -26,14 +26,14 @@ public class AuthController {
     private final MailService mailService;
 
     @PostMapping(path = "/oauth-login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Login.Response> oauthLogin(@RequestBody OauthLogin.Request request) {
+    public ResponseEntity<LoginResponseDto> oauthLogin(@RequestBody OauthLoginRequestDto requestDto) {
 
-        Login.Response responseBody = authService.oauthLogin(request);
+        LoginResponseDto responseBody = authService.oauthLogin(requestDto);
 
         ResponseCookie cookie = cookieService.generateCookie(
-                responseBody.refreshToken().getTokenType().name(),
-                responseBody.refreshToken().getValue(),
-                responseBody.refreshToken().getExpiresInSeconds());
+                responseBody.tokenInfo().refreshToken().getTokenType().name(),
+                responseBody.tokenInfo().refreshToken().getValue(),
+                responseBody.tokenInfo().refreshToken().getExpiresInSeconds());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -42,22 +42,22 @@ public class AuthController {
 
 
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RegisterInfo.Response> register(@RequestBody @Valid RegisterInfo.Request request) {
+    public ResponseEntity<RegisterResponseDto> register(@RequestBody @Valid RegisterRequestDto requestDto) {
 
-        RegisterInfo.Response responseDto = authService.register(request);
+        RegisterResponseDto responseDto = authService.register(requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Login.Response> login(@RequestBody @Valid Login.Request request) {
+    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto requestDto) {
 
-        Login.Response responseBody = authService.login(request);
+        LoginResponseDto responseBody = authService.login(requestDto);
 
         ResponseCookie cookie = cookieService.generateCookie(
-                responseBody.refreshToken().getTokenType().name(),
-                responseBody.refreshToken().getValue(),
-                responseBody.refreshToken().getExpiresInSeconds());
+                responseBody.tokenInfo().refreshToken().getTokenType().name(),
+                responseBody.tokenInfo().refreshToken().getValue(),
+                responseBody.tokenInfo().refreshToken().getExpiresInSeconds());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -78,13 +78,13 @@ public class AuthController {
     }
 
     @PostMapping(path = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TokenRefreshInfo> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<LoginResponseDto> refreshToken(HttpServletRequest request) {
 
         Cookie cookie = cookieService.extractCookies(request, TokenType.REFRESH.name());
 
-        TokenRefreshInfo refreshDtoTokenInfo = authService.refreshToken(cookie.getValue());
+        LoginResponseDto tokenInfoDto = authService.refreshToken(cookie.getValue());
 
-        return ResponseEntity.ok(refreshDtoTokenInfo);
+        return ResponseEntity.ok(tokenInfoDto);
     }
 
     @PostMapping(path = "/find-account", consumes = MediaType.APPLICATION_JSON_VALUE)

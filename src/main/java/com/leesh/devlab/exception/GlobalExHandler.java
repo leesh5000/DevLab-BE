@@ -1,5 +1,6 @@
 package com.leesh.devlab.exception;
 
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

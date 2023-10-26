@@ -4,9 +4,9 @@ import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.post.Post;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -67,9 +67,9 @@ public class Comment extends BaseEntity {
         this.post = post;
     }
 
-    public void edit(String contents, LoginInfo loginInfo) {
-        if (!this.member.getId().equals(loginInfo.id())) {
-            throw new BusinessException(ErrorCode.NOT_RESOURCE_OWNER, "not resource owner. member id = " + member.getId() + ", login id = " + loginInfo.id());
+    public void edit(String contents, LoginMemberDto loginMemberDto) {
+        if (!this.member.getId().equals(loginMemberDto.id())) {
+            throw new BusinessException(ErrorCode.NOT_RESOURCE_OWNER, "not resource owner. member id = " + member.getId() + ", login id = " + loginMemberDto.id());
         }
         this.contents = contents;
     }

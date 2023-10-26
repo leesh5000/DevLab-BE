@@ -1,7 +1,7 @@
 package com.leesh.devlab.jwt.implementation;
 
 import com.leesh.devlab.jwt.Token;
-import com.leesh.devlab.jwt.TokenType;
+import com.leesh.devlab.constant.TokenType;
 
 import java.util.Objects;
 

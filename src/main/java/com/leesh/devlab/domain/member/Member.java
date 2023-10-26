@@ -1,5 +1,6 @@
 package com.leesh.devlab.domain.member;
 
+import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.like.Like;
@@ -106,7 +107,7 @@ public class Member extends BaseEntity {
     }
 
     public String verify() {
-        this.securityCode = UUID.randomUUID().toString();
+        this.securityCode = UUID.randomUUID().toString().split("-")[4];
         return this.securityCode;
     }
 
@@ -118,8 +119,9 @@ public class Member extends BaseEntity {
         this.password = password;
     }
 
-    public void updateProfile(String nickname) {
+    public void updateProfile(String nickname, String introduce) {
         this.nickname = nickname;
+        this.introduce = introduce;
     }
 
     public Comment comment(Post post, String contents) {

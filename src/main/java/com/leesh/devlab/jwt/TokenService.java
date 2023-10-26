@@ -1,14 +1,15 @@
 package com.leesh.devlab.jwt;
 
+import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.exception.custom.AuthException;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 
 public interface TokenService {
 
-    LoginInfo extractLoginInfo(String value) throws AuthException;
+    LoginMemberDto extractLoginInfo(String value) throws AuthException;
 
     void validateToken(String value, TokenType tokenType) throws AuthException;
 
-    Token createToken(LoginInfo loginInfo, TokenType tokenType);
+    Token createToken(LoginMemberDto loginMemberDto, TokenType tokenType);
 
 }

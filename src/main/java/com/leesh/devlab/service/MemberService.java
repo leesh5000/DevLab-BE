@@ -2,14 +2,16 @@ package com.leesh.devlab.service;
 
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.dto.*;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.dto.ActivityDto;
+import com.leesh.devlab.constant.dto.MemberProfileRequestDto;
+import com.leesh.devlab.constant.dto.MyProfileResponseDto;
+import com.leesh.devlab.constant.dto.UpdateProfileRequestDto;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.external.OauthAttributes;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,17 +21,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
 
-    public MyProfile getMyProfile(LoginInfo loginInfo) {
+    public MyProfileResponseDto getMyProfile(LoginMemberDto loginMemberDto) {
 
-        Member member = getById(loginInfo.id());
-        Activities activities = getActivities(member);
+        Member member = getById(loginMemberDto.id());
+        ActivityDto activities = getActivities(member);
 
-        return MyProfile.builder()
+        return MyProfileResponseDto.builder()
                 .id(member.getId())
+                .loginId(member.getLoginId())
                 .nickname(member.getNickname())
+                .oauth(member.getOauth())
                 .createdAt(member.getCreatedAt())
                 .securityCode(member.getSecurityCode())
                 .introduce(member.getIntroduce())
@@ -37,7 +40,7 @@ public class MemberService {
                 .build();
     }
 
-    private Activities getActivities(Member member) {
+    private ActivityDto getActivities(Member member) {
 
         int postCount = member.getPosts().size();
         int postLikeCount = member.getPosts().stream()
@@ -49,7 +52,7 @@ public class MemberService {
                 .mapToInt(comment -> comment.getLikes().size())
                 .sum();
 
-        return Activities.builder()
+        return ActivityDto.builder()
                 .postCount(postCount)
                 .postLikeCount(postLikeCount)
                 .commentCount(commentCount)
@@ -57,12 +60,12 @@ public class MemberService {
                 .build();
     }
 
-    public MemberProfile getMemberProfile(Long memberId) {
+    public MemberProfileRequestDto getMemberProfile(Long memberId) {
 
         Member member = getById(memberId);
-        Activities activities = getActivities(member);
+        ActivityDto activities = getActivities(member);
 
-        return MemberProfile.builder()
+        return MemberProfileRequestDto.builder()
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
                 .introduce(member.getIntroduce())
@@ -71,16 +74,17 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateProfile(Long memberId, UpdateProfile updateProfile) {
+    public void updateProfile(Long memberId, UpdateProfileRequestDto updateProfileRequestDto) {
 
         Member member = getById(memberId);
 
-        // 비밀번호가 일치하지 않으면, 예외 발생
-        if (!passwordEncoder.matches(updateProfile.password(), member.getPassword())) {
-            throw new BusinessException(ErrorCode.WRONG_PASSWORD, "wrong password");
-        }
+        member.updateProfile(updateProfileRequestDto.nickname(), updateProfileRequestDto.introduce());
 
-        member.updateProfile(updateProfile.nickname());
+        // 이메일 인증된 회원이면, 해당 이메일로 보안코드를 전송한다.
+        if (updateProfileRequestDto.email().verified()) {
+            String securityCode = member.verify();
+            mailService.sendMail(updateProfileRequestDto.email().address(), "[DevLab] 계정 보안코드 안내", "계정 보안코드 : " + securityCode);
+        }
     }
 
     @Transactional
@@ -112,8 +116,8 @@ public class MemberService {
                 });
     }
 
-    public Member getByLoginId(Login.Request request) {
-        return memberRepository.findByLoginId(request.loginId())
+    public Member getByLoginId(String loginId) {
+        return memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
 

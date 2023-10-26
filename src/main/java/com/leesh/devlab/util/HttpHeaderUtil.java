@@ -1,12 +1,12 @@
 package com.leesh.devlab.util;
 
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
-import static com.leesh.devlab.jwt.GrantType.isBearerType;
+import static com.leesh.devlab.constant.GrantType.isBearerType;
 
 public class HttpHeaderUtil {
 

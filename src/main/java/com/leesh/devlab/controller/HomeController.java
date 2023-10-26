@@ -1,6 +1,6 @@
 package com.leesh.devlab.controller;
 
-import com.leesh.devlab.dto.HealthCheck;
+import com.leesh.devlab.constant.dto.HealthCheckDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
@@ -18,9 +18,9 @@ public class HomeController {
     private final Environment environment;
 
     @GetMapping(value = "/api/health", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HealthCheck> healthCheck() {
+    public ResponseEntity<HealthCheckDto> healthCheck() {
 
-        HealthCheck response = new HealthCheck("ok", Locale.getDefault().toString(), TimeZone.getDefault().getID(), environment.getActiveProfiles());
+        HealthCheckDto response = new HealthCheckDto("ok", Locale.getDefault().toString(), TimeZone.getDefault().getID(), environment.getActiveProfiles());
 
         return ResponseEntity.ok(response);
     }

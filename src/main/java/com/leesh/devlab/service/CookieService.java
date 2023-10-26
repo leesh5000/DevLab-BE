@@ -1,6 +1,6 @@
 package com.leesh.devlab.service;
 
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
