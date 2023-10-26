@@ -1,9 +1,8 @@
 package com.leesh.devlab.controller;
 
-import com.leesh.devlab.config.LoginMember;
-import com.leesh.devlab.domain.post.Category;
-import com.leesh.devlab.dto.*;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.config.LoginMemberAnno;
+import com.leesh.devlab.constant.dto.*;
+import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.LikeService;
 import com.leesh.devlab.service.PostService;
@@ -26,16 +25,16 @@ public class PostController {
     private final LikeService likeService;
 
     @GetMapping(value = "/{post-id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostDetail> getDetail(@PathVariable("post-id") Long postId) {
+    public ResponseEntity<PostDetailDto> getDetail(@PathVariable("post-id") Long postId) {
 
-        PostDetail responseDto = postService.getDetail(postId);
+        PostDetailDto responseDto = postService.getDetail(postId);
 
         return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostInfo>> getLists(@RequestParam(value = "category", required = false) Category category, @PageableDefault(size = 20) Pageable pageable,
-                                                   @RequestParam(value = "keyword", required = false) String keyword) {
+    public ResponseEntity<Page<PostInfoDto>> getLists(@RequestParam(value = "category", required = false) Category category, @PageableDefault(size = 20) Pageable pageable,
+                                                      @RequestParam(value = "keyword", required = false) String keyword) {
 
         var responseDto = postService.getLists(category, pageable, keyword);
 
@@ -43,51 +42,51 @@ public class PostController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CreatePost.Response> create(@RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
+    public ResponseEntity<CreatePostResponseDto> create(@RequestBody CreatePostRequestDto requestDto, @LoginMemberAnno LoginMemberDto loginMemberDto) {
 
-        CreatePost.Response responseDto = postService.create(requestDto, loginInfo);
+        CreatePostResponseDto responseDto = postService.create(requestDto, loginMemberDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @PutMapping(value = "/{post-id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> put(@PathVariable("post-id") Long postId, @RequestBody CreatePost.Request requestDto, @LoginMember LoginInfo loginInfo) {
+    public ResponseEntity<Void> put(@PathVariable("post-id") Long postId, @RequestBody CreatePostRequestDto requestDto, @LoginMemberAnno LoginMemberDto loginMemberDto) {
 
-        postService.put(postId, requestDto, loginInfo);
+        postService.put(postId, requestDto, loginMemberDto);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(value = "/{post-id}")
-    public ResponseEntity<Void> delete(@PathVariable("post-id") Long postId, @LoginMember LoginInfo loginInfo) {
+    public ResponseEntity<Void> delete(@PathVariable("post-id") Long postId, @LoginMemberAnno LoginMemberDto loginMemberDto) {
 
-        postService.delete(postId, loginInfo);
+        postService.delete(postId, loginMemberDto);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/{post-id}/comments", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CreateComment.Response> createComment(@RequestBody CreateComment.Request requestDto, @LoginMember LoginInfo loginInfo, @PathVariable("post-id") Long postId) {
+    public ResponseEntity<CreateCommentResponseDto> createComment(@RequestBody CreateCommentRequestDto requestDto, @LoginMemberAnno LoginMemberDto loginMemberDto, @PathVariable("post-id") Long postId) {
 
-        CreateComment.Response responseDto = commentService.create(requestDto, loginInfo, postId);
+        CreateCommentResponseDto responseDto = commentService.create(requestDto, loginMemberDto, postId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @PutMapping(value = "/{post-id}/comments/{comment-id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> putComment(@RequestBody CreateComment.Request requestDto, @LoginMember LoginInfo loginInfo, @PathVariable("post-id") Long postId, @PathVariable("comment-id") Long commentId) {
+    public ResponseEntity<Void> putComment(@RequestBody CreateCommentRequestDto requestDto, @LoginMemberAnno LoginMemberDto loginMemberDto, @PathVariable("post-id") Long postId, @PathVariable("comment-id") Long commentId) {
 
-        commentService.put(requestDto, loginInfo, postId, commentId);
+        commentService.put(requestDto, loginMemberDto, postId, commentId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/{post-id}/likes", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LikeInfo> createLike(@LoginMember LoginInfo loginInfo, @PathVariable("post-id") Long postId) {
+    public ResponseEntity<LikeResponseDto> createLike(@LoginMemberAnno LoginMemberDto loginMemberDto, @PathVariable("post-id") Long postId) {
 
-        LikeInfo likeInfo = likeService.createPostLike(loginInfo, postId);
+        LikeResponseDto likeResponseDto = likeService.createPostLike(loginMemberDto, postId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(likeInfo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(likeResponseDto);
     }
 
 }

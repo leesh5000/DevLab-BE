@@ -1,29 +1,24 @@
 package com.leesh.devlab.service;
 
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.dto.FindAccount;
-import com.leesh.devlab.dto.Login;
-import com.leesh.devlab.dto.RegisterInfo;
-import com.leesh.devlab.dto.TokenRefreshInfo;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.external.OauthService;
 import com.leesh.devlab.external.OauthServiceFactory;
 import com.leesh.devlab.external.OauthToken;
-import com.leesh.devlab.jwt.GrantType;
+import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.jwt.TokenType;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.TokenType;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.leesh.devlab.dto.OauthLogin.Request;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,93 +29,98 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
     private final MemberService memberService;
+    private final MailService mailService;
 
     @Transactional
-    public Login.Response oauthLogin(Request request) {
+    public LoginResponseDto oauthLogin(OauthLoginRequestDto requestDto) {
 
         // 외부 oauth provider 에서 사용자 정보를 가져온다.
-        OauthAttributes oauthAttributes = getOauthAttributes(request);
+        OauthAttributes oauthAttributes = getOauthAttributes(requestDto);
 
         // Oauth Provider 에서 가져온 사용자 식별값을 이용하여 DB에서 가입된 회원을 찾는다. 만약 회원가입한 유저가 아니라면, 신규 가입을 하고 가져온다.
         Member findMember = memberService.getOrSaveByOauthId(oauthAttributes);
 
         // 인증 토큰을 생성한다.
-        return generateResponseToken(findMember);
+        TokenInfoDto tokenInfoDto = generateResponseToken(findMember);
+        UserInfoDto userInfoDto = new UserInfoDto(findMember.getId(), findMember.getNickname(), findMember.getRole());
+        return new LoginResponseDto(tokenInfoDto, userInfoDto);
     }
 
     @Transactional
-    public RegisterInfo.Response register(RegisterInfo.Request request) {
+    public RegisterResponseDto register(RegisterRequestDto requestDto) {
 
-        memberService.checkExistMember(request.loginId(), request.nickname());
+        memberService.checkExistMember(requestDto.loginId(), requestDto.nickname());
 
-        Member newMember = Member.createMember(request.loginId(), request.nickname(), passwordEncoder.encode(request.password()), request.verified());
+        Member newMember = Member.createMember(requestDto.loginId(), requestDto.nickname(), passwordEncoder.encode(requestDto.password()));
+
+        // 이메일 인증된 회원이면, 해당 이메일로 보안코드를 전송한다.
+        if (requestDto.email().verified()) {
+            String securityCode = newMember.verify();
+            mailService.sendMail(requestDto.email().address(), "[DevLab] 계정 보안코드 안내", "계정 보안코드 : " + securityCode);
+        }
 
         Long id = memberRepository.save(newMember).getId();
-
-        return new RegisterInfo.Response(id);
+        return new RegisterResponseDto(id);
     }
 
     @Transactional
-    public Login.Response login(Login.Request request) {
+    public LoginResponseDto login(@Valid LoginRequestDto request) {
 
-        Member findMember = memberService.getByLoginId(request);
+        Member findMember = memberService.getByLoginId(request.loginId());
 
         if (!passwordEncoder.matches(request.password(), findMember.getPassword())) {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD, "wrong password");
         }
 
-        return generateResponseToken(findMember);
+        TokenInfoDto tokenInfoDto = generateResponseToken(findMember);
+        UserInfoDto userInfoDto = new UserInfoDto(findMember.getId(), findMember.getNickname(), findMember.getRole());
+        return new LoginResponseDto(tokenInfoDto, userInfoDto);
     }
 
-    private Login.Response generateResponseToken(Member findMember) {
-        LoginInfo loginInfo = LoginInfo.from(findMember);
-        Token accessToken = tokenService.createToken(loginInfo, TokenType.ACCESS);
-        Token refreshToken = tokenService.createToken(loginInfo, TokenType.REFRESH);
+    private TokenInfoDto generateResponseToken(Member findMember) {
+        LoginMemberDto loginMemberDto = LoginMemberDto.from(findMember);
+        Token accessToken = tokenService.createToken(loginMemberDto, TokenType.ACCESS);
+        Token refreshToken = tokenService.createToken(loginMemberDto, TokenType.REFRESH);
 
         // 유저의 refresh token을 업데이트한다.
         findMember.updateRefreshToken(refreshToken);
 
-        return new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
+        return new TokenInfoDto(GrantType.BEARER.getType(), accessToken, refreshToken);
     }
 
-    public TokenRefreshInfo refreshToken(String refreshToken) {
+    public LoginResponseDto refreshToken(String refreshToken) {
 
         // 리프레시 토큰 검증
         tokenService.validateToken(refreshToken, TokenType.REFRESH);
 
         // 검증을 통과했으면, 리프레시 토큰을 통해 유저를 찾는다.
         // 리프레시 토큰이 탈취 되었을 때, 블락 처리를 할 수 있어야 하기 때문에 DB에서 유저를 찾아야한다.
-        Member member = memberService.getByRefreshToken(refreshToken);
+        Member findMember = memberService.getByRefreshToken(refreshToken);
 
         // 리프레시 토큰이 만료됐으면, 예외를 던진다.
-        if (member.getRefreshToken().isExpired()) {
+        if (findMember.getRefreshToken().isExpired()) {
             throw new AuthException(ErrorCode.EXPIRED_REFRESH_TOKEN, "expired refresh token");
         }
 
         // 새로운 액세스 토큰을 발급한다.
-        Token accessToken = tokenService.createToken(LoginInfo.from(member), TokenType.ACCESS);
-
-        return TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, member.getLoginId(), member.getNickname());
+        Token aceessToken = tokenService.createToken(LoginMemberDto.from(findMember), TokenType.ACCESS);
+        TokenInfoDto tokenInfoDto = new TokenInfoDto(GrantType.BEARER.getType(), aceessToken, null);
+        UserInfoDto userInfoDto = new UserInfoDto(findMember.getId(), findMember.getNickname(), findMember.getRole());
+        return new LoginResponseDto(tokenInfoDto, userInfoDto);
 
     }
 
-    private OauthAttributes getOauthAttributes(Request request) {
+    private OauthAttributes getOauthAttributes(OauthLoginRequestDto requestDto) {
 
         // oauth 타입에 맞는 oauth api service 구현체를 가져온다.
-        OauthService oauthService = oauthServiceFactory.getService(request.oauthType());
+        OauthService oauthService = oauthServiceFactory.getService(requestDto.oauthType());
 
         // 현재 로그인을 시도한 유저 정보를 가져오기 위해 먼저 토큰을 발급받는다.
-        OauthToken oauthToken = oauthService.fetchToken(request.authorizationCode());
+        OauthToken oauthToken = oauthService.fetchToken(requestDto.authorizationCode());
 
         // 토큰을 이용하여 유저 정보를 가져온다.
         return oauthService.fetchAttributes(oauthToken.getAccessToken());
-
-    }
-
-    // TODO : 추후 HTML 템플릿 처리 할 것
-    public void findAccount(FindAccount requestDto) {
 
     }
 

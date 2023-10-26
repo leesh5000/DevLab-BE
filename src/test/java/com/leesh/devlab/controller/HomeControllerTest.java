@@ -1,7 +1,7 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leesh.devlab.dto.HealthCheck;
+import com.leesh.devlab.constant.dto.HealthCheckDto;
 import config.WebMvcTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class HomeControllerTest {
     void healthCheck_test() throws Exception {
 
         // given
-        HealthCheck response = new HealthCheck("ok", "ko_KR", "Asia/Seoul", "test", "local", "dev");
+        HealthCheckDto response = new HealthCheckDto("ok", "ko_KR", "Asia/Seoul", "test", "local", "dev");
 
         // when
         ResultActions result = mvc.perform(get("/api/health")

@@ -1,14 +1,12 @@
 package com.leesh.devlab.controller;
 
-import com.leesh.devlab.config.LoginMember;
-import com.leesh.devlab.dto.*;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.config.LoginMemberAnno;
+import com.leesh.devlab.constant.dto.*;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
-import com.leesh.devlab.jwt.dto.LoginInfo;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
 import com.leesh.devlab.service.PostService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,86 +28,66 @@ public class MemberController {
     private final CommentService commentService;
 
     @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MyProfile> getMyProfile(@LoginMember LoginInfo loginInfo) {
+    public ResponseEntity<MyProfileResponseDto> getMyProfile(@LoginMemberAnno LoginMemberDto loginMemberDto) {
 
-        MyProfile myProfile = memberService.getMyProfile(loginInfo);
+        MyProfileResponseDto myProfileResponseDto = memberService.getMyProfile(loginMemberDto);
 
-        return ResponseEntity.ok(myProfile);
+        return ResponseEntity.ok(myProfileResponseDto);
     }
 
-    @GetMapping(value = "/{member-id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MemberProfile> getProfile(@PathVariable("member-id") Long memberId) {
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MemberProfileRequestDto> getProfile(@PathVariable("id") Long memberId) {
 
-        MemberProfile memberProfile = memberService.getMemberProfile(memberId);
-
-        return ResponseEntity.ok(memberProfile);
+        MemberProfileRequestDto memberProfileRequestDto = memberService.getMemberProfile(memberId);
+        
+        return ResponseEntity.ok(memberProfileRequestDto);
     }
 
-    @PatchMapping(value = "/{member-id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> updateProfile(@PathVariable("member-id") Long memberId,
-                                              @LoginMember LoginInfo loginInfo,
-                                              @RequestBody @Valid UpdateProfile updateProfile) {
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> updateProfile(@PathVariable("id") Long memberId,
+                                              @LoginMemberAnno LoginMemberDto loginMemberDto,
+                                              @RequestBody @Valid UpdateProfileRequestDto updateProfileRequestDto) {
 
         // 현재 로그인 한 사용자가 수정하려는 사용자와 같은지 확인
-        isAccessible(memberId, loginInfo);
+        isAccessible(memberId, loginMemberDto);
 
-        memberService.updateProfile(memberId, updateProfile);
+        memberService.updateProfile(memberId, updateProfileRequestDto);
 
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping(value = "/{member-id}")
-    public ResponseEntity<Void> deleteMember(@PathVariable("member-id") Long memberId,
-                                             @LoginMember LoginInfo loginInfo) {
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> deleteMember(@PathVariable("id") Long memberId,
+                                             @LoginMemberAnno LoginMemberDto loginMemberDto) {
 
         // 현재 로그인 한 사용자가 자원을 수정하려는 사용자와 같은지 확인
-        isAccessible(memberId, loginInfo);
+        isAccessible(memberId, loginMemberDto);
 
         memberService.deleteMember(memberId);
 
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/{member-id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostDetail>> getMemberPosts(@PathVariable("member-id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
+    @GetMapping(value = "/{id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<PostInfoDto>> getMemberPosts(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
 
-        Page<PostDetail> memberPosts = postService.getListsByMemberId(memberId, pageable);
+        Page<PostInfoDto> postPage = postService.getLists(pageable, memberId);
 
-        return ResponseEntity.ok(memberPosts);
+        return ResponseEntity.ok(postPage);
     }
 
-    @GetMapping(value = "/{member-id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<CommentDetail>> getMemberComments(@PathVariable("member-id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
+    @GetMapping(value = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<CommentDto>> getMemberComments(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
 
-        Page<CommentDetail> memberComments = commentService.getListsByMemberId(memberId, pageable);
+        Page<CommentDto> memberComments = commentService.getLists(pageable, memberId);
 
         return ResponseEntity.ok(memberComments);
     }
 
-    private void isAccessible(Long memberId, LoginInfo loginInfo) {
-        if (!Objects.equals(memberId, loginInfo.id())) {
+    private void isAccessible(Long memberId, LoginMemberDto loginMemberDto) {
+        if (!Objects.equals(memberId, loginMemberDto.id())) {
             throw new BusinessException(ErrorCode.NO_PERMISSION, "no permission");
         }
-    }
-
-    @PostMapping(path = "/{member-id}/email/verify", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> emailVerify(@PathVariable("member-id") Long memberId, @LoginMember LoginInfo loginInfo, @RequestBody EmailVerify requestDto, HttpSession session) {
-
-        isAccessible(memberId, loginInfo);
-
-        memberService.emailVerify(requestDto, session);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping(path = "/{member-id}/email/confirm")
-    public ResponseEntity<Void> emailConfirm(@PathVariable("member-id") Long memberId, @LoginMember LoginInfo loginInfo, @RequestBody EmailConfirm requestDto, HttpSession session) {
-
-        isAccessible(memberId, loginInfo);
-
-        memberService.emailConfirm(loginInfo, requestDto, session);
-
-        return ResponseEntity.noContent().build();
     }
 
 }

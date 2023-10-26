@@ -1,11 +1,12 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leesh.devlab.domain.member.OauthType;
-import com.leesh.devlab.dto.*;
-import com.leesh.devlab.jwt.GrantType;
+import com.leesh.devlab.constant.dto.*;
+import com.leesh.devlab.constant.OauthType;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.jwt.Token;
-import com.leesh.devlab.jwt.TokenType;
+import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.AuthService;
 import com.leesh.devlab.service.CookieService;
@@ -77,20 +78,22 @@ class AuthControllerTest {
         Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
 
-        OauthLogin.Request requestBody = new OauthLogin.Request(OauthType.NAVER, authorizationCode);
-        Login.Response responseBody = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
+        TokenInfoDto tokenInfoDto = new TokenInfoDto(GrantType.BEARER.getType(), accessToken, refreshToken);
+        UserInfoDto userInfoDto = new UserInfoDto(1L, "test", Role.MEMBER);
+        OauthLoginRequestDto requestDto = new OauthLoginRequestDto(OauthType.NAVER, authorizationCode);
+        LoginResponseDto responseDto = new LoginResponseDto(tokenInfoDto, userInfoDto);
 
-        ResponseCookie responseCookie = ResponseCookie.from(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue())
+        ResponseCookie responseCookie = ResponseCookie.from(responseDto.tokenInfo().refreshToken().getTokenType().name(), responseDto.tokenInfo().refreshToken().getValue())
                 .httpOnly(true)
                 .domain(COOKIE_DOMAIN)
                 .sameSite("None")
                 .secure(true)
                 .path("/")
-                .maxAge(responseBody.refreshToken().getExpiresInSeconds())
+                .maxAge(responseDto.tokenInfo().refreshToken().getExpiresInSeconds())
                 .build();
 
-        given(authService.oauthLogin(requestBody))
-                .willReturn(responseBody);
+        given(authService.oauthLogin(requestDto))
+                .willReturn(responseDto);
 
         given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
                 .willReturn(responseCookie);
@@ -99,28 +102,32 @@ class AuthControllerTest {
         ResultActions result = mvc.perform(post("/api/auth/oauth-login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(requestBody)));
+                .content(om.writeValueAsString(requestDto)));
 
         // then
         result
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, responseCookie.toString()))
-                .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
-                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresInSeconds()))
-                .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
-                .andExpect(cookie().httpOnly(responseBody.refreshToken().getTokenType().name(), true))
-                .andExpect(jsonPath("$.grant_type").value(GrantType.BEARER.getType()))
-                .andExpect(jsonPath("$.access_token").exists())
-                .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
-                .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
-                .andExpect(jsonPath("$.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
-                .andExpect(jsonPath("$.refresh_token").exists())
-                .andExpect(jsonPath("$.refresh_token.token_type").value(TokenType.REFRESH.name()))
-                .andExpect(jsonPath("$.refresh_token.value").value(refreshToken.getValue()))
-                .andExpect(jsonPath("$.refresh_token.expires_in_seconds").value(refreshToken.getExpiresInSeconds()))
+                .andExpect(cookie().value(responseDto.tokenInfo().refreshToken().getTokenType().name(), responseDto.tokenInfo().refreshToken().getValue()))
+                .andExpect(cookie().maxAge(responseDto.tokenInfo().refreshToken().getTokenType().name(), responseDto.tokenInfo().refreshToken().getExpiresInSeconds()))
+                .andExpect(cookie().domain(responseDto.tokenInfo().refreshToken().getTokenType().name(), COOKIE_DOMAIN))
+                .andExpect(cookie().httpOnly(responseDto.tokenInfo().refreshToken().getTokenType().name(), true))
+                .andExpect(jsonPath("$.user_info").exists())
+                .andExpect(jsonPath("$.user_info.id").value(userInfoDto.id()))
+                .andExpect(jsonPath("$.user_info.nickname").value(userInfoDto.nickname()))
+                .andExpect(jsonPath("$.user_info.role").value(userInfoDto.role().name()))
+                .andExpect(jsonPath("$.token_info").exists())
+                .andExpect(jsonPath("$.token_info.grant_type").value(tokenInfoDto.grantType()))
+                .andExpect(jsonPath("$.token_info.access_token").exists())
+                .andExpect(jsonPath("$.token_info.access_token.token_type").value(TokenType.ACCESS.name()))
+                .andExpect(jsonPath("$.token_info.access_token.value").value(accessToken.getValue()))
+                .andExpect(jsonPath("$.token_info.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
+                .andExpect(jsonPath("$.token_info.refresh_token").exists())
+                .andExpect(jsonPath("$.token_info.refresh_token.token_type").value(TokenType.REFRESH.name()))
+                .andExpect(jsonPath("$.token_info.refresh_token.value").value(refreshToken.getValue()))
+                .andExpect(jsonPath("$.token_info.refresh_token.expires_in_seconds").value(refreshToken.getExpiresInSeconds()))
                 .andDo(print());
 
-        then(authService).should().oauthLogin(requestBody);
+        then(authService).should().oauthLogin(requestDto);
 
         // API Docs
         result
@@ -136,15 +143,20 @@ class AuthControllerTest {
                                 cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
                         ),
                         responseFields(
-                                fieldWithPath("grant_type").description("토큰 인증 유형"),
-                                fieldWithPath("access_token").description("액세스 토큰"),
-                                fieldWithPath("access_token.token_type").description("토큰 유형"),
-                                fieldWithPath("access_token.value").description("토큰 값"),
-                                fieldWithPath("access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
-                                fieldWithPath("refresh_token").description("리프레쉬 토큰"),
-                                fieldWithPath("refresh_token.token_type").description("토큰 유형"),
-                                fieldWithPath("refresh_token.value").description("토큰 값"),
-                                fieldWithPath("refresh_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)")
+                                fieldWithPath("user_info").description("현재 로그인 한 유저 정보"),
+                                fieldWithPath("user_info.id").description("유저의 식별자 ID"),
+                                fieldWithPath("user_info.nickname").description("닉네임"),
+                                fieldWithPath("user_info.role").description("유저의 권한"),
+                                fieldWithPath("token_info").description("토큰 정보"),
+                                fieldWithPath("token_info.grant_type").description("토큰 인증 유형"),
+                                fieldWithPath("token_info.access_token").description("액세스 토큰"),
+                                fieldWithPath("token_info.access_token.token_type").description("토큰 유형"),
+                                fieldWithPath("token_info.access_token.value").description("토큰 값"),
+                                fieldWithPath("token_info.access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
+                                fieldWithPath("token_info.refresh_token").description("리프레시 토큰"),
+                                fieldWithPath("token_info.refresh_token.token_type").description("토큰 유형"),
+                                fieldWithPath("token_info.refresh_token.value").description("토큰 값"),
+                                fieldWithPath("token_info.refresh_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)")
                         )));
 
     }
@@ -153,16 +165,17 @@ class AuthControllerTest {
     void register_test() throws Exception {
 
         // given
-        RegisterInfo.Request request = new RegisterInfo.Request("test", "test", "test", true);
+        EmailDto emailDto = new EmailDto("name@company.com", false);
+        RegisterRequestDto requestDto = new RegisterRequestDto("test", "test", "test", emailDto);
 
-        given(authService.register(request))
-                .willReturn(new RegisterInfo.Response(1L));
+        given(authService.register(requestDto))
+                .willReturn(new RegisterResponseDto(1L));
 
         // when
         var result = mvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(request)));
+                .content(om.writeValueAsString(requestDto)));
 
         // then
         result
@@ -170,7 +183,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.member_id").exists())
                 .andDo(print());
 
-        then(authService).should().register(request);
+        then(authService).should().register(requestDto);
 
         // API Docs
         result
@@ -179,7 +192,9 @@ class AuthControllerTest {
                                 fieldWithPath("login_id").description("로그인 아이디"),
                                 fieldWithPath("password").description("비밀번호"),
                                 fieldWithPath("nickname").description("닉네임"),
-                                fieldWithPath("verified").description("이메일 인증 여부")
+                                fieldWithPath("email").description("이메일"),
+                                fieldWithPath("email.address").description("이메일 주소"),
+                                fieldWithPath("email.verified").description("이메일 인증 여부")
                         ),
                         responseFields(
                                 fieldWithPath("member_id").description("생성된 회원 아이디(PK)")
@@ -192,50 +207,60 @@ class AuthControllerTest {
         // given
         Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
-        Login.Request requestBody = new Login.Request("test", "test");
-        Login.Response responseBody = new Login.Response(GrantType.BEARER.getType(), accessToken, refreshToken);
+        String loginId = "test";
+        String password = "test";
+        long id = 1L;
 
-        ResponseCookie cookie = ResponseCookie.from(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue())
+        LoginRequestDto requestDto = new LoginRequestDto(loginId, password);
+        UserInfoDto userInfoDto = new UserInfoDto(id, loginId, Role.MEMBER);
+        TokenInfoDto tokenInfoDto = new TokenInfoDto(GrantType.BEARER.getType(), accessToken, refreshToken);
+        LoginResponseDto responseDto = new LoginResponseDto(tokenInfoDto, userInfoDto);
+
+        ResponseCookie responseCookie = ResponseCookie.from(responseDto.tokenInfo().refreshToken().getTokenType().name(), responseDto.tokenInfo().refreshToken().getValue())
                 .httpOnly(true)
                 .domain(COOKIE_DOMAIN)
                 .sameSite("None")
                 .secure(true)
                 .path("/")
-                .maxAge(responseBody.refreshToken().getExpiresInSeconds())
+                .maxAge(responseDto.tokenInfo().refreshToken().getExpiresInSeconds())
                 .build();
 
-        given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
-                .willReturn(cookie);
+        given(authService.login(requestDto))
+                .willReturn(responseDto);
 
-        given(authService.login(requestBody))
-                .willReturn(responseBody);
+        given(cookieService.generateCookie(any(String.class), any(String.class), any(Integer.class)))
+                .willReturn(responseCookie);
 
         // when
         var result = mvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(requestBody)));
+                .content(om.writeValueAsString(requestDto)));
 
         // then
         result
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, cookie.toString()))
-                .andExpect(cookie().value(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getValue()))
-                .andExpect(cookie().maxAge(responseBody.refreshToken().getTokenType().name(), responseBody.refreshToken().getExpiresInSeconds()))
-                .andExpect(cookie().domain(responseBody.refreshToken().getTokenType().name(), COOKIE_DOMAIN))
-                .andExpect(cookie().httpOnly(responseBody.refreshToken().getTokenType().name(), true))
-                .andExpect(jsonPath("$.grant_type").value(GrantType.BEARER.getType()))
-                .andExpect(jsonPath("$.access_token").exists())
-                .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
-                .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
-                .andExpect(jsonPath("$.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
-                .andExpect(jsonPath("$.refresh_token").exists())
-                .andExpect(jsonPath("$.refresh_token.token_type").value(TokenType.REFRESH.name()))
-                .andExpect(jsonPath("$.refresh_token.value").value(refreshToken.getValue()))
-                .andExpect(jsonPath("$.refresh_token.expires_in_seconds").value(refreshToken.getExpiresInSeconds()))
+                .andExpect(cookie().value(responseDto.tokenInfo().refreshToken().getTokenType().name(), responseDto.tokenInfo().refreshToken().getValue()))
+                .andExpect(cookie().maxAge(responseDto.tokenInfo().refreshToken().getTokenType().name(), responseDto.tokenInfo().refreshToken().getExpiresInSeconds()))
+                .andExpect(cookie().domain(responseDto.tokenInfo().refreshToken().getTokenType().name(), COOKIE_DOMAIN))
+                .andExpect(cookie().httpOnly(responseDto.tokenInfo().refreshToken().getTokenType().name(), true))
+                .andExpect(jsonPath("$.user_info").exists())
+                .andExpect(jsonPath("$.user_info.id").value(userInfoDto.id()))
+                .andExpect(jsonPath("$.user_info.nickname").value(userInfoDto.nickname()))
+                .andExpect(jsonPath("$.user_info.role").value(userInfoDto.role().name()))
+                .andExpect(jsonPath("$.token_info").exists())
+                .andExpect(jsonPath("$.token_info.grant_type").value(tokenInfoDto.grantType()))
+                .andExpect(jsonPath("$.token_info.access_token").exists())
+                .andExpect(jsonPath("$.token_info.access_token.token_type").value(TokenType.ACCESS.name()))
+                .andExpect(jsonPath("$.token_info.access_token.value").value(accessToken.getValue()))
+                .andExpect(jsonPath("$.token_info.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
+                .andExpect(jsonPath("$.token_info.refresh_token").exists())
+                .andExpect(jsonPath("$.token_info.refresh_token.token_type").value(TokenType.REFRESH.name()))
+                .andExpect(jsonPath("$.token_info.refresh_token.value").value(refreshToken.getValue()))
+                .andExpect(jsonPath("$.token_info.refresh_token.expires_in_seconds").value(refreshToken.getExpiresInSeconds()))
                 .andDo(print());
 
-        then(authService).should().login(requestBody);
+        then(authService).should().login(requestDto);
 
         // API Docs
         result
@@ -251,15 +276,20 @@ class AuthControllerTest {
                                 cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
                         ),
                         responseFields(
-                                fieldWithPath("grant_type").description("토큰 인증 유형"),
-                                fieldWithPath("access_token").description("액세스 토큰"),
-                                fieldWithPath("access_token.token_type").description("토큰 유형"),
-                                fieldWithPath("access_token.value").description("토큰 값"),
-                                fieldWithPath("access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
-                                fieldWithPath("refresh_token").description("리프레쉬 토큰"),
-                                fieldWithPath("refresh_token.token_type").description("토큰 유형"),
-                                fieldWithPath("refresh_token.value").description("토큰 값"),
-                                fieldWithPath("refresh_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)")
+                                fieldWithPath("user_info").description("현재 로그인 한 유저 정보"),
+                                fieldWithPath("user_info.id").description("유저의 식별자 ID"),
+                                fieldWithPath("user_info.nickname").description("닉네임"),
+                                fieldWithPath("user_info.role").description("유저의 권한"),
+                                fieldWithPath("token_info").description("토큰 정보"),
+                                fieldWithPath("token_info.grant_type").description("토큰 인증 유형"),
+                                fieldWithPath("token_info.access_token").description("액세스 토큰"),
+                                fieldWithPath("token_info.access_token.token_type").description("토큰 유형"),
+                                fieldWithPath("token_info.access_token.value").description("토큰 값"),
+                                fieldWithPath("token_info.access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
+                                fieldWithPath("token_info.refresh_token").description("리프레시 토큰"),
+                                fieldWithPath("token_info.refresh_token.token_type").description("토큰 유형"),
+                                fieldWithPath("token_info.refresh_token.value").description("토큰 값"),
+                                fieldWithPath("token_info.refresh_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)")
                         )));
 
     }
@@ -328,9 +358,12 @@ class AuthControllerTest {
         // given
         Token accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
         Token refreshToken = new Jwt(TokenType.REFRESH, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.REFRESH.getExpiresInSeconds());
+        Long id = 1L;
         String loginId = "test1";
         String nickname = "test1";
-        TokenRefreshInfo response = TokenRefreshInfo.of(GrantType.BEARER.getType(), accessToken, loginId, nickname);
+        TokenInfoDto tokenInfoDto = new TokenInfoDto(GrantType.BEARER.getType(), accessToken, null);
+        UserInfoDto userInfoDto = new UserInfoDto(id, loginId, Role.MEMBER);
+        LoginResponseDto responseDto = new LoginResponseDto(tokenInfoDto, userInfoDto);
 
         String requestCookie = ResponseCookie.from(refreshToken.getTokenType().name(), refreshToken.getValue())
                 .httpOnly(true)
@@ -347,7 +380,7 @@ class AuthControllerTest {
                 .willReturn(cookie);
 
         given(authService.refreshToken(refreshToken.getValue()))
-                .willReturn(response);
+                .willReturn(responseDto);
 
         // when
         var result = mvc.perform(post("/api/auth/refresh-token")
@@ -359,13 +392,17 @@ class AuthControllerTest {
         // then
         result
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.grant_type").value(GrantType.BEARER.getType()))
-                .andExpect(jsonPath("$.access_token").exists())
-                .andExpect(jsonPath("$.access_token.token_type").value(TokenType.ACCESS.name()))
-                .andExpect(jsonPath("$.access_token.value").value(accessToken.getValue()))
-                .andExpect(jsonPath("$.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
-                .andExpect(jsonPath("$.user_info.login_id").value(loginId))
-                .andExpect(jsonPath("$.user_info.nickname").value(nickname))
+                .andExpect(jsonPath("$.user_info").exists())
+                .andExpect(jsonPath("$.user_info.id").value(userInfoDto.id()))
+                .andExpect(jsonPath("$.user_info.nickname").value(userInfoDto.nickname()))
+                .andExpect(jsonPath("$.user_info.role").value(userInfoDto.role().name()))
+                .andExpect(jsonPath("$.token_info").exists())
+                .andExpect(jsonPath("$.token_info.grant_type").value(tokenInfoDto.grantType()))
+                .andExpect(jsonPath("$.token_info.refresh_token").doesNotExist())
+                .andExpect(jsonPath("$.token_info.access_token").exists())
+                .andExpect(jsonPath("$.token_info.access_token.token_type").value(TokenType.ACCESS.name()))
+                .andExpect(jsonPath("$.token_info.access_token.value").value(accessToken.getValue()))
+                .andExpect(jsonPath("$.token_info.access_token.expires_in_seconds").value(accessToken.getExpiresInSeconds()))
                 .andDo(print());
 
         then(authService).should().refreshToken(refreshToken.getValue());
@@ -377,14 +414,17 @@ class AuthControllerTest {
                                 cookieWithName(TokenType.REFRESH.name()).description("리프레시 토큰 (Http Only)")
                         ),
                         responseFields(
-                                fieldWithPath("grant_type").description("토큰 인증 유형"),
-                                fieldWithPath("access_token").description("액세스 토큰"),
-                                fieldWithPath("access_token.token_type").description("토큰 유형"),
-                                fieldWithPath("access_token.value").description("토큰 값"),
-                                fieldWithPath("access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)"),
                                 fieldWithPath("user_info").description("현재 로그인 한 유저 정보"),
-                                fieldWithPath("user_info.login_id").description("아이디"),
-                                fieldWithPath("user_info.nickname").description("닉네임")
+                                fieldWithPath("user_info.id").description("유저의 식별자 ID"),
+                                fieldWithPath("user_info.nickname").description("닉네임"),
+                                fieldWithPath("user_info.role").description("유저의 권한"),
+                                fieldWithPath("token_info").description("토큰 정보"),
+                                fieldWithPath("token_info.grant_type").description("토큰 인증 유형"),
+                                fieldWithPath("token_info.refresh_token").description("리프레시 토큰 (NULL)"),
+                                fieldWithPath("token_info.access_token").description("액세스 토큰"),
+                                fieldWithPath("token_info.access_token.token_type").description("토큰 유형"),
+                                fieldWithPath("token_info.access_token.value").description("토큰 값"),
+                                fieldWithPath("token_info.access_token.expires_in_seconds").description("토큰 만료 시간 (초 단위)")
                         )));
     }
 
@@ -395,8 +435,6 @@ class AuthControllerTest {
         String email = "test@gmail.com";
         FindAccount request = new FindAccount(email);
 
-        doNothing().when(authService).findAccount(request);
-
         // when
         var result = mvc.perform(post("/api/auth/find-account")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -406,8 +444,6 @@ class AuthControllerTest {
         result
                 .andExpect(status().isNoContent())
                 .andDo(print());
-
-        then(authService).should().findAccount(request);
 
         // API Docs
         result

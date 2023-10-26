@@ -1,7 +1,7 @@
 package com.leesh.devlab.external.implementation.kakao.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.leesh.devlab.domain.member.OauthType;
+import com.leesh.devlab.constant.OauthType;
 import com.leesh.devlab.external.OauthAttributes;
 import lombok.Getter;
 

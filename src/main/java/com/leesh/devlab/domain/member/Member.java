@@ -1,5 +1,6 @@
 package com.leesh.devlab.domain.member;
 
+import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.like.Like;
@@ -41,6 +42,9 @@ public class Member extends BaseEntity {
     @Column(name = "password", length = 255, nullable = true)
     private String password;
 
+    @Column(name = "introduce")
+    private String introduce;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 10)
     private Role role = Role.MEMBER;
@@ -80,34 +84,31 @@ public class Member extends BaseEntity {
     /* 생성 메서드 */
     public static Member createMember(OauthAttributes oauthAttributes) {
 
-        String nickname = oauthAttributes.getOauthType().toString().charAt(0) + UUID.randomUUID().toString().split("-")[0];
-        Oauth oauth = new Oauth(oauthAttributes.getOauthType(), oauthAttributes.getId());
-        String securityCode = UUID.randomUUID().toString();
+        Member member = new Member();
+        member.nickname = oauthAttributes.getOauthType().toString().charAt(0) + UUID.randomUUID().toString().split("-")[0];
+        member.oauth = new Oauth(oauthAttributes.getOauthType(), oauthAttributes.getId());
 
-        return new Member(null, nickname, securityCode, null, oauth);
+        return member;
     }
 
-    public static Member createMember(String loginId, String nickname, String password, boolean verified) {
+    public static Member createMember(String loginId, String nickname, String password) {
 
-        String securityCode = null;
-        if (verified) {
-            securityCode = UUID.randomUUID().toString();
-        }
+        Member member = new Member();
+        member.loginId = loginId;
+        member.nickname = nickname;
+        member.password = password;
 
-        return new Member(loginId, nickname, securityCode, password, null);
-    }
-
-    private Member(String loginId, String nickname, String securityCode, String password, Oauth oauth) {
-        this.loginId = loginId;
-        this.nickname = nickname;
-        this.securityCode = securityCode;
-        this.password = password;
-        this.oauth = oauth;
+        return member;
     }
 
     /* 도메인 비즈니스 로직 */
     public void updateRefreshToken(Token refreshToken) {
         this.refreshToken = new RefreshToken(refreshToken.getValue(), System.currentTimeMillis() + refreshToken.getExpiresInSeconds() * 1000L);
+    }
+
+    public String verify() {
+        this.securityCode = UUID.randomUUID().toString().split("-")[4];
+        return this.securityCode;
     }
 
     public void logout() {
@@ -118,8 +119,9 @@ public class Member extends BaseEntity {
         this.password = password;
     }
 
-    public void updateProfile(String nickname) {
+    public void updateProfile(String nickname, String introduce) {
         this.nickname = nickname;
+        this.introduce = introduce;
     }
 
     public Comment comment(Post post, String contents) {

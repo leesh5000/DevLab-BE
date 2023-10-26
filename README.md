@@ -64,9 +64,10 @@ create table members
 (
     id                       bigint auto_increment,
     login_id                 varchar(20) unique,
-    nickname                 varchar(10) not null unique,
+    nickname                 varchar(20) not null unique,
     security_code            varchar(255) unique,
     password                 varchar(255),
+    introduce                text,
     oauth_type               varchar(20),
     oauth_id                 varchar(255) unique,
     role                     varchar(10)  not null,

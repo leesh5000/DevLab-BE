@@ -1,12 +1,13 @@
 package com.leesh.devlab.domain.post;
 
+import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.tag.Tag;
-import com.leesh.devlab.exception.ErrorCode;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

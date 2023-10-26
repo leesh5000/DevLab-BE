@@ -1,13 +1,12 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leesh.devlab.domain.member.Role;
-import com.leesh.devlab.domain.post.Category;
-import com.leesh.devlab.dto.*;
+import com.leesh.devlab.constant.dto.*;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.jwt.TokenType;
-import com.leesh.devlab.jwt.dto.LoginInfo;
+import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.LikeService;
@@ -73,13 +72,13 @@ class PostControllerTest {
 
     private Token accessToken;
 
-    private LoginInfo testMember;
+    private LoginMemberDto testMember;
 
     @BeforeEach
     void setUp() {
 
         accessToken = new Jwt(TokenType.ACCESS, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQ0NFU1MiLCJpYXQiOjE2NzUyMTA4NzksImV4cCI6MTY3NTIxMTc3OSwidXNlcklkIjoxLCJyb2xlIjoiVVNFUiJ9.X1AfxGWGUPhC5ovt3hcLv8_6Zb8H0Z4yn8tDxHohrTx_kcgTDWIHPt8yDuTHYo9KmqqqIwTQ7VEtMaVyJdqKrQ", TokenType.ACCESS.getExpiresInSeconds());
-        testMember = new LoginInfo(1L, "test", Role.MEMBER);
+        testMember = new LoginMemberDto(1L, "test", Role.MEMBER);
 
         doNothing().when(tokenService).validateToken(accessToken.getValue(), accessToken.getTokenType());
         given(tokenService.extractLoginInfo(accessToken.getValue()))
@@ -107,12 +106,12 @@ class PostControllerTest {
         long commentModifiedAt = System.currentTimeMillis();
         int commentLikeCount = 10;
 
-        List<CommentDetail> commentDetails = new ArrayList<>();
-        commentDetails.add(new CommentDetail(commentId, commentContent, commentAuthor, commentCreatedAt, commentModifiedAt, postId, commentLikeCount));
-        PostDetail postDetail = new PostDetail(postId, title, content, category, author, commentDetails, tags, postLikeCount, createdAt, createdAt);
+        List<CommentDetailDto> commentDetailDtos = new ArrayList<>();
+        commentDetailDtos.add(new CommentDetailDto(commentId, commentContent, commentAuthor, commentCreatedAt, commentModifiedAt, postId, commentLikeCount));
+        PostDetailDto postDetailDto = new PostDetailDto(postId, title, content, category, author, commentDetailDtos, tags, postLikeCount, createdAt, createdAt);
 
         given(postService.getDetail(postId))
-                .willReturn(postDetail);
+                .willReturn(postDetailDto);
 
         // when
         var result = mvc.perform(get("/api/posts/{post-id}", postId)
@@ -178,35 +177,28 @@ class PostControllerTest {
         Category category = Category.INFORMATION;
         String author = "test";
         long createdAt = System.currentTimeMillis();
-
-        long commentId = 1L;
-        String commentContent = "새로운 댓글";
-        String commentAuthor = "널널한 개발자";
-        long commentCreatedAt = System.currentTimeMillis();
-        long commentModifiedAt = System.currentTimeMillis();
-        int commentLikeCount = 10;
         long commentCount = 10;
         long likeCount = 10;
         List<String> tags = List.of("spring", "java");
 
-        PostInfo postInfo = new PostInfo(postId, title, content, category, createdAt, createdAt, author, commentCount, likeCount, tags);
-        List<PostInfo> postInfos = new ArrayList<>();
+        PostInfoDto postInfoDto = new PostInfoDto(postId, title, content, category, createdAt, createdAt, author, commentCount, likeCount, tags);
+        List<PostInfoDto> postInfoDtos = new ArrayList<>();
+        postInfoDtos.add(postInfoDto);
 
         int pageNumber = 0;
         int pageSize = 5;
         Sort sort = Sort.by(
                 Sort.Order.desc("createdAt")
         );
-        String searchValue = "객체지향의 4가지 원칙";
+        String keyword = "객체지향의 4가지 원칙";
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<PostInfo> page;
-        page = PageableExecutionUtils.getPage(postInfos, pageable, postInfos::size);
+        Page<PostInfoDto> postPages = PageableExecutionUtils.getPage(postInfoDtos, pageable, postInfoDtos::size);
         given(postService.getLists(any(Category.class), any(Pageable.class), any(String.class)))
-                .willReturn(page);
+                .willReturn(postPages);
 
         // when
-        var result = mvc.perform(get("/api/posts?category={category}&page={page}&size={size}&sort={property,direction}&search={searchValue}", category, pageNumber, pageSize, "createdAt,desc", searchValue)
+        var result = mvc.perform(get("/api/posts?category={category}&page={page}&size={size}&sort={property,direction}&keyword={keyword}", category, pageNumber, pageSize, "createdAt,desc", keyword)
                 .contentType(MediaType.APPLICATION_JSON));
 
         // then
@@ -223,24 +215,24 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.content[0].comment_count").value(commentCount))
                 .andExpect(jsonPath("$.content[0].created_at").value(createdAt))
                 .andExpect(jsonPath("$.content[0].modified_at").value(createdAt))
-                .andExpect(jsonPath("$.pageable.offset").value(page.getPageable().getOffset()))
-                .andExpect(jsonPath("$.pageable.page_size").value(page.getPageable().getPageSize()))
+                .andExpect(jsonPath("$.pageable.offset").value(postPages.getPageable().getOffset()))
+                .andExpect(jsonPath("$.pageable.page_size").value(postPages.getPageable().getPageSize()))
                 .andExpect(jsonPath("$.pageable.paged").value(true))
                 .andExpect(jsonPath("$.pageable.unpaged").value(false))
-                .andExpect(jsonPath("$.pageable.page_number").value(page.getPageable().getPageNumber()))
+                .andExpect(jsonPath("$.pageable.page_number").value(postPages.getPageable().getPageNumber()))
                 .andExpect(jsonPath("$.pageable.sort").isMap())
                 .andExpect(jsonPath("$.pageable.sort.empty").value(false))
                 .andExpect(jsonPath("$.pageable.sort.sorted").value(true))
                 .andExpect(jsonPath("$.pageable.sort.unsorted").value(false))
-                .andExpect(jsonPath("$.total_pages").value(page.getTotalPages()))
-                .andExpect(jsonPath("$.total_elements").value(page.getTotalElements()))
-                .andExpect(jsonPath("$.last").value(page.isLast()))
-                .andExpect(jsonPath("$.first").value(page.isFirst()))
-                .andExpect(jsonPath("$.number").value(page.getNumber()))
-                .andExpect(jsonPath("$.size").value(page.getSize()))
-                .andExpect(jsonPath("$.number_of_elements").value(page.getNumberOfElements()))
-                .andExpect(jsonPath("$.empty").value(page.isEmpty()))
-                .andExpect(jsonPath("$.first").value(page.isFirst()))
+                .andExpect(jsonPath("$.total_pages").value(postPages.getTotalPages()))
+                .andExpect(jsonPath("$.total_elements").value(postPages.getTotalElements()))
+                .andExpect(jsonPath("$.last").value(postPages.isLast()))
+                .andExpect(jsonPath("$.first").value(postPages.isFirst()))
+                .andExpect(jsonPath("$.number").value(postPages.getNumber()))
+                .andExpect(jsonPath("$.size").value(postPages.getSize()))
+                .andExpect(jsonPath("$.number_of_elements").value(postPages.getNumberOfElements()))
+                .andExpect(jsonPath("$.empty").value(postPages.isEmpty()))
+                .andExpect(jsonPath("$.first").value(postPages.isFirst()))
                 .andExpect(jsonPath("$.sort").isMap())
                 .andDo(print());
 
@@ -253,7 +245,7 @@ class PostControllerTest {
                         parameterWithName("page").description("페이지 번호"),
                         parameterWithName("size").description("페이지 사이즈"),
                         parameterWithName("sort").description("정렬 방식"),
-                        parameterWithName("search").description("검색어")
+                        parameterWithName("keyword").description("검색어")
                 ),
                 responseFields(
                         fieldWithPath("content").description("게시글 목록"),
@@ -297,8 +289,8 @@ class PostControllerTest {
 
         // given
         long newPostId = 1L;
-        CreatePost.Request request = new CreatePost.Request("test title", "test contents", Category.QUESTION, Set.of("java", "spring"));
-        CreatePost.Response response = new CreatePost.Response(newPostId);
+        CreatePostRequestDto request = new CreatePostRequestDto("test title", "test contents", Category.QUESTION, Set.of("java", "spring"));
+        CreatePostResponseDto response = new CreatePostResponseDto(newPostId);
 
         given(postService.create(request, testMember))
                 .willReturn(response);
@@ -315,7 +307,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.post_id").value(newPostId))
                 .andDo(print());
 
-        then(postService).should().create(any(CreatePost.Request.class), any(LoginInfo.class));
+        then(postService).should().create(any(CreatePostRequestDto.class), any(LoginMemberDto.class));
 
         // API Docs
         result.andDo(document("posts/create",
@@ -338,22 +330,22 @@ class PostControllerTest {
 
         // given
         long postId = 1L;
-        CreatePost.Request request = new CreatePost.Request("test title", "test contents", Category.QUESTION, Set.of("java", "spring"));
+        CreatePostRequestDto requestDto = new CreatePostRequestDto("test title", "test contents", Category.QUESTION, Set.of("java", "spring"));
 
-        doNothing().when(postService).put(postId, request, testMember);
+        doNothing().when(postService).put(postId, requestDto, testMember);
 
         // when
         var result = mvc.perform(RestDocumentationRequestBuilders.put("/api/posts/{post-id}", postId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + accessToken.getValue())
-                .content(om.writeValueAsString(request)));
+                .content(om.writeValueAsString(requestDto)));
 
         // then
         result.andExpect(status().isNoContent())
                 .andDo(print());
 
-        then(postService).should().put(postId, request, testMember);
+        then(postService).should().put(postId, requestDto, testMember);
 
         // API Docs
         result.andDo(document("posts/put",
@@ -405,18 +397,18 @@ class PostControllerTest {
         // given
         long postId = 1L;
         long commentId = 1L;
-        CreateComment.Request request = new CreateComment.Request("새로운 댓글");
-        CreateComment.Response response = new CreateComment.Response(commentId);
+        CreateCommentRequestDto requestDto = new CreateCommentRequestDto("새로운 댓글");
+        CreateCommentResponseDto responseDto = new CreateCommentResponseDto(commentId);
 
-        given(commentService.create(request, testMember, postId))
-                .willReturn(response);
+        given(commentService.create(requestDto, testMember, postId))
+                .willReturn(responseDto);
 
         // when
         var result = mvc.perform(post("/api/posts/{post-id}/comments", postId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + accessToken.getValue())
-                .content(om.writeValueAsString(request)));
+                .content(om.writeValueAsString(requestDto)));
 
         // then
         result
@@ -425,7 +417,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.comment_id").value(commentId))
                 .andDo(print());
 
-        then(commentService).should().create(any(CreateComment.Request.class), any(LoginInfo.class), any(Long.class));
+        then(commentService).should().create(any(CreateCommentRequestDto.class), any(LoginMemberDto.class), any(Long.class));
 
         // API Docs
         result.andDo(document("posts/create-comment",
@@ -449,23 +441,23 @@ class PostControllerTest {
         // given
         long postId = 1L;
         long commentId = 1L;
-        CreateComment.Request request = new CreateComment.Request("새로운 댓글");
-        CreateComment.Response response = new CreateComment.Response(commentId);
+        CreateCommentRequestDto requestDto = new CreateCommentRequestDto("새로운 댓글");
+        CreateCommentResponseDto responseDto = new CreateCommentResponseDto(commentId);
 
-        doNothing().when(commentService).put(request, testMember, postId, commentId);
+        doNothing().when(commentService).put(requestDto, testMember, postId, commentId);
 
         // when
         var result = mvc.perform(RestDocumentationRequestBuilders.put("/api/posts/{post-id}/comments/{comment-id}", postId, commentId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + accessToken.getValue())
-                .content(om.writeValueAsString(request)));
+                .content(om.writeValueAsString(requestDto)));
 
         // then
         result.andExpect(status().isNoContent())
                 .andDo(print());
 
-        then(commentService).should().put(request, testMember, postId, commentId);
+        then(commentService).should().put(requestDto, testMember, postId, commentId);
 
         // API Docs
         result.andDo(document("posts/put-comment",
@@ -488,7 +480,7 @@ class PostControllerTest {
         long postId = 1L;
         long likeId = 1L;
         long now = System.currentTimeMillis();
-        LikeInfo response = new LikeInfo(likeId, now, now);
+        LikeResponseDto response = new LikeResponseDto(likeId, now, now);
         given(likeService.createPostLike(testMember, postId))
                 .willReturn(response);
 
