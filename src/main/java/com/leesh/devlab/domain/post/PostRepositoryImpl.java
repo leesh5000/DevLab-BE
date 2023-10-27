@@ -1,13 +1,14 @@
 package com.leesh.devlab.domain.post;
 
+import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.constant.dto.PostInfoDto;
 import com.leesh.devlab.constant.dto.QPostInfoDto;
-import com.leesh.devlab.constant.Category;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,15 +41,15 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<PostInfoDto> getPostPage(Category category, Pageable pageable, String keyword, Long memberId) {
+    public Page<PostInfoDto> getPosts(Category category, Pageable pageable, String keyword, Long memberId) {
 
         List<PostInfoDto> postInfos = queryFactory
                 .from(post)
                 .innerJoin(post.member, member)
                 .leftJoin(post.hashtags, hashtag)
                 .leftJoin(hashtag.tag, tag)
-                .where(categoryEq(category))
                 .where(keywordEq(keyword))
+                .where(categoryEq(category))
                 .where(memberIdEq(memberId))
                 .groupBy(post.id)
                 .orderBy(getOrderBy(pageable.getSort()))
@@ -85,8 +86,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .innerJoin(post.member, member)
                 .leftJoin(post.hashtags, hashtag)
                 .leftJoin(hashtag.tag, tag)
-                .where(categoryEq(category))
                 .where(keywordEq(keyword))
+                .where(categoryEq(category))
                 .where(memberIdEq(memberId))
                 .groupBy(post.id)
                 .fetch()
@@ -109,8 +110,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         }
 
         String decodedKeyword = URLDecoder.decode(keyword, StandardCharsets.UTF_8);
+
+        JPQLQuery<Long> tagNameMatchPostIds = JPAExpressions
+                .select(post.id)
+                .from(post)
+                .leftJoin(hashtag).on(hashtag.post.eq(post))
+                .leftJoin(tag).on(hashtag.tag.eq(tag))
+                .where(numberTemplate(Double.class, "function('match', {0}, {1})", tag.name, "\"" + keyword + "\"").gt(0));
+
         return numberTemplate(Double.class, "function('matches', {0}, {1}, {2})", post.title, post.contents, "\"" + decodedKeyword + "\"").gt(0)
-                .or(numberTemplate(Double.class, "function('match', {0}, {1})", tag.name, "\"" + decodedKeyword + "\"").gt(0));
+                .or(post.id.in(tagNameMatchPostIds));
     }
 
     private static BooleanExpression categoryEq(Category category) {

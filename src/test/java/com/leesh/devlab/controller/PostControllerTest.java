@@ -1,12 +1,12 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leesh.devlab.constant.dto.*;
-import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.constant.Category;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.LikeService;
@@ -106,12 +106,10 @@ class PostControllerTest {
         long commentModifiedAt = System.currentTimeMillis();
         int commentLikeCount = 10;
 
-        List<CommentDetailDto> commentDetailDtos = new ArrayList<>();
-        commentDetailDtos.add(new CommentDetailDto(commentId, commentContent, commentAuthor, commentCreatedAt, commentModifiedAt, postId, commentLikeCount));
-        PostDetailDto postDetailDto = new PostDetailDto(postId, title, content, category, author, commentDetailDtos, tags, postLikeCount, createdAt, createdAt);
+        PostDto postDto = new PostDto(postId, title, content, category, author, tags, postLikeCount, createdAt, createdAt);
 
-        given(postService.getDetail(postId))
-                .willReturn(postDetailDto);
+        given(postService.getPost(postId))
+                .willReturn(postDto);
 
         // when
         var result = mvc.perform(get("/api/posts/{post-id}", postId)
@@ -125,13 +123,6 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.contents").value(content))
                 .andExpect(jsonPath("$.category").value(category.name()))
                 .andExpect(jsonPath("$.author").value(author))
-                .andExpect(jsonPath("$.comment_details[0].id").value(commentId))
-                .andExpect(jsonPath("$.comment_details[0].contents").value(commentContent))
-                .andExpect(jsonPath("$.comment_details[0].author").value(commentAuthor))
-                .andExpect(jsonPath("$.comment_details[0].created_at").value(commentCreatedAt))
-                .andExpect(jsonPath("$.comment_details[0].modified_at").value(commentModifiedAt))
-                .andExpect(jsonPath("$.comment_details[0].like_count").value(commentLikeCount))
-                .andExpect(jsonPath("$.comment_details[0].post_id").value(postId))
                 .andExpect(jsonPath("$.tags[0]").value(tags.get(0)))
                 .andExpect(jsonPath("$.tags[1]").value(tags.get(1)))
                 .andExpect(jsonPath("$.like_count").value(postLikeCount))
@@ -139,7 +130,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.modified_at").value(createdAt))
                 .andDo(print());
 
-        then(postService).should().getDetail(1L);
+        then(postService).should().getPost(1L);
 
         // API Docs
         result.andDo(document("posts/get-detail",
@@ -152,14 +143,6 @@ class PostControllerTest {
                         fieldWithPath("contents").description("내용"),
                         fieldWithPath("category").description("카테고리"),
                         fieldWithPath("author").description("작성자"),
-                        fieldWithPath("comment_details").description("댓글 목록"),
-                        fieldWithPath("comment_details[].id").description("식별자"),
-                        fieldWithPath("comment_details[].contents").description("내용"),
-                        fieldWithPath("comment_details[].author").description("작성자"),
-                        fieldWithPath("comment_details[].created_at").description("생성일"),
-                        fieldWithPath("comment_details[].modified_at").description("수정일"),
-                        fieldWithPath("comment_details[].like_count").description("좋아요 수"),
-                        fieldWithPath("comment_details[].post_id").description("게시글 식별자"),
                         fieldWithPath("tags").description("태그 목록"),
                         fieldWithPath("like_count").description("좋아요 수"),
                         fieldWithPath("created_at").description("생성일"),
@@ -194,7 +177,7 @@ class PostControllerTest {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<PostInfoDto> postPages = PageableExecutionUtils.getPage(postInfoDtos, pageable, postInfoDtos::size);
-        given(postService.getLists(any(Category.class), any(Pageable.class), any(String.class)))
+        given(postService.getPosts(any(Category.class), any(Pageable.class), any(String.class)))
                 .willReturn(postPages);
 
         // when
@@ -236,7 +219,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.sort").isMap())
                 .andDo(print());
 
-        then(postService).should().getLists(any(Category.class), any(Pageable.class), any(String.class));
+        then(postService).should().getPosts(any(Category.class), any(Pageable.class), any(String.class));
 
         // API Docs
         result.andDo(document("posts/get-lists",

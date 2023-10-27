@@ -7,9 +7,8 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record PostDetailDto(
+public record PostDto(
         Long id, String title, String contents, Category category, String author,
-        @JsonProperty("comment_details") List<CommentDetailDto> commentDetailDtos,
         List<String> tags,
         int likeCount,
         Long createdAt, Long modifiedAt) {
