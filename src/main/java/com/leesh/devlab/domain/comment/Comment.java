@@ -1,17 +1,18 @@
 package com.leesh.devlab.domain.comment;
 
+import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.constant.dto.LoginMemberDto;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.post.Post;
-import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
-import com.leesh.devlab.constant.dto.LoginMemberDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;

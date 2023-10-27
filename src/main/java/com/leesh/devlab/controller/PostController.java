@@ -1,8 +1,8 @@
 package com.leesh.devlab.controller;
 
 import com.leesh.devlab.config.LoginMemberAnno;
-import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.constant.Category;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.LikeService;
 import com.leesh.devlab.service.PostService;
@@ -28,6 +28,14 @@ public class PostController {
     public ResponseEntity<PostDetailDto> getDetail(@PathVariable("post-id") Long postId) {
 
         PostDetailDto responseDto = postService.getDetail(postId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping(value = "/{post-id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getPostComments(@PathVariable("post-id") Long postId, Pageable pageable) {
+
+        var responseDto = commentService.getPostComments(pageable, postId);
 
         return ResponseEntity.ok(responseDto);
     }

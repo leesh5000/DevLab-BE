@@ -1,5 +1,6 @@
 package com.leesh.devlab.domain.comment;
 
+import com.leesh.devlab.constant.dto.PostCommentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
