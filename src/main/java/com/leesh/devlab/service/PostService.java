@@ -1,5 +1,7 @@
 package com.leesh.devlab.service;
 
+import com.leesh.devlab.constant.Category;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.domain.comment.CommentRepository;
 import com.leesh.devlab.domain.hashtag.Hashtag;
@@ -7,11 +9,9 @@ import com.leesh.devlab.domain.hashtag.HashtagRepository;
 import com.leesh.devlab.domain.like.LikeRepository;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.post.PostRepository;
 import com.leesh.devlab.domain.tag.Tag;
-import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -79,7 +79,7 @@ public class PostService {
         post.edit(requestDto.title(), requestDto.contents(), requestDto.category(), newTags);
     }
 
-    private Post getByIdWithMember(Long postId) {
+    private Post getPostByIdWithMemberAndLikes(Long postId) {
         return postRepository.findByIdWithMember(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_RESOURCE, "not found"));
     }
@@ -87,7 +87,7 @@ public class PostService {
     @Transactional
     public void delete(Long postId, LoginMemberDto loginMemberDto) {
 
-        Post findPost = getByIdWithMember(postId);
+        Post findPost = getPostByIdWithMemberAndLikes(postId);
 
         validateAuthor(loginMemberDto, findPost);
 
@@ -102,14 +102,14 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostDetailDto getDetail(Long postId) {
+    public PostDto getPost(Long postId) {
 
-        Post post = getByIdWithMember(postId);
+        Post post = getPostByIdWithMemberAndLikes(postId);
 
         return generatePostDetail(post);
     }
 
-    private PostDetailDto generatePostDetail(Post post) {
+    private PostDto generatePostDetail(Post post) {
 
         List<String> tags = post.getHashtags().stream()
                 .map(Hashtag::getTag)
@@ -118,11 +118,7 @@ public class PostService {
 
         int likeCount = post.getLikes().size();
 
-        List<CommentDetailDto> commentDetailDtos = post.getComments().stream()
-                .map(commentService::generateCommentDetail)
-                .toList();
-
-        return PostDetailDto.builder()
+        return PostDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .contents(post.getContents())
@@ -130,24 +126,23 @@ public class PostService {
                 .author(post.getMember().getNickname())
                 .tags(tags)
                 .likeCount(likeCount)
-                .commentDetailDtos(commentDetailDtos)
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public Page<PostInfoDto> getLists(Category category, Pageable pageable, String keyword) {
-        return postRepository.getPostPage(category, pageable, keyword, null);
+    public Page<PostInfoDto> getPosts(Category category, Pageable pageable, String keyword) {
+        return postRepository.getPosts(category, pageable, keyword, null);
     }
 
     @Transactional(readOnly = true)
-    public Page<PostInfoDto> getLists(Pageable pageable, Long memberId) {
-        return postRepository.getPostPage(null, pageable, null, memberId);
+    public Page<PostInfoDto> getPosts(Pageable pageable, Long memberId) {
+        return postRepository.getPosts(null, pageable, null, memberId);
     }
 
     @Transactional(readOnly = true)
-    public Page<PostDetailDto> getListsByMemberId(Long memberId, Pageable pageable) {
+    public Page<PostDto> getListsByMemberId(Long memberId, Pageable pageable) {
 
         memberService.existById(memberId);
 

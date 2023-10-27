@@ -1,8 +1,8 @@
 package com.leesh.devlab.controller;
 
 import com.leesh.devlab.config.LoginMemberAnno;
-import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.constant.Category;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.LikeService;
 import com.leesh.devlab.service.PostService;
@@ -25,18 +25,26 @@ public class PostController {
     private final LikeService likeService;
 
     @GetMapping(value = "/{post-id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostDetailDto> getDetail(@PathVariable("post-id") Long postId) {
+    public ResponseEntity<PostDto> getPost(@PathVariable("post-id") Long postId) {
 
-        PostDetailDto responseDto = postService.getDetail(postId);
+        PostDto responseDto = postService.getPost(postId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping(value = "/{post-id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getPostComments(@PathVariable("post-id") Long postId, Pageable pageable) {
+
+        var responseDto = commentService.getPostComments(pageable, postId);
 
         return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostInfoDto>> getLists(@RequestParam(value = "category", required = false) Category category, @PageableDefault(size = 20) Pageable pageable,
+    public ResponseEntity<Page<PostInfoDto>> getPosts(@RequestParam(value = "category", required = false) Category category, @PageableDefault(size = 20) Pageable pageable,
                                                       @RequestParam(value = "keyword", required = false) String keyword) {
 
-        var responseDto = postService.getLists(category, pageable, keyword);
+        var responseDto = postService.getPosts(category, pageable, keyword);
 
         return ResponseEntity.ok(responseDto);
     }

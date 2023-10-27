@@ -1,18 +1,14 @@
 package com.leesh.devlab.service;
 
+import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.comment.CommentRepository;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.domain.post.Post;
 import com.leesh.devlab.domain.post.PostRepository;
-import com.leesh.devlab.constant.dto.CommentDetailDto;
-import com.leesh.devlab.constant.dto.CommentDto;
-import com.leesh.devlab.constant.dto.CreateCommentRequestDto;
-import com.leesh.devlab.constant.dto.CreateCommentResponseDto;
-import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
-import com.leesh.devlab.constant.dto.LoginMemberDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -111,10 +107,12 @@ public class CommentService {
 
     public Page<CommentDto> getLists(Pageable pageable, Long memberId) {
 
-        Page<CommentDto> comments = commentRepository.getCommentPage(pageable, memberId);
+        return commentRepository.getCommentPage(pageable, memberId);
+    }
 
-        return comments;
+    public Page<PostCommentDto> getPostComments(Pageable pageable, Long postId) {
 
+        return commentRepository.getPostComments(pageable, postId);
     }
 
     public Page<CommentDetailDto> getListsByMemberId(Long memberId, Pageable pageable) {

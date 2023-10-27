@@ -285,7 +285,7 @@ public class MemberControllerTest {
         postInfoDtos.add(postInfoDto);
         Page<PostInfoDto> postPage = new PageImpl<>(postInfoDtos, pageable, postInfoDtos.size());
 
-        given(postService.getLists(pageable, testMember.id()))
+        given(postService.getPosts(pageable, testMember.id()))
                 .willReturn(postPage);
 
         // when
@@ -328,7 +328,7 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.sort").isMap())
                 .andDo(print());
 
-        then(postService).should().getLists(pageable, testMember.id());
+        then(postService).should().getPosts(pageable, testMember.id());
 
         // API Docs
         result.andDo(document("get-member-posts",
