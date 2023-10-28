@@ -388,52 +388,23 @@ include::{snippets}/get-member-comments/http-response.adoc[]
 ==== *Response Body* ====
 include::{snippets}/get-member-comments/response-fields.adoc[]
 
-=== *이메일 인증 요청* ===
-
-입력으로 받은 사용자의 이메일로 인증번호를 전송합니다.
-
-==== *Request* ====
-include::{snippets}/email-verify/http-request.adoc[]
-
-==== *Path Parameters* ====
-include::{snippets}/email-verify/path-parameters.adoc[]
-
-==== *Request Body* ====
-include::{snippets}/email-verify/request-fields.adoc[]
-
-=== *이메일 인증 확인* ===
-
-인증번호를 통해 이메일 인증을 완료합니다.
-
-==== *Request* ====
-include::{snippets}/email-confirm/http-request.adoc[]
-
-==== *Path Parameters* ====
-include::{snippets}/email-confirm/path-parameters.adoc[]
-
-==== *Request Body* ====
-include::{snippets}/email-confirm/request-fields.adoc[]
-
-==== *Response* ====
-include::{snippets}/email-confirm/http-response.adoc[]
-
 == *게시글* ==
 
-=== *게시글 세부조회* ===
+=== *게시글 단건 조회* ===
 
 입력으로 받은 식별자의 게시글을 조회합니다.
 
 ==== *Request* ====
-include::{snippets}/posts/get-detail/http-request.adoc[]
+include::{snippets}/posts/getPost/http-request.adoc[]
 
 ==== *Path Parameters* ====
-include::{snippets}/posts/get-detail/path-parameters.adoc[]
+include::{snippets}/posts/getPost/path-parameters.adoc[]
 
 ==== *Response* ====
-include::{snippets}/posts/get-detail/http-response.adoc[]
+include::{snippets}/posts/getPost/http-response.adoc[]
 
 ==== *Response Body* ====
-include::{snippets}/posts/get-detail/response-fields.adoc[]
+include::{snippets}/posts/getPost/response-fields.adoc[]
 
 === *게시글 페이징 조회* ===
 

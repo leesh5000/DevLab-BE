@@ -1,8 +1,8 @@
 package com.leesh.devlab.controller;
 
 import com.leesh.devlab.config.LoginMemberAnno;
-import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
@@ -36,11 +36,19 @@ public class MemberController {
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MemberProfileRequestDto> getProfile(@PathVariable("id") Long memberId) {
+    public ResponseEntity<MemberProfileResponseDto> getProfile(@PathVariable("id") Long memberId) {
 
-        MemberProfileRequestDto memberProfileRequestDto = memberService.getMemberProfile(memberId);
+        MemberProfileResponseDto memberProfileRequestDto = memberService.getMemberProfile(memberId);
         
         return ResponseEntity.ok(memberProfileRequestDto);
+    }
+
+    @GetMapping(value = "/nickname/{nickname}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MemberProfileResponseDto> getProfile(@PathVariable("nickname") String nickname) {
+
+        MemberProfileResponseDto memberProfileResponseDto = memberService.getMemberProfile(nickname);
+
+        return ResponseEntity.ok(memberProfileResponseDto);
     }
 
     @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -69,9 +77,9 @@ public class MemberController {
     }
 
     @GetMapping(value = "/{id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostInfoDto>> getMemberPosts(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<PostDto>> getMemberPosts(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
 
-        Page<PostInfoDto> postPage = postService.getPosts(pageable, memberId);
+        Page<PostDto> postPage = postService.getPosts(pageable, memberId);
 
         return ResponseEntity.ok(postPage);
     }

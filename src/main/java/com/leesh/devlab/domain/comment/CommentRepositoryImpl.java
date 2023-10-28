@@ -37,7 +37,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                         comment.id, comment.contents, member.nickname,
                         getCommentLikeCount(),
                         comment.createdAt, comment.modifiedAt,
-                        new QCommentDto_PostDto(comment.post.id, comment.post.title, comment.post.category)))
+                        new QCommentDto_CommentPostDto(comment.post.id, comment.post.title, comment.post.category)))
                 .from(comment)
                 .innerJoin(comment.member, member)
                 .leftJoin(comment.post)
@@ -72,7 +72,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     public Page<PostCommentDto> getPostComments(Pageable pageable, Long postId) {
 
         List<PostCommentDto> content = queryFactory
-                .select(new QPostCommentDto(comment.id, comment.contents, member.nickname, getCommentLikeCount(), comment.createdAt, comment.modifiedAt))
+                .select(new QPostCommentDto(comment.id, comment.contents, new QAuthorDto(member.id, member.nickname), getCommentLikeCount(), comment.createdAt, comment.modifiedAt))
                 .from(comment)
                 .innerJoin(comment.member, member)
                 .leftJoin(comment.post, post)

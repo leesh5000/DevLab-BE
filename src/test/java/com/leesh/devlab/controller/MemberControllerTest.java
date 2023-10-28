@@ -1,13 +1,13 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leesh.devlab.constant.dto.*;
-import com.leesh.devlab.constant.Role;
 import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.constant.GrantType;
+import com.leesh.devlab.constant.Role;
+import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
@@ -148,7 +148,7 @@ public class MemberControllerTest {
         // given
         ActivityDto activities = new ActivityDto(10, 1, 32, 13);
         String introduce = "안녕하세요 ^^ 개발을 즐기는 ...";
-        MemberProfileRequestDto response = new MemberProfileRequestDto(testMember.nickname(), System.currentTimeMillis(), introduce, activities);
+        MemberProfileResponseDto response = new MemberProfileResponseDto(testMember.id(), testMember.nickname(), System.currentTimeMillis(), introduce, activities);
 
         given(memberService.getMemberProfile(testMember.id()))
                 .willReturn(response);
@@ -180,6 +180,7 @@ public class MemberControllerTest {
                         headerWithName(HttpHeaders.AUTHORIZATION).description("액세스 토큰")
                 ),
                 responseFields(
+                        fieldWithPath("id").description("식별자"),
                         fieldWithPath("nickname").description("닉네임"),
                         fieldWithPath("created_at").description("생성일"),
                         fieldWithPath("introduce").description("내 소개"),
@@ -269,9 +270,8 @@ public class MemberControllerTest {
         String title = "Spring Bean 주입 방식";
         String content = "Spring Bean 주입 방식에는 3가지 방식이 있습니다..";
         Category category = Category.INFORMATION;
-        String author = "test";
         List<String> tags = List.of("java", "spring");
-        long postLikeCount = 11;
+        long likeCount = 11;
         long createdAt = System.currentTimeMillis();
         long modifiedAt = System.currentTimeMillis();
         long commentCount = 10;
@@ -280,10 +280,11 @@ public class MemberControllerTest {
         Sort sort = Sort.by(Sort.Order.desc("createdAt"));
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        PostInfoDto postInfoDto = new PostInfoDto(postId, title, content, category, createdAt, modifiedAt, author, commentCount, postLikeCount, tags);
-        List<PostInfoDto> postInfoDtos = new ArrayList<>();
-        postInfoDtos.add(postInfoDto);
-        Page<PostInfoDto> postPage = new PageImpl<>(postInfoDtos, pageable, postInfoDtos.size());
+        AuthorDto author = new AuthorDto(testMember.id(), testMember.nickname());
+        PostDto postDto = new PostDto(postId, title, content, category, author, tags, likeCount, commentCount, createdAt, modifiedAt);
+        List<PostDto> postDtos = new ArrayList<>();
+        postDtos.add(postDto);
+        Page<PostDto> postPage = new PageImpl<>(postDtos, pageable, postDtos.size());
 
         given(postService.getPosts(pageable, testMember.id()))
                 .willReturn(postPage);
@@ -301,9 +302,11 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.content[0].category").value(category.name()))
                 .andExpect(jsonPath("$.content[0].created_at").value(createdAt))
                 .andExpect(jsonPath("$.content[0].modified_at").value(modifiedAt))
-                .andExpect(jsonPath("$.content[0].author").value(author))
+                .andExpect(jsonPath("$.content[0].author").exists())
+                .andExpect(jsonPath("$.content[0].author.id").value(author.id()))
+                .andExpect(jsonPath("$.content[0].author.nickname").value(author.nickname()))
+                .andExpect(jsonPath("$.content[0].like_count").value(likeCount))
                 .andExpect(jsonPath("$.content[0].comment_count").value(commentCount))
-                .andExpect(jsonPath("$.content[0].like_count").value(postLikeCount))
                 .andExpect(jsonPath("$.content[0].tags").exists())
                 .andExpect(jsonPath("$.content[0].tags[0]").value(tags.get(0)))
                 .andExpect(jsonPath("$.content[0].tags[1]").value(tags.get(1)))
@@ -348,9 +351,11 @@ public class MemberControllerTest {
                         fieldWithPath("content[].category").description("카테고리"),
                         fieldWithPath("content[].created_at").description("생성일"),
                         fieldWithPath("content[].modified_at").description("수정일"),
-                        fieldWithPath("content[].author").description("작성자"),
-                        fieldWithPath("content[].comment_count").description("댓글 수"),
+                        fieldWithPath("content[].author").description("작성자 정보"),
+                        fieldWithPath("content[].author.id").description("작성자 식별자"),
+                        fieldWithPath("content[].author.nickname").description("작성자 닉네임"),
                         fieldWithPath("content[].like_count").description("좋아요 수"),
+                        fieldWithPath("content[].comment_count").description("댓글 수"),
                         fieldWithPath("content[].tags").description("태그 목록"),
                         fieldWithPath("pageable").description("페이지 정보"),
                         fieldWithPath("pageable.offset").description("페이지 오프셋"),
@@ -394,7 +399,7 @@ public class MemberControllerTest {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         String postTitle = "Spring Bean 주입 방식";
-        CommentDto commentDto = new CommentDto(commentId, commentContent, commentAuthor, commentLikeCount, commentCreatedAt, commentModifiedAt, new CommentDto.PostDto(postId, postTitle, Category.INFORMATION));
+        CommentDto commentDto = new CommentDto(commentId, commentContent, commentAuthor, commentLikeCount, commentCreatedAt, commentModifiedAt, new CommentDto.CommentPostDto(postId, postTitle, Category.INFORMATION));
         List<CommentDto> commentDtos = new ArrayList<>();
         commentDtos.add(commentDto);
         Page<CommentDto> commentPage = new PageImpl<>(commentDtos, pageable, commentDtos.size());

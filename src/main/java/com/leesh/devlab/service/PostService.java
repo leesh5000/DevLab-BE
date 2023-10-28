@@ -123,7 +123,7 @@ public class PostService {
                 .title(post.getTitle())
                 .contents(post.getContents())
                 .category(post.getCategory())
-                .author(post.getMember().getNickname())
+                .author(new AuthorDto(post.getMember().getId(), post.getMember().getNickname()))
                 .tags(tags)
                 .likeCount(likeCount)
                 .createdAt(post.getCreatedAt())
@@ -132,12 +132,12 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostInfoDto> getPosts(Category category, Pageable pageable, String keyword) {
+    public Page<PostDto> getPosts(Category category, Pageable pageable, String keyword) {
         return postRepository.getPosts(category, pageable, keyword, null);
     }
 
     @Transactional(readOnly = true)
-    public Page<PostInfoDto> getPosts(Pageable pageable, Long memberId) {
+    public Page<PostDto> getPosts(Pageable pageable, Long memberId) {
         return postRepository.getPosts(null, pageable, null, memberId);
     }
 

@@ -87,26 +87,20 @@ class PostControllerTest {
     }
 
     @Test
-    void getDetail() throws Exception {
+    void getPost() throws Exception {
 
         // given
         long postId = 1L;
         String title = "Spring Bean 주입 방식";
         String content = "Spring Bean 주입 방식에는 3가지 방식이 있습니다..";
         Category category = Category.INFORMATION;
-        String author = "test";
+        AuthorDto author = new AuthorDto(10L, "개발맨");
         List<String> tags = List.of("java", "spring");
         int postLikeCount = 11;
+        int commentCount = 10;
         long createdAt = System.currentTimeMillis();
 
-        long commentId = 1L;
-        String commentContent = "새로운 댓글";
-        String commentAuthor = "널널한 개발자";
-        long commentCreatedAt = System.currentTimeMillis();
-        long commentModifiedAt = System.currentTimeMillis();
-        int commentLikeCount = 10;
-
-        PostDto postDto = new PostDto(postId, title, content, category, author, tags, postLikeCount, createdAt, createdAt);
+        PostDto postDto = new PostDto(postId, title, content, category, author, tags, postLikeCount, commentCount, createdAt, createdAt);
 
         given(postService.getPost(postId))
                 .willReturn(postDto);
@@ -122,10 +116,13 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.title").value(title))
                 .andExpect(jsonPath("$.contents").value(content))
                 .andExpect(jsonPath("$.category").value(category.name()))
-                .andExpect(jsonPath("$.author").value(author))
+                .andExpect(jsonPath("$.author").exists())
+                .andExpect(jsonPath("$.author.nickname").value(author.nickname()))
+                .andExpect(jsonPath("$.author.id").value(author.id()))
                 .andExpect(jsonPath("$.tags[0]").value(tags.get(0)))
                 .andExpect(jsonPath("$.tags[1]").value(tags.get(1)))
                 .andExpect(jsonPath("$.like_count").value(postLikeCount))
+                .andExpect(jsonPath("$.comment_count").value(commentCount))
                 .andExpect(jsonPath("$.created_at").value(createdAt))
                 .andExpect(jsonPath("$.modified_at").value(createdAt))
                 .andDo(print());
@@ -133,7 +130,7 @@ class PostControllerTest {
         then(postService).should().getPost(1L);
 
         // API Docs
-        result.andDo(document("posts/get-detail",
+        result.andDo(document("posts/getPost",
                 pathParameters(
                         parameterWithName("post-id").description("게시글 식별자")
                 ),
@@ -142,9 +139,12 @@ class PostControllerTest {
                         fieldWithPath("title").description("제목"),
                         fieldWithPath("contents").description("내용"),
                         fieldWithPath("category").description("카테고리"),
-                        fieldWithPath("author").description("작성자"),
+                        fieldWithPath("author").description("작성자 정보"),
+                        fieldWithPath("author.id").description("작성자 식별자"),
+                        fieldWithPath("author.nickname").description("작성자 닉네임"),
                         fieldWithPath("tags").description("태그 목록"),
                         fieldWithPath("like_count").description("좋아요 수"),
+                        fieldWithPath("comment_count").description("댓글 수"),
                         fieldWithPath("created_at").description("생성일"),
                         fieldWithPath("modified_at").description("수정일")
                 )));
@@ -156,17 +156,18 @@ class PostControllerTest {
         // given
         long postId = 1L;
         String title = "Spring Bean 주입 방식";
-        String content = "Spring Bean 주입 방식에는 3가지 방식이 있습니다..";
+        String contents = "Spring Bean 주입 방식에는 3가지 방식이 있습니다..";
         Category category = Category.INFORMATION;
-        String author = "test";
         long createdAt = System.currentTimeMillis();
         long commentCount = 10;
         long likeCount = 10;
         List<String> tags = List.of("spring", "java");
 
-        PostInfoDto postInfoDto = new PostInfoDto(postId, title, content, category, createdAt, createdAt, author, commentCount, likeCount, tags);
-        List<PostInfoDto> postInfoDtos = new ArrayList<>();
-        postInfoDtos.add(postInfoDto);
+        AuthorDto author = new AuthorDto(10L, "개발맨");
+
+        PostDto postDto = new PostDto(postId, title, contents, category, author, tags, likeCount, commentCount, createdAt, createdAt);
+        List<PostDto> content = new ArrayList<>();
+        content.add(postDto);
 
         int pageNumber = 0;
         int pageSize = 5;
@@ -176,9 +177,9 @@ class PostControllerTest {
         String keyword = "객체지향의 4가지 원칙";
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<PostInfoDto> postPages = PageableExecutionUtils.getPage(postInfoDtos, pageable, postInfoDtos::size);
+        Page<PostDto> posts = PageableExecutionUtils.getPage(content, pageable, content::size);
         given(postService.getPosts(any(Category.class), any(Pageable.class), any(String.class)))
-                .willReturn(postPages);
+                .willReturn(posts);
 
         // when
         var result = mvc.perform(get("/api/posts?category={category}&page={page}&size={size}&sort={property,direction}&keyword={keyword}", category, pageNumber, pageSize, "createdAt,desc", keyword)
@@ -189,33 +190,35 @@ class PostControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(postId))
                 .andExpect(jsonPath("$.content[0].title").value(title))
-                .andExpect(jsonPath("$.content[0].contents").value(content))
+                .andExpect(jsonPath("$.content[0].contents").value(contents))
                 .andExpect(jsonPath("$.content[0].category").value(category.name()))
-                .andExpect(jsonPath("$.content[0].author").value(author))
+                .andExpect(jsonPath("$.content[0].author").exists())
+                .andExpect(jsonPath("$.content[0].author.nickname").value(author.nickname()))
+                .andExpect(jsonPath("$.content[0].author.id").value(author.id()))
                 .andExpect(jsonPath("$.content[0].tags[0]").value(tags.get(0)))
                 .andExpect(jsonPath("$.content[0].tags[1]").value(tags.get(1)))
                 .andExpect(jsonPath("$.content[0].like_count").value(likeCount))
                 .andExpect(jsonPath("$.content[0].comment_count").value(commentCount))
                 .andExpect(jsonPath("$.content[0].created_at").value(createdAt))
                 .andExpect(jsonPath("$.content[0].modified_at").value(createdAt))
-                .andExpect(jsonPath("$.pageable.offset").value(postPages.getPageable().getOffset()))
-                .andExpect(jsonPath("$.pageable.page_size").value(postPages.getPageable().getPageSize()))
+                .andExpect(jsonPath("$.pageable.offset").value(posts.getPageable().getOffset()))
+                .andExpect(jsonPath("$.pageable.page_size").value(posts.getPageable().getPageSize()))
                 .andExpect(jsonPath("$.pageable.paged").value(true))
                 .andExpect(jsonPath("$.pageable.unpaged").value(false))
-                .andExpect(jsonPath("$.pageable.page_number").value(postPages.getPageable().getPageNumber()))
+                .andExpect(jsonPath("$.pageable.page_number").value(posts.getPageable().getPageNumber()))
                 .andExpect(jsonPath("$.pageable.sort").isMap())
                 .andExpect(jsonPath("$.pageable.sort.empty").value(false))
                 .andExpect(jsonPath("$.pageable.sort.sorted").value(true))
                 .andExpect(jsonPath("$.pageable.sort.unsorted").value(false))
-                .andExpect(jsonPath("$.total_pages").value(postPages.getTotalPages()))
-                .andExpect(jsonPath("$.total_elements").value(postPages.getTotalElements()))
-                .andExpect(jsonPath("$.last").value(postPages.isLast()))
-                .andExpect(jsonPath("$.first").value(postPages.isFirst()))
-                .andExpect(jsonPath("$.number").value(postPages.getNumber()))
-                .andExpect(jsonPath("$.size").value(postPages.getSize()))
-                .andExpect(jsonPath("$.number_of_elements").value(postPages.getNumberOfElements()))
-                .andExpect(jsonPath("$.empty").value(postPages.isEmpty()))
-                .andExpect(jsonPath("$.first").value(postPages.isFirst()))
+                .andExpect(jsonPath("$.total_pages").value(posts.getTotalPages()))
+                .andExpect(jsonPath("$.total_elements").value(posts.getTotalElements()))
+                .andExpect(jsonPath("$.last").value(posts.isLast()))
+                .andExpect(jsonPath("$.first").value(posts.isFirst()))
+                .andExpect(jsonPath("$.number").value(posts.getNumber()))
+                .andExpect(jsonPath("$.size").value(posts.getSize()))
+                .andExpect(jsonPath("$.number_of_elements").value(posts.getNumberOfElements()))
+                .andExpect(jsonPath("$.empty").value(posts.isEmpty()))
+                .andExpect(jsonPath("$.first").value(posts.isFirst()))
                 .andExpect(jsonPath("$.sort").isMap())
                 .andDo(print());
 
@@ -237,6 +240,8 @@ class PostControllerTest {
                         fieldWithPath("content[].contents").description("내용"),
                         fieldWithPath("content[].category").description("카테고리"),
                         fieldWithPath("content[].author").description("작성자"),
+                        fieldWithPath("content[].author.nickname").description("작성자 닉네임"),
+                        fieldWithPath("content[].author.id").description("작성자 식별자"),
                         fieldWithPath("content[].tags").description("태그 목록"),
                         fieldWithPath("content[].like_count").description("좋아요 수"),
                         fieldWithPath("content[].comment_count").description("댓글 수"),

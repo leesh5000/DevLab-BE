@@ -1,16 +1,12 @@
 package com.leesh.devlab.service;
 
+import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.constant.dto.ActivityDto;
-import com.leesh.devlab.constant.dto.MemberProfileRequestDto;
-import com.leesh.devlab.constant.dto.MyProfileResponseDto;
-import com.leesh.devlab.constant.dto.UpdateProfileRequestDto;
-import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.external.OauthAttributes;
-import com.leesh.devlab.constant.dto.LoginMemberDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,17 +56,37 @@ public class MemberService {
                 .build();
     }
 
-    public MemberProfileRequestDto getMemberProfile(Long memberId) {
+    public MemberProfileResponseDto getMemberProfile(Long id) {
 
-        Member member = getById(memberId);
+        Member member = getById(id);
         ActivityDto activities = getActivities(member);
 
-        return MemberProfileRequestDto.builder()
+        return MemberProfileResponseDto.builder()
+                .id(member.getId())
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
                 .introduce(member.getIntroduce())
                 .activities(activities)
                 .build();
+    }
+
+    public MemberProfileResponseDto getMemberProfile(String nickname) {
+
+        Member member = getByNickname(nickname);
+        ActivityDto activities = getActivities(member);
+
+        return MemberProfileResponseDto.builder()
+                .id(member.getId())
+                .nickname(member.getNickname())
+                .createdAt(member.getCreatedAt())
+                .introduce(member.getIntroduce())
+                .activities(activities)
+                .build();
+    }
+
+    private Member getByNickname(String nickname) {
+        return memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member"));
     }
 
     @Transactional
@@ -91,10 +107,6 @@ public class MemberService {
     public void deleteMember(Long memberId) {
 
         memberRepository.deleteById(memberId);
-    }
-
-    private String generateRandom6Digits() {
-        return String.valueOf((int) (Math.random() * 899999) + 100000);
     }
 
     public Member getByRefreshToken(String refreshToken) {
