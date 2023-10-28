@@ -62,6 +62,7 @@ public class MemberService {
         ActivityDto activities = getActivities(member);
 
         return MemberProfileResponseDto.builder()
+                .id(member.getId())
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
                 .introduce(member.getIntroduce())

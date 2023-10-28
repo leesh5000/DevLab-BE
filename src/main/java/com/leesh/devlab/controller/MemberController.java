@@ -77,9 +77,9 @@ public class MemberController {
     }
 
     @GetMapping(value = "/{id}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PostInfoDto>> getMemberPosts(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
+    public ResponseEntity<Page<PostDto>> getMemberPosts(@PathVariable("id") Long memberId, @PageableDefault(size = 20) Pageable pageable) {
 
-        Page<PostInfoDto> postPage = postService.getPosts(pageable, memberId);
+        Page<PostDto> postPage = postService.getPosts(pageable, memberId);
 
         return ResponseEntity.ok(postPage);
     }

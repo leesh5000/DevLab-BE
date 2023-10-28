@@ -1,8 +1,9 @@
 package com.leesh.devlab.domain.post;
 
 import com.leesh.devlab.constant.Category;
-import com.leesh.devlab.constant.dto.PostInfoDto;
-import com.leesh.devlab.constant.dto.QPostInfoDto;
+import com.leesh.devlab.constant.dto.PostDto;
+import com.leesh.devlab.constant.dto.QAuthorDto;
+import com.leesh.devlab.constant.dto.QPostDto;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -41,9 +42,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<PostInfoDto> getPosts(Category category, Pageable pageable, String keyword, Long memberId) {
+    public Page<PostDto> getPosts(Category category, Pageable pageable, String keyword, Long memberId) {
 
-        List<PostInfoDto> postInfos = queryFactory
+        List<PostDto> postInfos = queryFactory
                 .from(post)
                 .innerJoin(post.member, member)
                 .leftJoin(post.hashtags, hashtag)
@@ -56,27 +57,27 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .transform(groupBy(post.id).list(
-                        new QPostInfoDto(
+                        new QPostDto(
                                 post.id,
                                 post.title,
                                 post.contents,
                                 post.category,
-                                post.createdAt,
-                                post.modifiedAt,
-                                member.nickname,
-                                ExpressionUtils.as(
-                                        JPAExpressions
-                                                .select(count(comment.id))
-                                                .from(comment)
-                                                .where(comment.post.eq(post)),
-                                        "commentCount"),
+                                new QAuthorDto(member.id, member.nickname),
+                                stringTemplate("group_concat({0})", tag.name).as("tags"),
                                 ExpressionUtils.as(
                                         JPAExpressions
                                                 .select(count(like.id))
                                                 .from(like)
                                                 .where(like.post.eq(post)),
                                         "likeCount"),
-                                stringTemplate("group_concat({0})", tag.name).as("tags")
+                                ExpressionUtils.as(
+                                        JPAExpressions
+                                                .select(count(comment.id))
+                                                .from(comment)
+                                                .where(comment.post.eq(post)),
+                                        "commentCount"),
+                                post.createdAt,
+                                post.modifiedAt
                         )
                 ));
 
