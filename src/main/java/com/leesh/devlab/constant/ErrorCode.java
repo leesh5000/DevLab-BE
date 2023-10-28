@@ -24,6 +24,7 @@ public enum ErrorCode {
     WRONG_VERIFICATION_CODE(BAD_REQUEST, "A-008", "Wrong Verification Code"),
     NOT_EXIST_COOKIE(UNAUTHORIZED, "A-009", "Not Exist Cookie"),
     EXPIRED_REFRESH_TOKEN(UNAUTHORIZED, "A-010", "Expired Refresh Token"),
+    WRONG_SECURITY_CODE(FORBIDDEN, "A-011", "Wrong Security Code"),
 
     /* Member */
     NOT_EXIST_MEMBER(NOT_FOUND, "M-001", "Not Exist Member"),

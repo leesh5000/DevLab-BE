@@ -107,7 +107,7 @@ public class Member extends BaseEntity {
     }
 
     public String verify() {
-        this.securityCode = UUID.randomUUID().toString().split("-")[4];
+        this.securityCode = UUID.randomUUID().toString().split("-")[0] + "-" + UUID.randomUUID().toString().split("-")[4];
         return this.securityCode;
     }
 
