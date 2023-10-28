@@ -36,19 +36,19 @@ public class MemberController {
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MemberProfileRequestDto> getProfile(@PathVariable("id") Long memberId) {
+    public ResponseEntity<MemberProfileResponseDto> getProfile(@PathVariable("id") Long memberId) {
 
-        MemberProfileRequestDto memberProfileRequestDto = memberService.getMemberProfile(memberId);
+        MemberProfileResponseDto memberProfileRequestDto = memberService.getMemberProfile(memberId);
         
         return ResponseEntity.ok(memberProfileRequestDto);
     }
 
-    @GetMapping(value = "/{nickname}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MemberProfileRequestDto> getProfile(@PathVariable("nickname") String nickname) {
+    @GetMapping(value = "/nickname/{nickname}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MemberProfileResponseDto> getProfile(@PathVariable("nickname") String nickname) {
 
-        MemberProfileRequestDto memberProfileRequestDto = memberService.getMemberProfile(nickname);
+        MemberProfileResponseDto memberProfileResponseDto = memberService.getMemberProfile(nickname);
 
-        return ResponseEntity.ok(memberProfileRequestDto);
+        return ResponseEntity.ok(memberProfileResponseDto);
     }
 
     @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)

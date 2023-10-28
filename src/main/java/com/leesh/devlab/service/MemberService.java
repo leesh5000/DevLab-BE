@@ -56,12 +56,12 @@ public class MemberService {
                 .build();
     }
 
-    public MemberProfileRequestDto getMemberProfile(Long id) {
+    public MemberProfileResponseDto getMemberProfile(Long id) {
 
         Member member = getById(id);
         ActivityDto activities = getActivities(member);
 
-        return MemberProfileRequestDto.builder()
+        return MemberProfileResponseDto.builder()
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
                 .introduce(member.getIntroduce())
@@ -69,12 +69,13 @@ public class MemberService {
                 .build();
     }
 
-    public MemberProfileRequestDto getMemberProfile(String nickname) {
+    public MemberProfileResponseDto getMemberProfile(String nickname) {
 
         Member member = getByNickname(nickname);
         ActivityDto activities = getActivities(member);
 
-        return MemberProfileRequestDto.builder()
+        return MemberProfileResponseDto.builder()
+                .id(member.getId())
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
                 .introduce(member.getIntroduce())

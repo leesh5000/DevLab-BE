@@ -148,7 +148,7 @@ public class MemberControllerTest {
         // given
         ActivityDto activities = new ActivityDto(10, 1, 32, 13);
         String introduce = "안녕하세요 ^^ 개발을 즐기는 ...";
-        MemberProfileRequestDto response = new MemberProfileRequestDto(testMember.nickname(), System.currentTimeMillis(), introduce, activities);
+        MemberProfileResponseDto response = new MemberProfileResponseDto(testMember.nickname(), System.currentTimeMillis(), introduce, activities);
 
         given(memberService.getMemberProfile(testMember.id()))
                 .willReturn(response);
