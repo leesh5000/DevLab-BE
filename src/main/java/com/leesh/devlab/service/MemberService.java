@@ -109,10 +109,6 @@ public class MemberService {
         memberRepository.deleteById(memberId);
     }
 
-    private String generateRandom6Digits() {
-        return String.valueOf((int) (Math.random() * 899999) + 100000);
-    }
-
     public Member getByRefreshToken(String refreshToken) {
         return memberRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new AuthException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by refresh token = " + refreshToken));
