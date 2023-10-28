@@ -1,8 +1,8 @@
 package com.leesh.devlab.controller;
 
 import com.leesh.devlab.config.LoginMemberAnno;
-import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.service.CommentService;
 import com.leesh.devlab.service.MemberService;
@@ -40,6 +40,14 @@ public class MemberController {
 
         MemberProfileRequestDto memberProfileRequestDto = memberService.getMemberProfile(memberId);
         
+        return ResponseEntity.ok(memberProfileRequestDto);
+    }
+
+    @GetMapping(value = "/{nickname}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MemberProfileRequestDto> getProfile(@PathVariable("nickname") String nickname) {
+
+        MemberProfileRequestDto memberProfileRequestDto = memberService.getMemberProfile(nickname);
+
         return ResponseEntity.ok(memberProfileRequestDto);
     }
 
