@@ -90,6 +90,7 @@ create table posts
     title       varchar(255) not null,
     contents    text         not null,
     category    varchar(20)  not null,
+    views       bigint       not null default 0,
     created_by  varchar(255) not null,
     modified_by varchar(255) not null,
     created_at  bigint       not null,
@@ -120,7 +121,6 @@ create table comments
 
 create index comments_member_id_idx on comments (member_id);
 create index comments_post_id_idx on comments (post_id);
-create fulltext index comments_contents_idx on comments (contents);
 create index comments_created_at_idx on comments (created_at);
 
 create table likes
@@ -153,7 +153,7 @@ create table tags
     primary key (id)
 ) default character set utf8mb4 collate utf8mb4_general_ci;
 
-create fulltext index tags_name_idx on tags (name);
+create fulltext index tags_name_idx on tags (name) with parser ngram;
 
 create table hashtags
 (

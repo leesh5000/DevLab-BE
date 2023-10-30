@@ -11,13 +11,13 @@ import java.util.List;
 public record PostDto(
         Long id, String title, String contents, Category category, AuthorDto author,
         List<String> tags,
-        long likeCount, long commentCount,
+        long likeCount, long commentCount, long viewCount,
         Long createdAt, Long modifiedAt) {
 
     @QueryProjection
-    public PostDto(Long id, String title, String contents, Category category, AuthorDto author, String tags, long likeCount, long commentCount, Long createdAt, Long modifiedAt) {
+    public PostDto(Long id, String title, String contents, Category category, AuthorDto author, String tags, long likeCount, long commentCount, long viewCount, Long createdAt, Long modifiedAt) {
         this(id, title, contents, category, author,
                 tags != null ? Arrays.stream(tags.split(",")).toList() : List.of(),
-                likeCount, commentCount, createdAt, modifiedAt);
+                likeCount, commentCount, viewCount, createdAt, modifiedAt);
     }
 }

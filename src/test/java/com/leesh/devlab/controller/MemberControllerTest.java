@@ -272,6 +272,7 @@ public class MemberControllerTest {
         Category category = Category.INFORMATION;
         List<String> tags = List.of("java", "spring");
         long likeCount = 11;
+        long viewCount = 1092;
         long createdAt = System.currentTimeMillis();
         long modifiedAt = System.currentTimeMillis();
         long commentCount = 10;
@@ -281,7 +282,7 @@ public class MemberControllerTest {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         AuthorDto author = new AuthorDto(testMember.id(), testMember.nickname());
-        PostDto postDto = new PostDto(postId, title, content, category, author, tags, likeCount, commentCount, createdAt, modifiedAt);
+        PostDto postDto = new PostDto(postId, title, content, category, author, tags, likeCount, commentCount, viewCount, createdAt, modifiedAt);
         List<PostDto> postDtos = new ArrayList<>();
         postDtos.add(postDto);
         Page<PostDto> postPage = new PageImpl<>(postDtos, pageable, postDtos.size());
@@ -307,6 +308,7 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.content[0].author.nickname").value(author.nickname()))
                 .andExpect(jsonPath("$.content[0].like_count").value(likeCount))
                 .andExpect(jsonPath("$.content[0].comment_count").value(commentCount))
+                .andExpect(jsonPath("$.content[0].view_count").value(viewCount))
                 .andExpect(jsonPath("$.content[0].tags").exists())
                 .andExpect(jsonPath("$.content[0].tags[0]").value(tags.get(0)))
                 .andExpect(jsonPath("$.content[0].tags[1]").value(tags.get(1)))
@@ -356,6 +358,7 @@ public class MemberControllerTest {
                         fieldWithPath("content[].author.nickname").description("작성자 닉네임"),
                         fieldWithPath("content[].like_count").description("좋아요 수"),
                         fieldWithPath("content[].comment_count").description("댓글 수"),
+                        fieldWithPath("content[].view_count").description("조회 수"),
                         fieldWithPath("content[].tags").description("태그 목록"),
                         fieldWithPath("pageable").description("페이지 정보"),
                         fieldWithPath("pageable.offset").description("페이지 오프셋"),

@@ -98,9 +98,10 @@ class PostControllerTest {
         List<String> tags = List.of("java", "spring");
         int postLikeCount = 11;
         int commentCount = 10;
+        int viewCount = 1021;
         long createdAt = System.currentTimeMillis();
 
-        PostDto postDto = new PostDto(postId, title, content, category, author, tags, postLikeCount, commentCount, createdAt, createdAt);
+        PostDto postDto = new PostDto(postId, title, content, category, author, tags, postLikeCount, commentCount, viewCount, createdAt, createdAt);
 
         given(postService.getPost(postId))
                 .willReturn(postDto);
@@ -123,6 +124,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.tags[1]").value(tags.get(1)))
                 .andExpect(jsonPath("$.like_count").value(postLikeCount))
                 .andExpect(jsonPath("$.comment_count").value(commentCount))
+                .andExpect(jsonPath("$.view_count").value(viewCount))
                 .andExpect(jsonPath("$.created_at").value(createdAt))
                 .andExpect(jsonPath("$.modified_at").value(createdAt))
                 .andDo(print());
@@ -145,6 +147,7 @@ class PostControllerTest {
                         fieldWithPath("tags").description("태그 목록"),
                         fieldWithPath("like_count").description("좋아요 수"),
                         fieldWithPath("comment_count").description("댓글 수"),
+                        fieldWithPath("view_count").description("조회 수"),
                         fieldWithPath("created_at").description("생성일"),
                         fieldWithPath("modified_at").description("수정일")
                 )));
@@ -161,11 +164,12 @@ class PostControllerTest {
         long createdAt = System.currentTimeMillis();
         long commentCount = 10;
         long likeCount = 10;
+        long viewCount = 1022;
         List<String> tags = List.of("spring", "java");
 
         AuthorDto author = new AuthorDto(10L, "개발맨");
 
-        PostDto postDto = new PostDto(postId, title, contents, category, author, tags, likeCount, commentCount, createdAt, createdAt);
+        PostDto postDto = new PostDto(postId, title, contents, category, author, tags, likeCount, commentCount, viewCount, createdAt, createdAt);
         List<PostDto> content = new ArrayList<>();
         content.add(postDto);
 
@@ -199,6 +203,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.content[0].tags[1]").value(tags.get(1)))
                 .andExpect(jsonPath("$.content[0].like_count").value(likeCount))
                 .andExpect(jsonPath("$.content[0].comment_count").value(commentCount))
+                .andExpect(jsonPath("$.content[0].view_count").value(viewCount))
                 .andExpect(jsonPath("$.content[0].created_at").value(createdAt))
                 .andExpect(jsonPath("$.content[0].modified_at").value(createdAt))
                 .andExpect(jsonPath("$.pageable.offset").value(posts.getPageable().getOffset()))
@@ -245,6 +250,7 @@ class PostControllerTest {
                         fieldWithPath("content[].tags").description("태그 목록"),
                         fieldWithPath("content[].like_count").description("좋아요 수"),
                         fieldWithPath("content[].comment_count").description("댓글 수"),
+                        fieldWithPath("content[].view_count").description("조회 수"),
                         fieldWithPath("content[].created_at").description("생성일"),
                         fieldWithPath("content[].modified_at").description("수정일"),
                         fieldWithPath("pageable").description("페이지 정보"),

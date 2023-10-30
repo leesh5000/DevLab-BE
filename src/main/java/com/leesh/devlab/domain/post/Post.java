@@ -1,13 +1,13 @@
 package com.leesh.devlab.domain.post;
 
 import com.leesh.devlab.constant.Category;
+import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.domain.BaseEntity;
 import com.leesh.devlab.domain.comment.Comment;
 import com.leesh.devlab.domain.hashtag.Hashtag;
 import com.leesh.devlab.domain.like.Like;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.tag.Tag;
-import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -42,6 +42,9 @@ public class Post extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "category", length = 10, nullable = false)
     private Category category;
+
+    @Column(name = "views", nullable = false)
+    private Long views = 0L;
 
     @JoinColumn(name = "member_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -127,4 +130,7 @@ public class Post extends BaseEntity {
 
     }
 
+    public void increaseViews() {
+        this.views++;
+    }
 }

@@ -76,6 +76,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                                 .from(comment)
                                                 .where(comment.post.eq(post)),
                                         "commentCount"),
+                                post.views,
                                 post.createdAt,
                                 post.modifiedAt
                         )
@@ -139,6 +140,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 case "like_count" -> orders.add(new OrderSpecifier<>(direction, post.likes.size()));
                 case "created_at" -> orders.add(new OrderSpecifier<>(direction, post.createdAt));
                 case "modified_at" -> orders.add(new OrderSpecifier<>(direction, post.modifiedAt));
+                case "view_count" -> orders.add(new OrderSpecifier<>(direction, post.views));
                 default -> {}
             }
         }

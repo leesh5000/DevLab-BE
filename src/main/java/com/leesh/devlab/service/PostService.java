@@ -101,15 +101,17 @@ public class PostService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PostDto getPost(Long postId) {
 
         Post post = getPostByIdWithMemberAndLikes(postId);
+        // 게시글의 조회수를 증가시킨다. TODO 추후 캐시 방식으로 변경하기
+        post.increaseViews();
 
-        return generatePostDetail(post);
+        return generatePostDto(post);
     }
 
-    private PostDto generatePostDetail(Post post) {
+    private PostDto generatePostDto(Post post) {
 
         List<String> tags = post.getHashtags().stream()
                 .map(Hashtag::getTag)
@@ -126,6 +128,7 @@ public class PostService {
                 .author(new AuthorDto(post.getMember().getId(), post.getMember().getNickname()))
                 .tags(tags)
                 .likeCount(likeCount)
+                .viewCount(post.getViews())
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();
@@ -148,6 +151,6 @@ public class PostService {
 
         Page<Post> page = postRepository.findAllWithMemberByMemberId(memberId, pageable);
 
-        return page.map(this::generatePostDetail);
+        return page.map(this::generatePostDto);
     }
 }
