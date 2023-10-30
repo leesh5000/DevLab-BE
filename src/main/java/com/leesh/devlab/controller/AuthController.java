@@ -87,12 +87,6 @@ public class AuthController {
         return ResponseEntity.ok(tokenInfoDto);
     }
 
-    @PostMapping(path = "/find-account", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> findAccount(@RequestBody FindAccount request) {
-
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping(path = "/id-checks")
     public ResponseEntity<Void> checkLoginId(@RequestParam String id) {
 
@@ -135,6 +129,30 @@ public class AuthController {
         if (!cookie.getValue().equals(code)) {
             throw new BusinessException(ErrorCode.WRONG_VERIFICATION_CODE, "user input = " + code + " , " + "verification code = " + cookie.getValue());
         }
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(path = "/find-id", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FindLoginIdResponseDto> findLoginId(@RequestBody FindLoginIdRequestDto requestDto) {
+
+        FindLoginIdResponseDto responseDto = authService.findLoginId(requestDto);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @PostMapping(path = "/security-code-checks", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> checkSecurityCode(@RequestBody CheckSecurityCodeRequestDto requestDto) {
+
+        authService.checkSecurityCode(requestDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(path = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequestDto requestDto) {
+
+        authService.changePassword(requestDto);
 
         return ResponseEntity.noContent().build();
     }

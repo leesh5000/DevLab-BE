@@ -1,12 +1,12 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leesh.devlab.constant.dto.*;
+import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.constant.OauthType;
 import com.leesh.devlab.constant.Role;
-import com.leesh.devlab.constant.GrantType;
-import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.constant.TokenType;
+import com.leesh.devlab.constant.dto.*;
+import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.implementation.Jwt;
 import com.leesh.devlab.service.AuthService;
 import com.leesh.devlab.service.CookieService;
@@ -429,31 +429,6 @@ class AuthControllerTest {
     }
 
     @Test
-    void findAccount_test() throws Exception {
-
-        // given
-        String email = "test@gmail.com";
-        FindAccount request = new FindAccount(email);
-
-        // when
-        var result = mvc.perform(post("/api/auth/find-account")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(request)));
-
-        // then
-        result
-                .andExpect(status().isNoContent())
-                .andDo(print());
-
-        // API Docs
-        result
-                .andDo(document("find-account",
-                        requestFields(
-                                fieldWithPath("email").description("이메일")
-                        )));
-    }
-
-    @Test
     void validateId_test() throws Exception {
 
         // given
@@ -590,5 +565,102 @@ class AuthControllerTest {
                         requestCookies(
                                 cookieWithName(encode(email)).description("인증 코드 확인용 쿠키 (HttpOnly)")
                         )));
+    }
+
+    @Test
+    void findLoginId_test() throws Exception {
+
+        // given
+        FindLoginIdRequestDto requestDto = new FindLoginIdRequestDto("71ff8973e3c8");
+        FindLoginIdResponseDto responseDto = new FindLoginIdResponseDto("test10", OauthType.GOOGLE);
+
+        given(authService.findLoginId(requestDto))
+                .willReturn(responseDto);
+
+        // when
+        var result = mvc.perform(post("/api/auth/find-id")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsString(requestDto)));
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.login_id").value(responseDto.loginId()))
+                .andDo(print());
+
+        then(authService).should().findLoginId(requestDto);
+
+        // API Docs
+        result
+                .andDo(document("find-id",
+                        requestFields(
+                                fieldWithPath("security_code").description("보안 코드")
+                        ),
+                        responseFields(
+                                fieldWithPath("login_id").description("로그인 아이디"),
+                                fieldWithPath("oauth_type").description("소셜 계정 유형")
+                        )));
+    }
+
+    @Test
+    void checkSecurityCode_test() throws Exception {
+
+        // given
+        CheckSecurityCodeRequestDto requestDto = new CheckSecurityCodeRequestDto("test", "71ff8973e3c8");
+
+        doNothing().when(authService).checkSecurityCode(requestDto);
+
+        // when
+        var result = mvc.perform(post("/api/auth/security-code-checks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(requestDto)));
+
+        // then
+        result
+                .andExpect(status().isNoContent())
+                .andDo(print());
+
+        then(authService).should().checkSecurityCode(requestDto);
+
+        // API Docs
+        result
+                .andDo(document("checkSecurityCode",
+                        requestFields(
+                                fieldWithPath("login_id").description("로그인 아이디"),
+                                fieldWithPath("security_code").description("보안 코드")
+                        )));
+    }
+
+    @Test
+    void changePassword_test() throws Exception {
+
+        // given
+        ChangePasswordRequestDto requestDto = new ChangePasswordRequestDto("test", "71ff8973e3c8", "password10!@#");
+        doNothing().when(authService).changePassword(requestDto);
+
+        // when
+        var result = mvc.perform(post("/api/auth/change-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(requestDto)));
+
+        // then
+        result
+                .andExpect(status().isNoContent())
+                .andDo(print());
+
+        then(authService).should().changePassword(requestDto);
+
+        // API Docs
+        result
+                .andDo(document("change-password",
+                        requestFields(
+                                fieldWithPath("login_id").description("로그인 아이디"),
+                                fieldWithPath("security_code").description("보안 코드"),
+                                fieldWithPath("password").description("변경할 비밀번호")
+                        )));
+
     }
 }

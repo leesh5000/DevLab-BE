@@ -1,24 +1,27 @@
 package com.leesh.devlab.service;
 
+import com.leesh.devlab.constant.ErrorCode;
+import com.leesh.devlab.constant.GrantType;
+import com.leesh.devlab.constant.OauthType;
+import com.leesh.devlab.constant.TokenType;
 import com.leesh.devlab.constant.dto.*;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
-import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.AuthException;
 import com.leesh.devlab.exception.custom.BusinessException;
 import com.leesh.devlab.external.OauthAttributes;
 import com.leesh.devlab.external.OauthService;
 import com.leesh.devlab.external.OauthServiceFactory;
 import com.leesh.devlab.external.OauthToken;
-import com.leesh.devlab.constant.GrantType;
 import com.leesh.devlab.jwt.Token;
 import com.leesh.devlab.jwt.TokenService;
-import com.leesh.devlab.constant.TokenType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,7 +60,7 @@ public class AuthService {
         // 이메일 인증된 회원이면, 해당 이메일로 보안코드를 전송한다.
         if (requestDto.email().verified()) {
             String securityCode = newMember.verify();
-            mailService.sendMail(requestDto.email().address(), "[DevLab] 계정 보안코드 안내", "계정 보안코드 : " + securityCode);
+            mailService.sendMail(requestDto.email().address(), "[DevLab] 계정 보안코드 안내", newMember.getLoginId() + "의 계정 보안코드 : " + securityCode);
         }
 
         Long id = memberRepository.save(newMember).getId();
@@ -138,5 +141,43 @@ public class AuthService {
 
     public String generateVerificationCode() {
         return generateRandom6Digits();
+    }
+
+    public FindLoginIdResponseDto findLoginId(FindLoginIdRequestDto requestDto) {
+
+        Member member = getMemberBySecurityCode(requestDto.securityCode());
+        OauthType oauthType = (member.getOauth() != null) ? member.getOauth().getType() : null;
+
+        return new FindLoginIdResponseDto(member.getLoginId(), oauthType);
+    }
+
+    private Member getMemberBySecurityCode(String securityCode) {
+        return memberRepository.findBySecurityCode(securityCode)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by security code = " + securityCode));
+    }
+
+    public void checkSecurityCode(CheckSecurityCodeRequestDto requestDto) {
+
+        checkSecurityCode(requestDto.loginId(), requestDto.securityCode());
+    }
+
+    private void checkSecurityCode(String loginId, String securityCode) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by login id = " + loginId));
+
+        if (!Objects.equals(member.getSecurityCode(), securityCode)) {
+            throw new BusinessException(ErrorCode.WRONG_SECURITY_CODE, "wrong security code");
+        }
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequestDto requestDto) {
+
+        Member member = memberRepository.findByLoginId(requestDto.loginId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by login id = " + requestDto.loginId()));
+
+        checkSecurityCode(requestDto.loginId(), requestDto.securityCode());
+
+        member.changePassword(passwordEncoder.encode(requestDto.password()));
     }
 }
