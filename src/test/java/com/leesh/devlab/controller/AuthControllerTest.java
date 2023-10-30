@@ -632,4 +632,35 @@ class AuthControllerTest {
                                 fieldWithPath("security_code").description("보안 코드")
                         )));
     }
+
+    @Test
+    void changePassword_test() throws Exception {
+
+        // given
+        ChangePasswordRequestDto requestDto = new ChangePasswordRequestDto("test", "71ff8973e3c8", "password10!@#");
+        doNothing().when(authService).changePassword(requestDto);
+
+        // when
+        var result = mvc.perform(post("/api/auth/change-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(requestDto)));
+
+        // then
+        result
+                .andExpect(status().isNoContent())
+                .andDo(print());
+
+        then(authService).should().changePassword(requestDto);
+
+        // API Docs
+        result
+                .andDo(document("change-password",
+                        requestFields(
+                                fieldWithPath("login_id").description("로그인 아이디"),
+                                fieldWithPath("security_code").description("보안 코드"),
+                                fieldWithPath("password").description("변경할 비밀번호")
+                        )));
+
+    }
 }

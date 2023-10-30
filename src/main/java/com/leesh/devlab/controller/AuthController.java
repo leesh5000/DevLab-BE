@@ -148,4 +148,12 @@ public class AuthController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping(path = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequestDto requestDto) {
+
+        authService.changePassword(requestDto);
+
+        return ResponseEntity.noContent().build();
+    }
 }

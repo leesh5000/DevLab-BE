@@ -158,11 +158,26 @@ public class AuthService {
 
     public void checkSecurityCode(CheckSecurityCodeRequestDto requestDto) {
 
+        checkSecurityCode(requestDto.loginId(), requestDto.securityCode());
+    }
+
+    private void checkSecurityCode(String loginId, String securityCode) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by login id = " + loginId));
+
+        if (!Objects.equals(member.getSecurityCode(), securityCode)) {
+            throw new BusinessException(ErrorCode.WRONG_SECURITY_CODE, "wrong security code");
+        }
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequestDto requestDto) {
+
         Member member = memberRepository.findByLoginId(requestDto.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_EXIST_MEMBER, "not exist member by login id = " + requestDto.loginId()));
 
-        if (!Objects.equals(member.getSecurityCode(), requestDto.securityCode())) {
-            throw new BusinessException(ErrorCode.WRONG_SECURITY_CODE, "wrong security code");
-        }
+        checkSecurityCode(requestDto.loginId(), requestDto.securityCode());
+
+        member.changePassword(passwordEncoder.encode(requestDto.password()));
     }
 }
