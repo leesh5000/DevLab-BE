@@ -22,7 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${custom.cors.allowed-origin}")
     private String allowedOrigins;
 
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
 
@@ -54,6 +53,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/auth/**", RequestMethod.ANY) // 인증 API는 인증 필터를 타지 않도록 설정
                 .excludePathPatterns("/api/health", RequestMethod.GET) // health check API는 인증 필터를 타지 않도록 설정
                 .addPathPatterns("/api/members/me", RequestMethod.GET)
+                .excludePathPatterns("/docs/**", RequestMethod.GET)
         ;
 
         return proxy;
