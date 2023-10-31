@@ -38,3 +38,5 @@ token:
 custom:
   cors:
     allowed-origin: https://www.devlab.com
+  locale: ko_KR
+  timezone: Asia/Seoul
