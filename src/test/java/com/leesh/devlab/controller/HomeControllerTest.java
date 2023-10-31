@@ -1,6 +1,8 @@
 package com.leesh.devlab.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leesh.devlab.config.LocaleConfig;
+import com.leesh.devlab.config.TimezoneConfig;
 import com.leesh.devlab.constant.dto.HealthCheckDto;
 import config.WebMvcTestConfig;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(HomeController.class)
 @AutoConfigureRestDocs
-@Import(WebMvcTestConfig.class)
+@Import({WebMvcTestConfig.class, TimezoneConfig.class, LocaleConfig.class})
 public class HomeControllerTest {
 
     @Autowired

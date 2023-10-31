@@ -1,0 +1,72 @@
+name: Deploy to Amazon EC2
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ap-northeast-2
+  IMAGE_TAG: ${{ github.sha }}
+  S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: add permission to gradlew
+        run: chmod +x ./gradlew
+        shell: bash
+
+      - name: aws configure
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: build docker file & create scripts files
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          JASYPT_ENCRYPTOR_PASSWORD: ${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          touch scripts/deploy.sh
+          REGION=$AWS_REGION && echo "aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/deploy.sh
+          echo "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
+          PASSWORD=$JASYPT_ENCRYPTOR_PASSWORD && echo "docker run -p 8080:8080 -e JASYPT_ENCRYPTOR_PASSWORD="$PASSWORD" -d --restart always --name quiz-api-server $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
+
+      - name: upload to s3
+        run: |
+          zip -r deploy.zip ./scripts appspec.yml
+          aws s3 cp --acl private ./deploy.zip s3://$S3_BUCKET_NAME/$IMAGE_TAG.zip
+
+      - name: deploy
+        env:
+          CODE_DEPLOY_APPLICATION_NAME: ${{ secrets.CODE_DEPLOY_APPLICATION_NAME }}
+          CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: ${{ secrets.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }}
+        run: |
+          aws deploy create-deployment --application-name $CODE_DEPLOY_APPLICATION_NAME \
+          --deployment-group-name $CODE_DEPLOY_DEPLOYMENT_GROUP_NAME \
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$IMAGE_TAG.zip
