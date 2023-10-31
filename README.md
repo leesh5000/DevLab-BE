@@ -56,9 +56,9 @@ DevLab은 개발과 관련된 정보들을 서로 공유하고 질문할 수 있
 ## SQL
 
 ```sql
-drop database if exists DevLab;
-create database DevLab;
-use DevLab;
+drop database if exists DevMoa;
+create database DevMoa;
+use DevMoa;
 
 create table members
 (
