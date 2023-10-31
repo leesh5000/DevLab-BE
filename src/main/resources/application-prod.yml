@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ENC(fcLJPvZ0NKdenjNWUnGObuy41G6WPqqfacbqTktytGfFWt8cNXQwReUTKDcnRZbGvroqcNbgzr/xNmBuWWCP7iWUa+4dPP5H)
+    url: ENC(zJ1nUfORBbeuqyK2z9sBKr8C5D3ycW0uzTKWwvCi1Xp3Zjef7L0hhhhsDjAX3XBRg0Gba5Kcn+IilChr6ppPkvgX9texV2E0B+hdnPNld9Q=)
     username: ENC(NIo1pbl1qtS1svbGYDgmFw==)
     password: ENC(7s/ndFVQPJWTbTBLO3L32c87NB/MLrHy)
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -26,8 +26,6 @@ oauth:
     id: ENC(mUX6rlJeYrk3jSFEHzK39bIQP3hdoBwwyzd3rIHEtHa/dKlZ/qelkrhbYBd0FJqf/c9EW+VIOOQu6ox+RPkYHY5ah+2vjEadENF2+F3pOYb0ZWoIXQx4bA==)
     secret: ENC(/o4Q2q62U+Nlyn3XGXrlzFz9jQZySMjMeupWcS7JbFZAU87nUrzYGvkPUI4yWP6R)
     redirect-uri: ENC(TFG5pSZDNRncilXg5em9KvDWlmuXR9URjX0aGBxLFbpFPEbgrNY8SFW+g/yF7Th21X74Y/6VH5IvWPRpa2OqJQ==)
-
-decorator.datasource.p6spy.enable-logging: true
 custom:
   cors:
     allowed-origin: https://web.devlab.com:5173
