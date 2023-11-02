@@ -19,8 +19,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
     private final LoginMemberArgResolver loginMemberArgResolver;
-    @Value("${custom.cors.allowed-origin}")
-    private String allowedOrigins;
+    @Value("${custom.cors.allowed-origins}")
+    private String[] allowedOrigins;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

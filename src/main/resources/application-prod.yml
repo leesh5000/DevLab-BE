@@ -7,7 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true # JPA 쿼리 로그 출력
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -28,4 +28,5 @@ oauth:
     redirect-uri: ENC(TFG5pSZDNRncilXg5em9KvDWlmuXR9URjX0aGBxLFbpFPEbgrNY8SFW+g/yF7Th21X74Y/6VH5IvWPRpa2OqJQ==)
 custom:
   cors:
-    allowed-origin: https://web.devlab.com:5173
+    allowed-origins: https://www.devmoa.com, https://devmoa.com
+decorator.datasource.p6spy.enable-logging: false
