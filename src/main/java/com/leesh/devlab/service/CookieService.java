@@ -4,7 +4,7 @@ import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.exception.custom.BusinessException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +12,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-@RequiredArgsConstructor
 @Service
 public class CookieService {
 
-    public static final String COOKIE_DOMAIN = ".devmoa.com";
+    public final String COOKIE_DOMAIN;
 
+    public CookieService(@Value("${custom.domain}") String COOKIE_DOMAIN) {
+        this.COOKIE_DOMAIN = COOKIE_DOMAIN;
+    }
 
     public ResponseCookie generateCookie(String key, String value, int maxAgeSeconds) {
 

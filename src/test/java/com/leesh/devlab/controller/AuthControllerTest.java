@@ -27,7 +27,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.leesh.devlab.service.CookieService.COOKIE_DOMAIN;
 import static com.leesh.devlab.service.CookieService.encode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -69,6 +68,8 @@ class AuthControllerTest {
 
     @MockBean
     private MailService mailService;
+
+    String COOKIE_DOMAIN = "devmoa.com";
 
     @Test
     void oauthLogin_test() throws Exception {
@@ -327,7 +328,7 @@ class AuthControllerTest {
         // then
         result
                 .andExpect(status().isNoContent())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, "REFRESH=; Path=/; Domain=devlab.com; Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=None"))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, "REFRESH=; Path=/; Domain=devmoa.com; Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=None"))
                 .andExpect(cookie().value(TokenType.REFRESH.name(), ""))
                 .andExpect(cookie().maxAge(TokenType.REFRESH.name(), 0))
                 .andExpect(cookie().domain(TokenType.REFRESH.name(), COOKIE_DOMAIN))
