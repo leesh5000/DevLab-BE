@@ -18,14 +18,15 @@ spring:
       max-file-size: 10MB # 파일 업로드 요청 시, 하나의 파일 크기를 10MB로 제한
       max-request-size: 100MB # 파일 업로드 요청 시, 전체 요청 크기를 100MB로 제한
   mail:
-    host: smtp.naver.com
-    port: 465
-    username: ENC(nvm7UuFGfEFQuinssW92Hu5wqlhd/fr2RweMESxNAh0=)
-    password: ENC(yJ9a5zcyIX/ykcE7F0kHmvtLELXZux9h)
+    host: smtp.gmail.com
+    port: 587
+    username: ENC(Bgj/WUt4j3yiGnZ7aYLkeBhA+dJ7TLJl)
+    password: ENC(FBTmV8zimQ8rzeaUFn6U4UfgsvVqTYrgzI8ge2NoQhE=)
     properties:
       mail.smtp:
         auth: true
-        ssl.enable: true
+        timeout: 5000
+        starttls.enable: true
   jackson:
     mapper:
       accept-case-insensitive-enums: true # ENUM Deserializer 대소문자 무시
