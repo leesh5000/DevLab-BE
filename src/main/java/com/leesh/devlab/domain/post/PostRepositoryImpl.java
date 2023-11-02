@@ -118,7 +118,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(post)
                 .leftJoin(hashtag).on(hashtag.post.eq(post))
                 .leftJoin(tag).on(hashtag.tag.eq(tag))
-                .where(numberTemplate(Double.class, "function('match', {0}, {1})", tag.name, "\"" + keyword + "\"").gt(0));
+                .where(numberTemplate(Double.class, "function('match', {0}, {1})", tag.name, "\"" + decodedKeyword + "\"").gt(0));
 
         return numberTemplate(Double.class, "function('matches', {0}, {1}, {2})", post.title, post.contents, "\"" + decodedKeyword + "\"").gt(0)
                 .or(post.id.in(tagNameMatchPostIds));
