@@ -102,6 +102,7 @@ public class Post extends BaseEntity {
 
         // 입력으로 새로 들어온 태그 목록들을 태깅한다.
         newTags.forEach(this::tagging);
+        newTags.sort(Comparator.comparing(Tag::getName));
     }
 
     private void tagging(Tag newTag) {
