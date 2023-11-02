@@ -16,7 +16,7 @@ import java.util.Arrays;
 @Service
 public class CookieService {
 
-    public static final String COOKIE_DOMAIN = "devlab.com";
+    public static final String COOKIE_DOMAIN = ".devmoa.com";
 
 
     public ResponseCookie generateCookie(String key, String value, int maxAgeSeconds) {

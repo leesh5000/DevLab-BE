@@ -40,4 +40,4 @@ oauth:
 decorator.datasource.p6spy.enable-logging: true
 custom:
   cors:
-    allowed-origin: https://web.devlab.com:5173
+    allowed-origins: https://web.devlab.com:5173
