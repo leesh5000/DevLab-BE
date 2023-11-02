@@ -110,7 +110,7 @@ public class AuthController {
         int expiresInSeconds = 5 * 60;
 
         mailService.sendMail(email,
-                "[DevLab] 이메일 인증번호 안내",
+                "[DevMoa] 이메일 인증번호 안내",
                 "[이메일 인증번호] " + verificationCode + "\n" +
                 "인증번호 유효시간은 " + expiresInSeconds / 60 + "분 입니다.");
 
