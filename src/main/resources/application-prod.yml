@@ -27,6 +27,7 @@ oauth:
     secret: ENC(/o4Q2q62U+Nlyn3XGXrlzFz9jQZySMjMeupWcS7JbFZAU87nUrzYGvkPUI4yWP6R)
     redirect-uri: ENC(TFG5pSZDNRncilXg5em9KvDWlmuXR9URjX0aGBxLFbpFPEbgrNY8SFW+g/yF7Th21X74Y/6VH5IvWPRpa2OqJQ==)
 custom:
+  domain: devmoa.com
   cors:
     allowed-origins: https://www.devmoa.com, https://devmoa.com
 decorator.datasource.p6spy.enable-logging: false
