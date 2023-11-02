@@ -99,7 +99,7 @@ public class MemberService {
         // 이메일 인증된 회원이면, 해당 이메일로 보안코드를 전송한다.
         if (updateProfileRequestDto.email().verified()) {
             String securityCode = member.verify();
-            mailService.sendMail(updateProfileRequestDto.email().address(), "[DevLab] 계정 보안코드 안내", "계정 보안코드 : " + securityCode);
+            mailService.sendMail(updateProfileRequestDto.email().address(), "[DevMoa] 계정 보안코드 안내", "계정 보안코드 : " + securityCode);
         }
     }
 

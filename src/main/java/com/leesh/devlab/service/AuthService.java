@@ -60,7 +60,7 @@ public class AuthService {
         // 이메일 인증된 회원이면, 해당 이메일로 보안코드를 전송한다.
         if (requestDto.email().verified()) {
             String securityCode = newMember.verify();
-            mailService.sendMail(requestDto.email().address(), "[DevLab] 계정 보안코드 안내", newMember.getLoginId() + "의 계정 보안코드 : " + securityCode);
+            mailService.sendMail(requestDto.email().address(), "[DevMoa] 계정 보안코드 안내", newMember.getLoginId() + "의 계정 보안코드 : " + securityCode);
         }
 
         Long id = memberRepository.save(newMember).getId();
