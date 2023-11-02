@@ -3,10 +3,7 @@ package com.leesh.devlab.service;
 import com.leesh.devlab.constant.Category;
 import com.leesh.devlab.constant.ErrorCode;
 import com.leesh.devlab.constant.dto.*;
-import com.leesh.devlab.domain.comment.CommentRepository;
 import com.leesh.devlab.domain.hashtag.Hashtag;
-import com.leesh.devlab.domain.hashtag.HashtagRepository;
-import com.leesh.devlab.domain.like.LikeRepository;
 import com.leesh.devlab.domain.member.Member;
 import com.leesh.devlab.domain.member.MemberRepository;
 import com.leesh.devlab.domain.post.Post;
@@ -30,11 +27,7 @@ public class PostService {
 
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
     private final TagService tagService;
-    private final HashtagRepository hashtagRepository;
-    private final LikeRepository likeRepository;
-    private final CommentService commentService;
     private final MemberService memberService;
 
     @Transactional
