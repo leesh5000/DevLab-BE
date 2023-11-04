@@ -155,8 +155,7 @@ public class MemberControllerTest {
 
         // when
         var result = mvc.perform(get("/api/members/{member-id}", testMember.id())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, GrantType.BEARER.getType() + " " + accessToken.getValue()));
+                .contentType(MediaType.APPLICATION_JSON));
 
         // then
         result.andExpect(status().isOk())
@@ -175,9 +174,6 @@ public class MemberControllerTest {
         result.andDo(document("get-profile",
                 pathParameters(
                         parameterWithName("member-id").description("유저 식별자")
-                ),
-                requestHeaders(
-                        headerWithName(HttpHeaders.AUTHORIZATION).description("액세스 토큰")
                 ),
                 responseFields(
                         fieldWithPath("id").description("식별자"),
