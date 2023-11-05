@@ -319,9 +319,6 @@ ID를 통해 다른 유저의 프로필을 조회합니다. Login ID, Email 등�
 ==== *Request* ====
 include::{snippets}/get-profile/http-request.adoc[]
 
-==== *Request Header* ====
-include::{snippets}/get-profile/request-headers.adoc[]
-
 ==== *Path Parameters* ====
 include::{snippets}/get-profile/path-parameters.adoc[]
 
